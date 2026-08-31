@@ -34,6 +34,7 @@
 
   <glaggle-card>
     <div class="btn-row">
+      <glaggle-button text="▶ Lektion 1 starten" variant="primary" full-width id="btnLektion1"></glaggle-button>
       <glaggle-button text="Weiter" variant="primary" full-width id="btnWeiter"></glaggle-button>
       <glaggle-button text="Zurück" variant="secondary" full-width></glaggle-button>
       <glaggle-button text="Abbrechen" variant="danger" full-width></glaggle-button>
@@ -46,6 +47,9 @@
   // So reagierst du auf einen Klick — 'glaggle-click' statt normalem 'click'
   document.getElementById('btnWeiter').addEventListener('glaggle-click', () => {
     alert('Weiter geklickt!');
+  });
+  document.getElementById('btnLektion1').addEventListener('glaggle-click', () => {
+    window.location.href = 'lektionen/lektion1.html';
   });
 </script>
 
