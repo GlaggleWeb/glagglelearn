@@ -11,17 +11,16 @@
   --gl-text: #2b2f33;
   --gl-text-soft: #6b7280;
   --gl-border: #e5e7eb;
+   
+  --gl-primary: #a4d65e;         /* Hauptfarbe (z.B. der grüne "Weiter"-Button) */
+  --gl-primary-shadow: #6ea832;  /* dunklerer Ton für den 3D-Rand darunter */
+  --gl-primary-hover: #b3e070;   /* Farbe beim Drüberfahren mit der Maus */
 
-  /* Marken- / Akzentfarben */
-  --gl-primary: #a4d65e;        /* helles Grün wie im Screenshot */
-  --gl-primary-shadow: #6ea832; /* dunkles Grün für den 3D-Rand */
-  --gl-primary-hover: #b3e070;
-
-  --gl-secondary: #70c4f7;      /* Glaggle-Blau */
+  --gl-secondary: #70c4f7;       /* zweite Akzentfarbe (z.B. "Zurück"-Button) */
   --gl-secondary-shadow: #2e94d1;
   --gl-secondary-hover: #8ed0f9;
 
-  --gl-danger: #f76c6c;
+  --gl-danger: #f76c6c;          /* für "Abbrechen"/Fehler */
   --gl-danger-shadow: #c94848;
 
   --gl-text-on-accent: #1f2a12;
