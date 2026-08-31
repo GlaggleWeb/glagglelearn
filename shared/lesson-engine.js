@@ -74,13 +74,17 @@ class GlaggleLesson {
         <h2>${step.question}</h2>
         <div class="gl-options" id="glOptions"></div>
         <div id="glFeedback" class="gl-feedback"></div>
+        <glaggle-button text="Prüfen" variant="secondary" full-width id="glCheck" disabled></glaggle-button>
         <glaggle-button text="Weiter" variant="primary" full-width id="glNext" disabled></glaggle-button>
       </div>
     `;
     const optionsEl = this.container.querySelector('#glOptions');
     const feedbackEl = this.container.querySelector('#glFeedback');
+    const checkBtn = this.container.querySelector('#glCheck');
     const nextBtn = this.container.querySelector('#glNext');
-    let answered = false;
+    let selected = null;
+    let checked = false;
+    const optionButtons = [];
 
     step.options.forEach((optText, i) => {
       const optBtn = document.createElement('button');
@@ -88,25 +92,32 @@ class GlaggleLesson {
       optBtn.type = 'button';
       optBtn.innerText = optText;
       optBtn.addEventListener('click', () => {
-        if (answered) return;
-        answered = true;
-        const isCorrect = i === step.correct;
-        optBtn.classList.add(isCorrect ? 'gl-correct' : 'gl-wrong');
-        if (!isCorrect) {
-          const correctBtn = optionsEl.children[step.correct];
-          correctBtn.classList.add('gl-correct');
-        } else {
-          this.correctCount++;
-        }
-        feedbackEl.innerText = isCorrect ? '✅ Richtig!' : '❌ Leider falsch.';
-        feedbackEl.className = 'gl-feedback ' + (isCorrect ? 'gl-feedback-ok' : 'gl-feedback-bad');
-        nextBtn.removeAttribute('disabled');
+        if (checked) return; // nach dem Prüfen keine Auswahl mehr ändern
+        optionButtons.forEach(b => b.classList.remove('gl-selected'));
+        optBtn.classList.add('gl-selected');
+        selected = i;
+        checkBtn.removeAttribute('disabled');
       });
+      optionButtons.push(optBtn);
       optionsEl.appendChild(optBtn);
     });
 
+    checkBtn.addEventListener('glaggle-click', () => {
+      if (selected === null || checked) return;
+      checked = true;
+      const isCorrect = selected === step.correct;
+      optionButtons[selected].classList.add(isCorrect ? 'gl-correct' : 'gl-wrong');
+      if (!isCorrect) optionButtons[step.correct].classList.add('gl-correct');
+      if (isCorrect) this.correctCount++;
+
+      feedbackEl.innerText = isCorrect ? '✅ Richtig!' : '❌ Leider falsch.';
+      feedbackEl.className = 'gl-feedback ' + (isCorrect ? 'gl-feedback-ok' : 'gl-feedback-bad');
+      checkBtn.setAttribute('disabled', '');
+      nextBtn.removeAttribute('disabled');
+    });
+
     nextBtn.addEventListener('glaggle-click', () => {
-      if (!answered) return;
+      if (!checked) return;
       this.next();
     });
   }
@@ -117,7 +128,7 @@ class GlaggleLesson {
         <h2>${step.question}</h2>
         <input type="text" id="glBlankInput" class="gl-input" placeholder="Antwort eingeben..." autocomplete="off">
         <div id="glFeedback" class="gl-feedback"></div>
-        <glaggle-button text="Prüfen" variant="secondary" full-width id="glCheck"></glaggle-button>
+        <glaggle-button text="Prüfen" variant="secondary" full-width id="glCheck" disabled></glaggle-button>
         <glaggle-button text="Weiter" variant="primary" full-width id="glNext" disabled></glaggle-button>
       </div>
     `;
@@ -138,8 +149,12 @@ class GlaggleLesson {
       nextBtn.removeAttribute('disabled');
     };
 
+    input.addEventListener('input', () => {
+      if (input.value.trim().length > 0) checkBtn.removeAttribute('disabled');
+      else checkBtn.setAttribute('disabled', '');
+    });
     checkBtn.addEventListener('glaggle-click', check);
-    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') check(); });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !answered) check(); });
     nextBtn.addEventListener('glaggle-click', () => {
       if (!answered) return;
       this.next();
