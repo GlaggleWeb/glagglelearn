@@ -66,3 +66,89 @@ body {
   color: var(--gl-text);
   margin: 0;
 }
+
+/* ==========================================================================
+   LEKTION-STYLES — von lesson-engine.js verwendet.
+   Zentral hier definiert, damit jede Lektion automatisch gleich aussieht.
+   ========================================================================== */
+
+.gl-step h2 {
+  font-size: 1.3rem;
+  margin-bottom: var(--gl-space-3);
+  line-height: 1.4;
+}
+
+.gl-step-text {
+  color: var(--gl-text-soft);
+  line-height: 1.6;
+  margin-bottom: var(--gl-space-3);
+}
+
+.gl-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: var(--gl-space-2);
+}
+
+.gl-option {
+  font-family: var(--gl-font);
+  text-align: left;
+  padding: 16px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gl-text);
+  background: var(--gl-surface);
+  border: 2px solid var(--gl-border);
+  border-radius: var(--gl-radius-md);
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.08s ease, background 0.15s ease;
+}
+
+.gl-option:hover {
+  border-color: var(--gl-secondary);
+  transform: translateY(-1px);
+}
+
+.gl-option.gl-correct {
+  border-color: var(--gl-primary-shadow);
+  background: color-mix(in srgb, var(--gl-primary) 25%, var(--gl-surface));
+}
+
+.gl-option.gl-wrong {
+  border-color: var(--gl-danger-shadow);
+  background: color-mix(in srgb, var(--gl-danger) 25%, var(--gl-surface));
+}
+
+.gl-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1rem;
+  font-family: var(--gl-font);
+  color: var(--gl-text);
+  background: var(--gl-surface);
+  border: 2px solid var(--gl-border);
+  border-radius: var(--gl-radius-md);
+  outline: none;
+  margin-bottom: var(--gl-space-2);
+  box-sizing: border-box;
+}
+
+.gl-input:focus {
+  border-color: var(--gl-secondary);
+}
+
+.gl-feedback {
+  min-height: 24px;
+  font-weight: 700;
+  margin-bottom: var(--gl-space-2);
+}
+
+.gl-feedback-ok { color: var(--gl-primary-shadow); }
+.gl-feedback-bad { color: var(--gl-danger-shadow); }
+
+/* glaggle-button Komponenten in der Lektion brauchen etwas Abstand zueinander */
+.gl-step glaggle-button {
+  display: block;
+  margin-bottom: 12px;
+}
