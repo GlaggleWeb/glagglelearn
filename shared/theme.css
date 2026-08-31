@@ -3,7 +3,7 @@
    Eine Datei für Farben, Fonts, Spacing. Änderst du hier etwas,
    ändert es sich automatisch auf JEDER Seite, die diese Datei einbindet.
    ========================================================================== */
-
+ 
 :root {
   /* Grundfarben (Light Mode) */
   --gl-bg: #f4f6f8;
