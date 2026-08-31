@@ -1,4 +1,4 @@
-/* ========================================================================== 
+/* ==========================================================================
    GLAGGLE LEARN — SHARED COMPONENTS
    Definiert wiederverwendbare Web Components. Einbinden per:
      <script src="../shared/components.js" defer></script>
@@ -19,10 +19,13 @@ class GlaggleButton extends HTMLElement {
 
   connectedCallback() {
     this.render();
-    // Klick auf das Custom Element nach aussen weiterreichen
-    this.shadowRoot.querySelector('button').addEventListener('click', (e) => {
+    // Delegation auf shadowRoot statt auf dem <button> selbst:
+    // so geht der Listener nicht verloren, wenn render() das <button>
+    // Element beim Attribut-Wechsel (z.B. disabled entfernen) neu erzeugt.
+    this.shadowRoot.addEventListener('click', (e) => {
+      if (!e.target.closest('button')) return;
       if (this.hasAttribute('disabled')) return;
-      this.dispatchEvent(new CustomEvent('glaggle-click', { bubbles: true }));
+      this.dispatchEvent(new CustomEvent('glaggle-click', { bubbles: true, composed: true }));
     });
   }
 
