@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lektion 1 — Mathe Grundlagen | Glaggle Learn</title>
+
+<!-- Zentrales Theme & Components — auf JEDER Lektionsseite gleich einbinden -->
+<link rel="stylesheet" href="../shared/theme.css">
+<script src="../shared/components.js" defer></script>
+<script src="../shared/lesson-engine.js" defer></script>
+
+<style>
+  .lesson-wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+  .lesson-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .lesson-header a {
+    color: var(--gl-text-soft);
+    text-decoration: none;
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+  glaggle-progress { flex: 1; }
+</style>
+</head>
+<body>
+
+<div class="lesson-wrap">
+  <div class="lesson-header">
+    <a href="../index.html" title="Zurück">✕</a>
+    <glaggle-progress id="glProgress" value="0" max="1"></glaggle-progress>
+  </div>
+
+  <glaggle-card>
+    <div id="lesson"></div>
+  </glaggle-card>
+</div>
+
+<script>
+  // --- HIER wird der Lektionsinhalt definiert ---
+  // Neue Lektion erstellen = einfach dieses Array anpassen/kopieren.
+  const steps = [
+    {
+      type: 'info',
+      title: '👋 Willkommen bei Lektion 1',
+      text: 'In dieser Lektion wiederholen wir ein paar Grundlagen der Mathematik. Tippe auf "Weiter", um zu starten.'
+    },
+    {
+      type: 'mc',
+      question: 'Was ist 7 + 5?',
+      options: ['10', '12', '13', '11'],
+      correct: 1
+    },
+    {
+      type: 'mc',
+      question: 'Welche Zahl ist eine Primzahl?',
+      options: ['9', '15', '17', '21'],
+      correct: 2
+    },
+    {
+      type: 'blank',
+      question: 'Ergänze: 9 × 6 = ___',
+      answer: '54'
+    },
+    {
+      type: 'info',
+      title: '💡 Wusstest du?',
+      text: 'Eine Primzahl ist eine Zahl grösser als 1, die nur durch 1 und sich selbst teilbar ist.'
+    },
+    {
+      type: 'blank',
+      question: 'Wie heisst das Ergebnis einer Division?',
+      answer: 'Quotient'
+    }
+  ];
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const lessonEl = document.getElementById('lesson');
+    const progressEl = document.getElementById('glProgress');
+
+    new GlaggleLesson(lessonEl, steps, {
+      progressEl: progressEl,
+      onComplete: (correct, total) => {
+        lessonEl.innerHTML = `
+          <div class="gl-step" style="text-align:center;">
+            <h2>🎉 Lektion abgeschlossen!</h2>
+            <p class="gl-step-text">Du hast ${correct} von ${total} Fragen richtig beantwortet.</p>
+            <glaggle-button text="Zur Startseite" variant="primary" full-width id="glFinish"></glaggle-button>
+          </div>
+        `;
+        document.getElementById('glFinish').addEventListener('glaggle-click', () => {
+          window.location.href = '../index.html';
+        });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
