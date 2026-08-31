@@ -1,4 +1,4 @@
-/* ==========================================================================
+/* ========================================================================== 
    GLAGGLE LEARN — SHARED COMPONENTS
    Definiert wiederverwendbare Web Components. Einbinden per:
      <script src="../shared/components.js" defer></script>
