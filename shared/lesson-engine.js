@@ -12,6 +12,7 @@
        const steps = [ ... ];
        window.addEventListener('DOMContentLoaded', () => {
          new GlaggleLesson(document.getElementById('lesson'), steps, {
+           buttonsContainer: document.getElementById('glButtons'),
            onComplete: () => alert('Fertig!')
          });
        });
@@ -57,12 +58,24 @@ class GlaggleLesson {
     this.renderStep();
   }
 
-  renderButtons(checkBtn, nextBtn) {
+  clearButtons() {
     if (this.buttonsContainer) {
       this.buttonsContainer.innerHTML = '';
-      this.buttonsContainer.appendChild(checkBtn);
-      this.buttonsContainer.appendChild(nextBtn);
     }
+  }
+
+  addButton(text, variant, id, disabled = false) {
+    if (!this.buttonsContainer) return null;
+    
+    const btn = document.createElement('glaggle-button');
+    btn.setAttribute('text', text);
+    btn.setAttribute('variant', variant);
+    btn.setAttribute('full-width', '');
+    btn.id = id;
+    if (disabled) btn.setAttribute('disabled', '');
+    
+    this.buttonsContainer.appendChild(btn);
+    return btn;
   }
 
   renderInfo(step) {
@@ -73,17 +86,8 @@ class GlaggleLesson {
       </div>
     `;
     
-    const nextBtn = document.createElement('glaggle-button');
-    nextBtn.setAttribute('text', 'Weiter');
-    nextBtn.setAttribute('variant', 'primary');
-    nextBtn.setAttribute('full-width', '');
-    nextBtn.id = 'glNext';
-    
-    const checkBtn = document.createElement('glaggle-button');
-    checkBtn.setAttribute('disabled', '');
-    checkBtn.style.display = 'none';
-    
-    this.renderButtons(checkBtn, nextBtn);
+    this.clearButtons();
+    const nextBtn = this.addButton('Weiter', 'primary', 'glNext', false);
     
     nextBtn.addEventListener('glaggle-click', () => this.next());
   }
@@ -105,21 +109,9 @@ class GlaggleLesson {
     const optionButtons = [];
 
     // Buttons erstellen
-    const checkBtn = document.createElement('glaggle-button');
-    checkBtn.setAttribute('text', 'Prüfen');
-    checkBtn.setAttribute('variant', 'secondary');
-    checkBtn.setAttribute('full-width', '');
-    checkBtn.setAttribute('disabled', '');
-    checkBtn.id = 'glCheck';
-    
-    const nextBtn = document.createElement('glaggle-button');
-    nextBtn.setAttribute('text', 'Weiter');
-    nextBtn.setAttribute('variant', 'primary');
-    nextBtn.setAttribute('full-width', '');
-    nextBtn.setAttribute('disabled', '');
-    nextBtn.id = 'glNext';
-    
-    this.renderButtons(checkBtn, nextBtn);
+    this.clearButtons();
+    const checkBtn = this.addButton('Prüfen', 'secondary', 'glCheck', true);
+    const nextBtn = this.addButton('Weiter', 'primary', 'glNext', true);
 
     step.options.forEach((optText, i) => {
       const optBtn = document.createElement('button');
@@ -169,21 +161,9 @@ class GlaggleLesson {
     const input = this.container.querySelector('#glBlankInput');
     const feedbackEl = this.container.querySelector('#glFeedback');
     
-    const checkBtn = document.createElement('glaggle-button');
-    checkBtn.setAttribute('text', 'Prüfen');
-    checkBtn.setAttribute('variant', 'secondary');
-    checkBtn.setAttribute('full-width', '');
-    checkBtn.setAttribute('disabled', '');
-    checkBtn.id = 'glCheck';
-    
-    const nextBtn = document.createElement('glaggle-button');
-    nextBtn.setAttribute('text', 'Weiter');
-    nextBtn.setAttribute('variant', 'primary');
-    nextBtn.setAttribute('full-width', '');
-    nextBtn.setAttribute('disabled', '');
-    nextBtn.id = 'glNext';
-    
-    this.renderButtons(checkBtn, nextBtn);
+    this.clearButtons();
+    const checkBtn = this.addButton('Prüfen', 'secondary', 'glCheck', true);
+    const nextBtn = this.addButton('Weiter', 'primary', 'glNext', true);
     
     let answered = false;
 
