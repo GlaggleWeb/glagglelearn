@@ -1,7 +1,8 @@
 /* ==========================================================================
    GLAGGLE LEARN — ZENTRALES THEME
-   Eine Datei für Farben, Fonts, Spacing. Änderst du hier etwas,
+   Eine Datei für Farben, Fonts, Spacing, Layout. Änderst du hier etwas,
    ändert es sich automatisch auf JEDER Seite, die diese Datei einbindet.
+   Lektionsseiten selbst brauchen KEIN eigenes <style> mehr.
    ========================================================================== */
 
 :root {
@@ -12,15 +13,16 @@
   --gl-text-soft: #6b7280;
   --gl-border: #e5e7eb;
 
-  --gl-primary: #a4d65e;         /* Hauptfarbe (z.B. der grüne "Weiter"-Button) */
-  --gl-primary-shadow: #6ea832;  /* dunklerer Ton für den 3D-Rand darunter */
-  --gl-primary-hover: #b3e070;   /* Farbe beim Drüberfahren mit der Maus */
+  /* Marken- / Akzentfarben */
+  --gl-primary: #a4d65e;        /* helles Grün wie im Screenshot */
+  --gl-primary-shadow: #6ea832; /* dunkles Grün für den 3D-Rand */
+  --gl-primary-hover: #b3e070;
 
-  --gl-secondary: #70c4f7;       /* zweite Akzentfarbe (z.B. "Zurück"-Button) */
+  --gl-secondary: #70c4f7;      /* Glaggle-Blau */
   --gl-secondary-shadow: #2e94d1;
   --gl-secondary-hover: #8ed0f9;
 
-  --gl-danger: #f76c6c;          /* für "Abbrechen"/Fehler */
+  --gl-danger: #f76c6c;
   --gl-danger-shadow: #c94848;
 
   --gl-text-on-accent: #1f2a12;
@@ -67,12 +69,51 @@ body {
 }
 
 /* ==========================================================================
-   LEKTION-STYLES — von lesson-engine.js verwendet.
+   LEKTIONS-SEITEN-LAYOUT
+   Ein einziger Wrapper für jede Lektionsseite. Skaliert flüssig mit
+   clamp() zwischen Handy und grossem Mac-Bildschirm — kein fixer Zoom,
+   keine feste Breite, die auf grossen Screens "handygross" bleibt.
+   ========================================================================== */
+
+.gl-lesson-wrap {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: clamp(16px, 4vw, 40px) clamp(16px, 5vw, 32px) 60px;
+}
+
+.gl-lesson-header {
+  display: flex;
+  align-items: center;
+  gap: var(--gl-space-2);
+  margin-bottom: var(--gl-space-3);
+}
+
+.gl-lesson-header a {
+  color: var(--gl-text-soft);
+  text-decoration: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.gl-lesson-header glaggle-progress {
+  flex: 1;
+}
+
+/* Auf grossen Screens (Mac, Desktop) darf Text/Optionen etwas grösser sein */
+@media (min-width: 1024px) {
+  .gl-step h2 { font-size: 1.6rem; }
+  .gl-option, .gl-input { font-size: 1.1rem; padding: 18px 22px; }
+}
+
+/* ==========================================================================
+   LEKTION-INHALTS-STYLES — von lesson-engine.js verwendet.
    Zentral hier definiert, damit jede Lektion automatisch gleich aussieht.
    ========================================================================== */
 
 .gl-step h2 {
-  font-size: 1.3rem;
+  font-size: clamp(1.15rem, 2.5vw, 1.4rem);
   margin-bottom: var(--gl-space-3);
   line-height: 1.4;
 }
@@ -102,6 +143,7 @@ body {
   border-radius: var(--gl-radius-md);
   cursor: pointer;
   transition: border-color 0.15s ease, transform 0.08s ease, background 0.15s ease;
+  width: 100%;
 }
 
 .gl-option:hover {
@@ -124,45 +166,6 @@ body {
   background: color-mix(in srgb, var(--gl-danger) 25%, var(--gl-surface));
 }
 
-/* ==========================================================================
-   LEKTION-SEITEN-LAYOUT — zentral hier, damit auf der Lektionsseite selbst
-   kein <style>-Block mehr nötig ist. Responsive: wächst mit dem Bildschirm,
-   bleibt aber auf grossen Screens (Mac etc.) angenehm lesbar begrenzt.
-   ========================================================================== */
-
-.lesson-wrap {
-  width: 100%;
-  max-width: 640px;      /* auf grossen Screens: nicht zu breit für Lesbarkeit */
-  margin: 0 auto;
-  padding: clamp(16px, 4vw, 40px) clamp(16px, 5vw, 32px) 60px;
-  box-sizing: border-box;
-}
-
-.lesson-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: var(--gl-space-3);
-}
-
-.lesson-header a {
-  color: var(--gl-text-soft);
-  text-decoration: none;
-  font-size: 1.4rem;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.lesson-header glaggle-progress {
-  flex: 1;
-}
-
-/* Auf sehr grossen Screens darf der Lektions-Text etwas grösser werden */
-@media (min-width: 1024px) {
-  .gl-step h2 { font-size: 1.5rem; }
-  .gl-option, .gl-input { font-size: 1.05rem; }
-}
-
 .gl-input {
   width: 100%;
   padding: 14px 16px;
@@ -174,7 +177,6 @@ body {
   border-radius: var(--gl-radius-md);
   outline: none;
   margin-bottom: var(--gl-space-2);
-  box-sizing: border-box;
 }
 
 .gl-input:focus {
@@ -190,7 +192,7 @@ body {
 .gl-feedback-ok { color: var(--gl-primary-shadow); }
 .gl-feedback-bad { color: var(--gl-danger-shadow); }
 
-/* glaggle-button Komponenten in der Lektion brauchen etwas Abstand zueinander */
+/* glaggle-button Komponenten in der Lektion brauchen Abstand zueinander */
 .gl-step glaggle-button {
   display: block;
   margin-bottom: 12px;
