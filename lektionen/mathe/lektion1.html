@@ -8,8 +8,8 @@
 <!-- Zentrales Theme & Components — auf JEDER Lektionsseite gleich einbinden.
      Kein eigenes <style> hier nötig — alles Layout/Design kommt aus theme.css -->
 <link rel="stylesheet" href="../../shared/theme.css">
-<script src="../../shared/components.js" defer></script>
 <script src="../../shared/lesson-engine.js" defer></script>
+<script src="../../shared/components.js" defer></script>
 </head>
 <body>
 
@@ -97,12 +97,22 @@
     });
   }
 
-  // Warten bis Custom Elements registriert sind
-  Promise.all([
-    customElements.whenDefined('glaggle-button'),
-    customElements.whenDefined('glaggle-card'),
-    customElements.whenDefined('glaggle-progress')
-  ]).then(startLesson);
+  // Warten bis ALLE Custom Elements und GlaggleLesson registriert sind
+  function waitForDependencies() {
+    if (typeof GlaggleLesson === 'undefined') {
+      // GlaggleLesson noch nicht geladen, nächste Iteration warten
+      requestAnimationFrame(waitForDependencies);
+      return;
+    }
+    
+    Promise.all([
+      customElements.whenDefined('glaggle-button'),
+      customElements.whenDefined('glaggle-card'),
+      customElements.whenDefined('glaggle-progress')
+    ]).then(startLesson);
+  }
+
+  waitForDependencies();
 </script>
 
 </body>
