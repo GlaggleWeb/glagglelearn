@@ -96,6 +96,11 @@ body {
   margin-bottom: var(--gl-space-3);
   align-self: flex-start;
   width: 100%;
+  position: sticky;
+  top: 0;
+  background: var(--gl-bg);
+  z-index: 10;
+  padding-bottom: var(--gl-space-2);
 }
 
 .gl-lesson-header a {
@@ -121,6 +126,12 @@ body {
     Zentral hier definiert, damit jede Lektion automatisch gleich aussieht.
     ========================================================================== */
 
+.gl-step {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
 .gl-step h2 {
   font-size: clamp(1.15rem, 2.5vw, 1.4rem);
   margin-bottom: var(--gl-space-3);
@@ -131,6 +142,11 @@ body {
   color: var(--gl-text-soft);
   line-height: 1.6;
   margin-bottom: var(--gl-space-3);
+}
+
+/* Inhaltsbereich wächst, Buttons bleiben unten */
+.gl-step > div:not(:last-child) {
+  flex: 1;
 }
 
 .gl-options {
@@ -192,6 +208,11 @@ body {
   border-color: var(--gl-secondary);
 }
 
+.gl-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .gl-feedback {
   min-height: 24px;
   font-weight: 700;
@@ -205,6 +226,7 @@ body {
 .gl-step glaggle-button {
   display: block;
   margin-bottom: 12px;
+  margin-top: auto;
 }
 
 /* Button verstecken wenn disabled (Prüfen-Button nach Submit) */
