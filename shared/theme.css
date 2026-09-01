@@ -61,46 +61,43 @@
 
 * { box-sizing: border-box; }
 
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: var(--gl-font);
   background: var(--gl-bg);
   color: var(--gl-text);
-  margin: 0;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 }
 
 /* ==========================================================================
     LEKTIONS-SEITEN-LAYOUT
-    Ein einziger Wrapper für jede Lektionsseite. Skaliert flüssig mit
-    clamp() zwischen Handy und grossem Mac-Bildschirm — kein fixer Zoom,
-    keine feste Breite, die auf grossen Screens "handygross" bleibt.
+    Flexbox mit sticky header oben und sticky buttons unten.
     ========================================================================== */
 
 .gl-lesson-wrap {
   width: 100%;
-  max-width: clamp(320px, 90vw, 900px);
-  margin: 0 auto;
-  padding: clamp(16px, 4vw, 40px) clamp(16px, 5vw, 32px) 60px;
-  flex: 1;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
 }
 
+/* Fortschrittsbalken OBEN fix kleben */
 .gl-lesson-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
   gap: var(--gl-space-2);
-  margin-bottom: var(--gl-space-3);
-  align-self: flex-start;
-  width: 100%;
-  position: sticky;
-  top: 0;
+  padding: clamp(12px, 3vw, 24px) clamp(16px, 5vw, 32px);
   background: var(--gl-bg);
-  z-index: 10;
-  padding-bottom: var(--gl-space-2);
+  border-bottom: 1px solid var(--gl-border);
 }
 
 .gl-lesson-header a {
@@ -115,6 +112,40 @@ body {
   flex: 1;
 }
 
+/* Zentraler Inhaltsbereich — scrollbar hier */
+.gl-lesson-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: clamp(24px, 4vw, 40px) clamp(16px, 5vw, 32px);
+}
+
+.gl-lesson-content > glaggle-card {
+  width: 100%;
+  max-width: clamp(320px, 90vw, 900px);
+  margin: 0 auto;
+}
+
+/* Button-Bereich UNTEN fix kleben */
+.gl-lesson-buttons {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  padding: clamp(12px, 3vw, 24px) clamp(16px, 5vw, 32px);
+  background: var(--gl-bg);
+  border-top: 1px solid var(--gl-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gl-lesson-buttons glaggle-button {
+  display: block;
+}
+
+.gl-lesson-buttons glaggle-button[disabled] {
+  display: none;
+}
+
 /* Auf grossen Screens (Mac, Desktop) darf Text/Optionen etwas grösser sein */
 @media (min-width: 1024px) {
   .gl-step h2 { font-size: 1.6rem; }
@@ -126,27 +157,17 @@ body {
     Zentral hier definiert, damit jede Lektion automatisch gleich aussieht.
     ========================================================================== */
 
-.gl-step {
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-}
-
 .gl-step h2 {
   font-size: clamp(1.15rem, 2.5vw, 1.4rem);
   margin-bottom: var(--gl-space-3);
   line-height: 1.4;
+  margin-top: 0;
 }
 
 .gl-step-text {
   color: var(--gl-text-soft);
   line-height: 1.6;
   margin-bottom: var(--gl-space-3);
-}
-
-/* Inhaltsbereich wächst, Buttons bleiben unten */
-.gl-step > div:not(:last-child) {
-  flex: 1;
 }
 
 .gl-options {
@@ -221,15 +242,3 @@ body {
 
 .gl-feedback-ok { color: var(--gl-primary-shadow); }
 .gl-feedback-bad { color: var(--gl-danger-shadow); }
-
-/* glaggle-button Komponenten in der Lektion brauchen Abstand zueinander */
-.gl-step glaggle-button {
-  display: block;
-  margin-bottom: 12px;
-  margin-top: auto;
-}
-
-/* Button verstecken wenn disabled (Prüfen-Button nach Submit) */
-.gl-step glaggle-button[disabled] {
-  display: none;
-}
