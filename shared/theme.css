@@ -1,199 +1,163 @@
 /* ==========================================================================
-   GLAGGLE LEARN — ZENTRALES THEME
-   Eine Datei für Farben, Fonts, Spacing, Layout. Änderst du hier etwas,
-   ändert es sich automatisch auf JEDER Seite, die diese Datei einbindet.
-   Lektionsseiten selbst brauchen KEIN eigenes <style> mehr.
+   GLAGGLE LEARN — LESSON ENGINE
+   Rendert eine Lektion aus einem simplen JS-Array. Unterstützte Typen:
+
+   { type: 'info',   title: '...', text: '...' }
+   { type: 'mc',      question: '...', options: ['A','B','C'], correct: 1 }
+   { type: 'blank',   question: '...', answer: 'wort' }  // Lückentext
+
+   Benutzung auf einer Lektionsseite:
+     <script src="../shared/lesson-engine.js" defer></script>
+     <script>
+       const steps = [ ... ];
+       window.addEventListener('DOMContentLoaded', () => {
+         new GlaggleLesson(document.getElementById('lesson'), steps, {
+           onComplete: () => alert('Fertig!')
+         });
+       });
+     </script>
    ========================================================================== */
 
-:root {
-  /* Grundfarben (Light Mode) */
-  --gl-bg: #f4f6f8;
-  --gl-surface: #ffffff;
-  --gl-text: #2b2f33;
-  --gl-text-soft: #6b7280;
-  --gl-border: #e5e7eb;
+class GlaggleLesson {
+  constructor(container, steps, options = {}) {
+    this.container = container;
+    this.steps = steps;
+    this.current = 0;
+    this.correctCount = 0;
+    this.onComplete = options.onComplete || (() => {});
+    this.progressEl = options.progressEl || null;
 
-  /* Marken- / Akzentfarben */
-  --gl-primary: #a4d65e;        /* helles Grün wie im Screenshot */
-  --gl-primary-shadow: #6ea832; /* dunkles Grün für den 3D-Rand */
-  --gl-primary-hover: #b3e070;
-
-  --gl-secondary: #70c4f7;      /* Glaggle-Blau */
-  --gl-secondary-shadow: #2e94d1;
-  --gl-secondary-hover: #8ed0f9;
-
-  --gl-danger: #f76c6c;
-  --gl-danger-shadow: #c94848;
-
-  --gl-text-on-accent: #1f2a12;
-
-  /* Radius & Abstände — für konsistente Rundungen überall */
-  --gl-radius-sm: 10px;
-  --gl-radius-md: 16px;
-  --gl-radius-lg: 24px;
-
-  --gl-space-1: 8px;
-  --gl-space-2: 16px;
-  --gl-space-3: 24px;
-  --gl-space-4: 32px;
-
-  /* Schrift */
-  --gl-font: 'Arial Rounded MT Bold', 'Segoe UI', Roboto, sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --gl-bg: #202124;
-    --gl-surface: #2b2d31;
-    --gl-text: #e8eaed;
-    --gl-text-soft: #a1a5aa;
-    --gl-border: #3c3f44;
-
-    --gl-primary: #a4d65e;
-    --gl-primary-shadow: #6ea832;
-    --gl-primary-hover: #b3e070;
-
-    --gl-secondary: #70c4f7;
-    --gl-secondary-shadow: #2e94d1;
-    --gl-secondary-hover: #8ed0f9;
+    this.renderStep();
   }
-}
 
-* { box-sizing: border-box; }
+  updateProgress() {
+    if (this.progressEl) {
+      this.progressEl.setAttribute('value', this.current);
+      this.progressEl.setAttribute('max', this.steps.length);
+    }
+  }
 
-body {
-  font-family: var(--gl-font);
-  background: var(--gl-bg);
-  color: var(--gl-text);
-  margin: 0;
-}
+  renderStep() {
+    this.updateProgress();
+    const step = this.steps[this.current];
+    if (!step) {
+      this.onComplete(this.correctCount, this.steps.length);
+      return;
+    }
 
-/* ==========================================================================
-   LEKTIONS-SEITEN-LAYOUT
-   Ein einziger Wrapper für jede Lektionsseite. Skaliert flüssig mit
-   clamp() zwischen Handy und grossem Mac-Bildschirm — kein fixer Zoom,
-   keine feste Breite, die auf grossen Screens "handygross" bleibt.
-   ========================================================================== */
+    if (step.type === 'info') this.renderInfo(step);
+    else if (step.type === 'mc') this.renderMC(step);
+    else if (step.type === 'blank') this.renderBlank(step);
+    else console.warn('Unbekannter Lektions-Typ:', step.type);
+  }
 
-.gl-lesson-wrap {
-  width: 100%;
-  max-width: 640px;
-  margin: 0 auto;
-  padding: clamp(16px, 4vw, 40px) clamp(16px, 5vw, 32px) 60px;
-}
+  next() {
+    this.current++;
+    this.renderStep();
+  }
 
-.gl-lesson-header {
-  display: flex;
-  align-items: center;
-  gap: var(--gl-space-2);
-  margin-bottom: var(--gl-space-3);
-}
+  renderInfo(step) {
+    this.container.innerHTML = `
+      <div class="gl-step">
+        <h2>${step.title}</h2>
+        <p class="gl-step-text">${step.text}</p>
+        <glaggle-button text="Weiter" variant="primary" full-width id="glNext"></glaggle-button>
+      </div>
+    `;
+    this.container.querySelector('#glNext')
+      .addEventListener('glaggle-click', () => this.next());
+  }
 
-.gl-lesson-header a {
-  color: var(--gl-text-soft);
-  text-decoration: none;
-  font-size: 1.4rem;
-  line-height: 1;
-  flex-shrink: 0;
-}
+  renderMC(step) {
+    this.container.innerHTML = `
+      <div class="gl-step">
+        <h2>${step.question}</h2>
+        <div class="gl-options" id="glOptions"></div>
+        <div id="glFeedback" class="gl-feedback"></div>
+        <glaggle-button text="Prüfen" variant="secondary" full-width id="glCheck" disabled></glaggle-button>
+        <glaggle-button text="Weiter" variant="primary" full-width id="glNext" disabled></glaggle-button>
+      </div>
+    `;
+    const optionsEl = this.container.querySelector('#glOptions');
+    const feedbackEl = this.container.querySelector('#glFeedback');
+    const checkBtn = this.container.querySelector('#glCheck');
+    const nextBtn = this.container.querySelector('#glNext');
+    let selected = null;
+    let checked = false;
+    const optionButtons = [];
 
-.gl-lesson-header glaggle-progress {
-  flex: 1;
-}
+    step.options.forEach((optText, i) => {
+      const optBtn = document.createElement('button');
+      optBtn.className = 'gl-option';
+      optBtn.type = 'button';
+      optBtn.innerText = optText;
+      optBtn.addEventListener('click', () => {
+        if (checked) return; // nach dem Prüfen keine Auswahl mehr ändern
+        optionButtons.forEach(b => b.classList.remove('gl-selected'));
+        optBtn.classList.add('gl-selected');
+        selected = i;
+        checkBtn.removeAttribute('disabled');
+      });
+      optionButtons.push(optBtn);
+      optionsEl.appendChild(optBtn);
+    });
 
-/* Auf grossen Screens (Mac, Desktop) darf Text/Optionen etwas grösser sein */
-@media (min-width: 1024px) {
-  .gl-step h2 { font-size: 1.6rem; }
-  .gl-option, .gl-input { font-size: 1.1rem; padding: 18px 22px; }
-}
+    checkBtn.addEventListener('glaggle-click', () => {
+      if (selected === null || checked) return;
+      checked = true;
+      const isCorrect = selected === step.correct;
+      optionButtons[selected].classList.add(isCorrect ? 'gl-correct' : 'gl-wrong');
+      if (!isCorrect) optionButtons[step.correct].classList.add('gl-correct');
+      if (isCorrect) this.correctCount++;
 
-/* ==========================================================================
-   LEKTION-INHALTS-STYLES — von lesson-engine.js verwendet.
-   Zentral hier definiert, damit jede Lektion automatisch gleich aussieht.
-   ========================================================================== */
+      feedbackEl.innerText = isCorrect ? '✅ Richtig!' : '❌ Leider falsch.';
+      feedbackEl.className = 'gl-feedback ' + (isCorrect ? 'gl-feedback-ok' : 'gl-feedback-bad');
+      checkBtn.setAttribute('disabled', '');
+      nextBtn.removeAttribute('disabled');
+    });
 
-.gl-step h2 {
-  font-size: clamp(1.15rem, 2.5vw, 1.4rem);
-  margin-bottom: var(--gl-space-3);
-  line-height: 1.4;
-}
+    nextBtn.addEventListener('glaggle-click', () => {
+      if (!checked) return;
+      this.next();
+    });
+  }
 
-.gl-step-text {
-  color: var(--gl-text-soft);
-  line-height: 1.6;
-  margin-bottom: var(--gl-space-3);
-}
+  renderBlank(step) {
+    this.container.innerHTML = `
+      <div class="gl-step">
+        <h2>${step.question}</h2>
+        <input type="text" id="glBlankInput" class="gl-input" placeholder="Antwort eingeben..." autocomplete="off">
+        <div id="glFeedback" class="gl-feedback"></div>
+        <glaggle-button text="Prüfen" variant="secondary" full-width id="glCheck" disabled></glaggle-button>
+        <glaggle-button text="Weiter" variant="primary" full-width id="glNext" disabled></glaggle-button>
+      </div>
+    `;
+    const input = this.container.querySelector('#glBlankInput');
+    const feedbackEl = this.container.querySelector('#glFeedback');
+    const checkBtn = this.container.querySelector('#glCheck');
+    const nextBtn = this.container.querySelector('#glNext');
+    let answered = false;
 
-.gl-options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: var(--gl-space-2);
-}
+    const check = () => {
+      if (answered) return;
+      answered = true;
+      const isCorrect = input.value.trim().toLowerCase() === step.answer.trim().toLowerCase();
+      if (isCorrect) this.correctCount++;
+      feedbackEl.innerText = isCorrect ? '✅ Richtig!' : `❌ Richtige Antwort: ${step.answer}`;
+      feedbackEl.className = 'gl-feedback ' + (isCorrect ? 'gl-feedback-ok' : 'gl-feedback-bad');
+      input.disabled = true;
+      nextBtn.removeAttribute('disabled');
+    };
 
-.gl-option {
-  font-family: var(--gl-font);
-  text-align: left;
-  padding: 16px 20px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--gl-text);
-  background: var(--gl-surface);
-  border: 2px solid var(--gl-border);
-  border-radius: var(--gl-radius-md);
-  cursor: pointer;
-  transition: border-color 0.15s ease, transform 0.08s ease, background 0.15s ease;
-  width: 100%;
-}
-
-.gl-option:hover {
-  border-color: var(--gl-secondary);
-  transform: translateY(-1px);
-}
-
-.gl-option.gl-selected {
-  border-color: var(--gl-secondary);
-  background: color-mix(in srgb, var(--gl-secondary) 18%, var(--gl-surface));
-}
-
-.gl-option.gl-correct {
-  border-color: var(--gl-primary-shadow);
-  background: color-mix(in srgb, var(--gl-primary) 25%, var(--gl-surface));
-}
-
-.gl-option.gl-wrong {
-  border-color: var(--gl-danger-shadow);
-  background: color-mix(in srgb, var(--gl-danger) 25%, var(--gl-surface));
-}
-
-.gl-input {
-  width: 100%;
-  padding: 14px 16px;
-  font-size: 1rem;
-  font-family: var(--gl-font);
-  color: var(--gl-text);
-  background: var(--gl-surface);
-  border: 2px solid var(--gl-border);
-  border-radius: var(--gl-radius-md);
-  outline: none;
-  margin-bottom: var(--gl-space-2);
-}
-
-.gl-input:focus {
-  border-color: var(--gl-secondary);
-}
-
-.gl-feedback {
-  min-height: 24px;
-  font-weight: 700;
-  margin-bottom: var(--gl-space-2);
-}
-
-.gl-feedback-ok { color: var(--gl-primary-shadow); }
-.gl-feedback-bad { color: var(--gl-danger-shadow); }
-
-/* glaggle-button Komponenten in der Lektion brauchen Abstand zueinander */
-.gl-step glaggle-button {
-  display: block;
-  margin-bottom: 12px;
+    input.addEventListener('input', () => {
+      if (input.value.trim().length > 0) checkBtn.removeAttribute('disabled');
+      else checkBtn.setAttribute('disabled', '');
+    });
+    checkBtn.addEventListener('glaggle-click', check);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !answered) check(); });
+    nextBtn.addEventListener('glaggle-click', () => {
+      if (!answered) return;
+      this.next();
+    });
+  }
 }
