@@ -1,40 +1,20 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lektion 1 — Mathe Grundlagen | Glaggle Learn</title>
 
-<!-- Zentrales Theme & Components — auf JEDER Lektionsseite gleich einbinden -->
-<link rel="stylesheet" href="../../shared/theme.css">
-<script src="../../shared/components.js" defer></script>
-<script src="../../shared/lesson-engine.js" defer></script>
-
-<style>
-  .lesson-wrap {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 24px 20px 60px;
-  }
-  .lesson-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-  .lesson-header a {
-    color: var(--gl-text-soft);
-    text-decoration: none;
-    font-size: 1.4rem;
-    line-height: 1;
-  }
-  glaggle-progress { flex: 1; }
-</style>
+<!-- Zentrales Theme & Components — auf JEDER Lektionsseite gleich einbinden.
+     Kein eigenes <style> hier nötig — alles Layout/Design kommt aus theme.css -->
+<link rel="stylesheet" href="../shared/theme.css">
+<script src="../shared/components.js" defer></script>
+<script src="../shared/lesson-engine.js" defer></script>
 </head>
 <body>
 
-<div class="lesson-wrap">
-  <div class="lesson-header">
+<div class="gl-lesson-wrap">
+  <div class="gl-lesson-header">
     <a href="../index.html" title="Zurück">✕</a>
     <glaggle-progress id="glProgress" value="0" max="1"></glaggle-progress>
   </div>
@@ -82,7 +62,9 @@
     }
   ];
 
-  window.addEventListener('DOMContentLoaded', () => {
+  // Warten bis Custom Elements registriert sind, damit glaggle-button
+  // & Co. garantiert funktionieren, bevor die Lektion rendert.
+  function startLesson() {
     const lessonEl = document.getElementById('lesson');
     const progressEl = document.getElementById('glProgress');
 
@@ -101,7 +83,13 @@
         });
       }
     });
-  });
+  }
+
+  Promise.all([
+    customElements.whenDefined('glaggle-button'),
+    customElements.whenDefined('glaggle-card'),
+    customElements.whenDefined('glaggle-progress')
+  ]).then(startLesson);
 </script>
 
 </body>
