@@ -66,20 +66,27 @@ body {
   background: var(--gl-bg);
   color: var(--gl-text);
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 /* ==========================================================================
-   LEKTIONS-SEITEN-LAYOUT
-   Ein einziger Wrapper für jede Lektionsseite. Skaliert flüssig mit
-   clamp() zwischen Handy und grossem Mac-Bildschirm — kein fixer Zoom,
-   keine feste Breite, die auf grossen Screens "handygross" bleibt.
-   ========================================================================== */
+    LEKTIONS-SEITEN-LAYOUT
+    Ein einziger Wrapper für jede Lektionsseite. Skaliert flüssig mit
+    clamp() zwischen Handy und grossem Mac-Bildschirm — kein fixer Zoom,
+    keine feste Breite, die auf grossen Screens "handygross" bleibt.
+    ========================================================================== */
 
 .gl-lesson-wrap {
   width: 100%;
-  max-width: none;  /* Entfernt die Beschränkung */
+  max-width: clamp(320px, 90vw, 900px);
   margin: 0 auto;
   padding: clamp(16px, 4vw, 40px) clamp(16px, 5vw, 32px) 60px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .gl-lesson-header {
@@ -87,6 +94,8 @@ body {
   align-items: center;
   gap: var(--gl-space-2);
   margin-bottom: var(--gl-space-3);
+  align-self: flex-start;
+  width: 100%;
 }
 
 .gl-lesson-header a {
@@ -108,9 +117,9 @@ body {
 }
 
 /* ==========================================================================
-   LEKTION-INHALTS-STYLES — von lesson-engine.js verwendet.
-   Zentral hier definiert, damit jede Lektion automatisch gleich aussieht.
-   ========================================================================== */
+    LEKTION-INHALTS-STYLES — von lesson-engine.js verwendet.
+    Zentral hier definiert, damit jede Lektion automatisch gleich aussieht.
+    ========================================================================== */
 
 .gl-step h2 {
   font-size: clamp(1.15rem, 2.5vw, 1.4rem);
@@ -196,4 +205,9 @@ body {
 .gl-step glaggle-button {
   display: block;
   margin-bottom: 12px;
+}
+
+/* Button verstecken wenn disabled (Prüfen-Button nach Submit) */
+.gl-step glaggle-button[disabled] {
+  display: none;
 }
