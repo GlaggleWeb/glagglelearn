@@ -108,7 +108,7 @@ class GlaggleLesson {
     let checked = false;
     const optionButtons = [];
 
-    // Buttons erstellen
+    // Buttons erstellen — nur Prüfen sichtbar am Anfang (disabled)
     this.clearButtons();
     const checkBtn = this.addButton('Prüfen', 'secondary', 'glCheck', true);
     const nextBtn = this.addButton('Weiter', 'primary', 'glNext', true);
@@ -161,6 +161,7 @@ class GlaggleLesson {
     const input = this.container.querySelector('#glBlankInput');
     const feedbackEl = this.container.querySelector('#glFeedback');
     
+    // Buttons erstellen — nur Prüfen sichtbar am Anfang (disabled)
     this.clearButtons();
     const checkBtn = this.addButton('Prüfen', 'secondary', 'glCheck', true);
     const nextBtn = this.addButton('Weiter', 'primary', 'glNext', true);
