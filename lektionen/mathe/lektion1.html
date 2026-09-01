@@ -14,20 +14,25 @@
 <body>
 
 <div class="gl-lesson-wrap">
+  <!-- Header mit Fortschrittsbalken — OBEN sticky -->
   <div class="gl-lesson-header">
     <a href="../index.html" title="Zurück">✕</a>
     <glaggle-progress id="glProgress" value="0" max="1"></glaggle-progress>
   </div>
 
-  <glaggle-card>
-    <div id="lesson"></div>
-  </glaggle-card>
+  <!-- Content-Bereich — scrollbar nur hier -->
+  <div class="gl-lesson-content">
+    <glaggle-card>
+      <div id="lesson"></div>
+    </glaggle-card>
+  </div>
+
+  <!-- Button-Bereich — UNTEN sticky -->
+  <div class="gl-lesson-buttons" id="glButtons"></div>
 </div>
 
 <script>
-  setTimeout(startLesson, 500);
   // --- HIER wird der Lektionsinhalt definiert ---
-  // Neue Lektion erstellen = einfach dieses Array anpassen/kopieren.
   const steps = [
     {
       type: 'info',
@@ -63,29 +68,36 @@
     }
   ];
 
-  // Warten bis Custom Elements registriert sind, damit glaggle-button
-  // & Co. garantiert funktionieren, bevor die Lektion rendert.
   function startLesson() {
     const lessonEl = document.getElementById('lesson');
     const progressEl = document.getElementById('glProgress');
+    const buttonsEl = document.getElementById('glButtons');
 
     new GlaggleLesson(lessonEl, steps, {
       progressEl: progressEl,
+      buttonsContainer: buttonsEl,
       onComplete: (correct, total) => {
         lessonEl.innerHTML = `
           <div class="gl-step" style="text-align:center;">
             <h2>🎉 Lektion abgeschlossen!</h2>
             <p class="gl-step-text">Du hast ${correct} von ${total} Fragen richtig beantwortet.</p>
-            <glaggle-button text="Zur Startseite" variant="primary" full-width id="glFinish"></glaggle-button>
           </div>
         `;
-        document.getElementById('glFinish').addEventListener('glaggle-click', () => {
+        const finishBtn = document.createElement('glaggle-button');
+        finishBtn.setAttribute('text', 'Zur Startseite');
+        finishBtn.setAttribute('variant', 'primary');
+        finishBtn.setAttribute('full-width', '');
+        finishBtn.id = 'glFinish';
+        buttonsEl.innerHTML = '';
+        buttonsEl.appendChild(finishBtn);
+        finishBtn.addEventListener('glaggle-click', () => {
           window.location.href = '../index.html';
         });
       }
     });
   }
 
+  // Warten bis Custom Elements registriert sind
   Promise.all([
     customElements.whenDefined('glaggle-button'),
     customElements.whenDefined('glaggle-card'),
