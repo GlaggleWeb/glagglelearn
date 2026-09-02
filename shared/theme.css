@@ -116,6 +116,12 @@ body {
   animation-fill-mode: forwards;
 }
 
+.gl-lesson-header glaggle-progress {
+  flex: 1;
+  animation: progressFill 0.8s ease-out;
+  animation-fill-mode: forwards;
+}
+
 @keyframes progressFill {
   from {
     opacity: 0.7;
@@ -160,11 +166,15 @@ body {
   display: block;
 }
 
-/* Disabled Buttons verstecken */
-.gl-lesson-buttons glaggle-button[disabled] {
+/* Weiter-Button: versteckt solange disabled (kommt erst nach Prüfen) */
+.gl-lesson-buttons glaggle-button#glNext[disabled] {
   display: none !important;
 }
 
+/* Prüfen-Button: bleibt sichtbar, wird nur optisch deaktiviert */
+.gl-lesson-buttons glaggle-button#glCheck[disabled] {
+  pointer-events: none;
+}
 /* Auf grossen Screens */
 @media (min-width: 1024px) {
   .gl-step h2 { font-size: 1.6rem; }
