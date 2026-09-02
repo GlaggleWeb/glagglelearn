@@ -139,6 +139,12 @@ function startLesson() {
     }
   });
 }
+
+Promise.all([
+  customElements.whenDefined('glaggle-button'),
+  customElements.whenDefined('glaggle-card'),
+  customElements.whenDefined('glaggle-progress')
+]).then(startLesson);
 </script>
 
 </body>
