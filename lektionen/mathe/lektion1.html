@@ -68,51 +68,77 @@
     }
   ];
 
-  function startLesson() {
-    const lessonEl = document.getElementById('lesson');
-    const progressEl = document.getElementById('glProgress');
-    const buttonsEl = document.getElementById('glButtons');
+ function formatTime(totalSeconds) {
+  const min = Math.floor(totalSeconds / 60);
+  const sec = totalSeconds % 60;
+  return min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+}
 
-    new GlaggleLesson(lessonEl, steps, {
-      progressEl: progressEl,
-      buttonsContainer: buttonsEl,
-      onComplete: (correct, total) => {
-        lessonEl.innerHTML = `
-          <div class="gl-step" style="text-align:center;">
-            <h2>🎉 Lektion abgeschlossen!</h2>
-            <p class="gl-step-text">Du hast ${correct} von ${total} Fragen richtig beantwortet.</p>
+function getSprueche(pct) {
+  if (pct === 100) return ['🏆 Perfekt! Du bist eine Mathe-Maschine!', '🔥 Kein Fehler — sauber durchgezogen!'];
+  if (pct >= 70) return ['💪 Stark! Nur ein kleiner Ausrutscher.', '👏 Fast makellos — weiter so!'];
+  if (pct >= 40) return ['🙂 Solide Basis, da geht noch was!', '📈 Übung macht den Meister!'];
+  return ['🌱 Jede Lektion macht dich besser!', '☕ Kurz durchatmen und nochmal ran!'];
+}
+
+function startLesson() {
+  const lessonEl = document.getElementById('lesson');
+  const progressEl = document.getElementById('glProgress');
+  const buttonsEl = document.getElementById('glButtons');
+
+  new GlaggleLesson(lessonEl, steps, {
+    progressEl: progressEl,
+    buttonsContainer: buttonsEl,
+    onComplete: (correct, totalQuestions, elapsedSeconds) => {
+      const pct = totalQuestions > 0 ? Math.round((correct / totalQuestions) * 100) : 0;
+
+      // LP-Berechnung: 5 LP pro richtige Antwort + Zeit-Bonus pro Frage
+      const avgSecPerQuestion = totalQuestions > 0 ? elapsedSeconds / totalQuestions : 999;
+      let bonusPerCorrect = 0;
+      if (avgSecPerQuestion < 30) bonusPerCorrect = 3;
+      else if (avgSecPerQuestion < 60) bonusPerCorrect = 1;
+
+      const basePoints = correct * 5;
+      const bonusPoints = correct * bonusPerCorrect;
+      const totalLP = basePoints + bonusPoints;
+
+      const sprueche = getSprueche(pct);
+      const spruch = sprueche[Math.floor(Math.random() * sprueche.length)];
+
+      lessonEl.innerHTML = `
+        <div class="gl-step" style="text-align:center;">
+          <h2>🎉 Lektion abgeschlossen!</h2>
+          <div class="gl-result-stats">
+            <div class="gl-result-box">
+              <div class="gl-result-value">${formatTime(elapsedSeconds)}</div>
+              <div class="gl-result-label">Zeit</div>
+            </div>
+            <div class="gl-result-box">
+              <div class="gl-result-value">${pct}%</div>
+              <div class="gl-result-label">Richtig</div>
+            </div>
+            <div class="gl-result-box">
+              <div class="gl-result-value">${totalLP} LP</div>
+              <div class="gl-result-label">${bonusPoints > 0 ? `+${bonusPoints} Bonus` : 'Learn Points'}</div>
+            </div>
           </div>
-        `;
-        const finishBtn = document.createElement('glaggle-button');
-        finishBtn.setAttribute('text', 'Zur Startseite');
-        finishBtn.setAttribute('variant', 'primary');
-        finishBtn.setAttribute('full-width', '');
-        finishBtn.id = 'glFinish';
-        buttonsEl.innerHTML = '';
-        buttonsEl.appendChild(finishBtn);
-        finishBtn.addEventListener('glaggle-click', () => {
-          window.location.href = '../index.html';
-        });
-      }
-    });
-  }
+          <p class="gl-result-quote">${spruch}</p>
+        </div>
+      `;
 
-  // Warten bis ALLE Custom Elements und GlaggleLesson registriert sind
-  function waitForDependencies() {
-    if (typeof GlaggleLesson === 'undefined') {
-      // GlaggleLesson noch nicht geladen, nächste Iteration warten
-      requestAnimationFrame(waitForDependencies);
-      return;
+      const finishBtn = document.createElement('glaggle-button');
+      finishBtn.setAttribute('text', 'Zur Startseite');
+      finishBtn.setAttribute('variant', 'primary');
+      finishBtn.setAttribute('full-width', '');
+      finishBtn.id = 'glFinish';
+      buttonsEl.innerHTML = '';
+      buttonsEl.appendChild(finishBtn);
+      finishBtn.addEventListener('glaggle-click', () => {
+        window.location.href = '../index.html';
+      });
     }
-    
-    Promise.all([
-      customElements.whenDefined('glaggle-button'),
-      customElements.whenDefined('glaggle-card'),
-      customElements.whenDefined('glaggle-progress')
-    ]).then(startLesson);
-  }
-
-  waitForDependencies();
+  });
+}
 </script>
 
 </body>
