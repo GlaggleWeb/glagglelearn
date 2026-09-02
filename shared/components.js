@@ -122,52 +122,50 @@ class GlaggleProgress extends HTMLElement {
     if (this.shadowRoot) this.render();
   }
 
-render() {
-  const value = parseFloat(this.getAttribute('value')) || 0;
-  const max = parseFloat(this.getAttribute('max')) || 100;
-  const pct = Math.max(0, Math.min(100, (value / max) * 100));
+  render() {
+    const value = parseFloat(this.getAttribute('value')) || 0;
+    const max = parseFloat(this.getAttribute('max')) || 100;
+    const pct = Math.max(0, Math.min(100, (value / max) * 100));
 
-  this.shadowRoot.innerHTML = `
-    <style>
-      :host { display: block; width: 100%; }
-      .track {
-        width: 100%;
-        height: 18px;
-        background: var(--gl-border, #e5e7eb);
-        border-radius: 999px;
-        overflow: hidden;
-        box-shadow: inset 0 2px 3px rgba(0,0,0,0.08);
-      }
-      .fill {
-        height: 100%;
-        width: ${pct}%;
-        background: linear-gradient(180deg, var(--gl-primary-hover, #b3e070), var(--gl-primary, #a4d65e));
-        border-radius: 999px 0 0 999px;
-        box-shadow: inset 0 -3px 0 rgba(0,0,0,0.12);
-        transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-      }
-      .fill.full { border-radius: 999px; }
-      /* NEU: kurzer Puls bei Fortschritt */
-      .fill.pulse { animation: glPulse 0.4s ease-out; }
-      @keyframes glPulse {
-        0% { filter: brightness(1); }
-        40% { filter: brightness(1.35); }
-        100% { filter: brightness(1); }
-      }
-    </style>
-    <div class="track">
-      <div class="fill ${pct >= 100 ? 'full' : ''}"></div>
-    </div>
-  `;
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host { display: block; width: 100%; }
+        .track {
+          width: 100%;
+          height: 18px;
+          background: var(--gl-border, #e5e7eb);
+          border-radius: 999px;
+          overflow: hidden;
+          box-shadow: inset 0 2px 3px rgba(0,0,0,0.08);
+        }
+        .fill {
+          height: 100%;
+          width: ${pct}%;
+          background: linear-gradient(180deg, var(--gl-primary-hover, #b3e070), var(--gl-primary, #a4d65e));
+          border-radius: 999px 0 0 999px;
+          box-shadow: inset 0 -3px 0 rgba(0,0,0,0.12);
+          transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .fill.full { border-radius: 999px; }
+        .fill.pulse { animation: glPulse 0.4s ease-out; }
+        @keyframes glPulse {
+          0% { filter: brightness(1); }
+          40% { filter: brightness(1.35); }
+          100% { filter: brightness(1); }
+        }
+      </style>
+      <div class="track">
+        <div class="fill ${pct >= 100 ? 'full' : ''}"></div>
+      </div>
+    `;
 
-  // Puls antriggern, aber nicht beim allerersten Render (value=0)
-  if (value > 0) {
-    const fillEl = this.shadowRoot.querySelector('.fill');
-    fillEl.classList.add('pulse');
-    fillEl.addEventListener('animationend', () => fillEl.classList.remove('pulse'), { once: true });
+    if (value > 0) {
+      const fillEl = this.shadowRoot.querySelector('.fill');
+      fillEl.classList.add('pulse');
+      fillEl.addEventListener('animationend', () => fillEl.classList.remove('pulse'), { once: true });
+    }
   }
 }
-
 customElements.define('glaggle-button', GlaggleButton);
 customElements.define('glaggle-card', GlaggleCard);
 customElements.define('glaggle-progress', GlaggleProgress);
