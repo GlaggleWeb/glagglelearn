@@ -116,11 +116,6 @@ body {
   animation-fill-mode: forwards;
 }
 
-.gl-lesson-header glaggle-progress {
-  flex: 1;
-  animation: progressFill 0.8s ease-out;
-  animation-fill-mode: forwards;
-}
 
 @keyframes progressFill {
   from {
