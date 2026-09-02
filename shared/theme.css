@@ -270,3 +270,44 @@ body {
 
 .gl-feedback-ok { color: var(--gl-primary-shadow); }
 .gl-feedback-bad { color: var(--gl-danger-shadow); }
+
+.gl-result-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gl-space-2);
+  margin: var(--gl-space-3) 0;
+}
+
+.gl-result-box {
+  background: var(--gl-bg);
+  border: 2px solid var(--gl-border);
+  border-radius: var(--gl-radius-md);
+  padding: var(--gl-space-2) var(--gl-space-1);
+  text-align: center;
+}
+
+.gl-result-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--gl-text);
+  line-height: 1.2;
+}
+
+.gl-result-label {
+  font-size: 0.75rem;
+  color: var(--gl-text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-top: 4px;
+}
+
+.gl-result-quote {
+  font-style: italic;
+  color: var(--gl-text-soft);
+  margin-top: var(--gl-space-2);
+}
+
+@media (max-width: 480px) {
+  .gl-result-value { font-size: 1.25rem; }
+  .gl-result-label { font-size: 0.65rem; }
+}
