@@ -20,18 +20,21 @@
    ========================================================================== */
 
 class GlaggleLesson {
-  constructor(container, steps, options = {}) {
-    this.container = container;
-    this.steps = steps;
-    this.current = 0;
-    this.correctCount = 0;
-    this.onComplete = options.onComplete || (() => {});
-    this.progressEl = options.progressEl || null;
-    this.buttonsContainer = options.buttonsContainer || null;
+constructor(container, steps, options = {}) {
+  this.container = container;
+  this.steps = steps;
+  this.current = 0;
+  this.correctCount = 0;
+  this.startTime = Date.now();           // NEU: Startzeit der Lektion
+  this.onComplete = options.onComplete || (() => {});
+  this.progressEl = options.progressEl || null;
+  this.buttonsContainer = options.buttonsContainer || null;
 
-    this.renderStep();
-  }
+  // NEU: Nur Fragen zählen (mc/blank), nicht info-Folien
+  this.totalQuestions = steps.filter(s => s.type === 'mc' || s.type === 'blank').length;
 
+  this.renderStep();
+}
   updateProgress() {
     if (this.progressEl) {
       this.progressEl.setAttribute('value', this.current);
@@ -39,20 +42,21 @@ class GlaggleLesson {
     }
   }
 
-  renderStep() {
-    this.updateProgress();
-    const step = this.steps[this.current];
-    if (!step) {
-      this.onComplete(this.correctCount, this.steps.length);
-      return;
-    }
-
-    if (step.type === 'info') this.renderInfo(step);
-    else if (step.type === 'mc') this.renderMC(step);
-    else if (step.type === 'blank') this.renderBlank(step);
-    else console.warn('Unbekannter Lektions-Typ:', step.type);
+renderStep() {
+  this.updateProgress();
+  const step = this.steps[this.current];
+  if (!step) {
+    const elapsedSeconds = Math.round((Date.now() - this.startTime) / 1000);
+    this.onComplete(this.correctCount, this.totalQuestions, elapsedSeconds);
+    return;
   }
 
+  if (step.type === 'info') this.renderInfo(step);
+  else if (step.type === 'mc') this.renderMC(step);
+  else if (step.type === 'blank') this.renderBlank(step);
+  else console.warn('Unbekannter Lektions-Typ:', step.type);
+}
+   
   next() {
     this.current++;
     this.renderStep();
