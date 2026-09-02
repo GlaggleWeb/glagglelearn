@@ -159,13 +159,14 @@ class GlaggleProgress extends HTMLElement {
       </div>
     `;
 
-    if (value > 0) {
+  if (value > 0) {
       const fillEl = this.shadowRoot.querySelector('.fill');
       fillEl.classList.add('pulse');
       fillEl.addEventListener('animationend', () => fillEl.classList.remove('pulse'), { once: true });
     }
-  }
-}
+  }   // ← schliesst render()
+}     // ← schliesst die Klasse GlaggleProgress
+
 customElements.define('glaggle-button', GlaggleButton);
 customElements.define('glaggle-card', GlaggleCard);
 customElements.define('glaggle-progress', GlaggleProgress);
