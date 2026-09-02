@@ -306,3 +306,74 @@ body {
   .gl-result-value { font-size: 1.25rem; }
   .gl-result-label { font-size: 0.65rem; }
 }
+
+/* ========== RESULT BOXES — Farbe + Dauer-Animation ========== */
+.gl-result-box {
+  position: relative;
+  overflow: hidden;
+}
+
+.gl-result-box.gl-box-time {
+  border-color: var(--gl-secondary-shadow);
+  background: color-mix(in srgb, var(--gl-secondary) 10%, var(--gl-bg));
+}
+
+.gl-result-box.gl-box-pct {
+  border-color: var(--gl-primary-shadow);
+  background: color-mix(in srgb, var(--gl-primary) 12%, var(--gl-bg));
+}
+
+.gl-result-box.gl-box-lp {
+  border-color: #e8b83c;
+  background: color-mix(in srgb, #f7d060 18%, var(--gl-bg));
+}
+
+.gl-result-value {
+  position: relative;
+  z-index: 1;
+}
+
+/* Dauerhaftes sanftes Glühen, startet NACH dem Hochzählen */
+.gl-result-box.gl-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.5), transparent 70%);
+  animation: glBoxGlow 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes glBoxGlow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.03); }
+}
+
+.gl-result-box.gl-box-lp.gl-glow {
+  animation: glLPPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes glLPPulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(232, 184, 60, 0); }
+  50% { box-shadow: 0 0 18px rgba(232, 184, 60, 0.5); }
+}
+
+/* Bounce beim Erreichen der Endzahl */
+.gl-result-value.gl-count-done {
+  animation: glCountBounce 0.4s ease-out;
+}
+
+@keyframes glCountBounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+.gl-result-quote {
+  opacity: 0;
+  animation: glFadeIn 0.6s ease-out 1.8s forwards;
+}
+
+@keyframes glFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
