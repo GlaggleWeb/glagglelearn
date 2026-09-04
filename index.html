@@ -3,53 +3,574 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Glaggle Learn</title>  
+<title>Glaggle Learn</title>
 
-<!-- Zentrales Theme & Components — überall gleich einbinden -->
 <link rel="stylesheet" href="shared/theme.css">
 <script src="shared/components.js" defer></script>
+<script src="shared/lesson-engine.js" defer></script>
 
 <style>
-  .wrap {
-    max-width: 480px;
-    margin: 60px auto;
-    padding: 0 20px;
-    text-align: center;
+  /* ==========================================================================
+     STARTSEITE — Topbar, rechte Sidebar, Hauptbereich
+     Nutzt die Farben/Radien/Abstände aus shared/theme.css.
+     ========================================================================== */
+
+  body {
+    height: 100vh;
+    overflow: hidden;
   }
-  h1 { margin-bottom: 8px; }
-  p.sub { color: var(--gl-text-soft); margin-bottom: 32px; }
-  .btn-row {
+
+  .gl-home {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-template-columns: 1fr auto;
+    height: 100vh;
+    width: 100%;
+  }
+
+  /* ---------- TOPBAR ---------- */
+  .gl-topbar {
+    grid-column: 1 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px clamp(16px, 3vw, 32px);
+    border-bottom: 1px solid var(--gl-border);
+    background: var(--gl-surface);
+  }
+
+  .gl-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .gl-brand img {
+    height: 34px;
+    width: 34px;
+    object-fit: contain;
+    border-radius: var(--gl-radius-sm);
+  }
+
+  .gl-brand-name {
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--gl-primary-shadow);
+  }
+
+  .gl-search-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--gl-border);
+    background: var(--gl-bg);
+    color: var(--gl-text-soft);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .gl-search-btn:hover {
+    background: color-mix(in srgb, var(--gl-secondary) 16%, var(--gl-surface));
+    border-color: var(--gl-secondary);
+    color: var(--gl-secondary-shadow);
+  }
+
+  .gl-search-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* ---------- SUCH-OVERLAY ---------- */
+  .gl-search-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 22, 24, 0.45);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: clamp(60px, 12vh, 140px);
+    z-index: 1000;
+  }
+
+  .gl-search-overlay.gl-open {
+    display: flex;
+  }
+
+  .gl-search-box {
+    width: min(560px, 90vw);
+    background: var(--gl-surface);
+    border-radius: var(--gl-radius-md);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    padding: var(--gl-space-2);
+  }
+
+  .gl-search-box input {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 1.05rem;
+    font-family: var(--gl-font);
+    border: 2px solid var(--gl-border);
+    border-radius: var(--gl-radius-md);
+    outline: none;
+    background: var(--gl-bg);
+    color: var(--gl-text);
+  }
+
+  .gl-search-box input:focus {
+    border-color: var(--gl-secondary);
+  }
+
+  .gl-search-hint {
+    margin: 10px 4px 2px;
+    font-size: 0.8rem;
+    color: var(--gl-text-soft);
+  }
+
+  /* ---------- HAUPTBEREICH ---------- */
+  .gl-main {
+    overflow-y: auto;
+    padding: clamp(20px, 3vw, 40px);
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: var(--gl-space-4);
+  }
+
+  .gl-section-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin: 0 0 var(--gl-space-2) 2px;
+    color: var(--gl-text);
+  }
+
+  /* ---------- FORTSETZEN-KARTE ---------- */
+  .gl-continue-card {
+    display: flex;
     align-items: center;
+    gap: var(--gl-space-3);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .gl-continue-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--gl-radius-md);
+    background: color-mix(in srgb, var(--gl-primary) 22%, var(--gl-surface));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .gl-continue-icon svg {
+    width: 30px;
+    height: 30px;
+    color: var(--gl-primary-shadow);
+  }
+
+  .gl-continue-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .gl-continue-eyebrow {
+    font-size: 0.78rem;
+    color: var(--gl-text-soft);
+    margin: 0 0 4px;
+  }
+
+  .gl-continue-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0 0 6px;
+  }
+
+  .gl-continue-arrow {
+    flex-shrink: 0;
+    color: var(--gl-text-soft);
+  }
+
+  .gl-continue-arrow svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* ---------- FÄCHER-GRID ---------- */
+  .gl-subject-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--gl-space-2);
+  }
+
+  .gl-subject-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+    padding: var(--gl-space-2);
+    background: var(--gl-surface);
+    border: 1px solid var(--gl-border);
+    border-radius: var(--gl-radius-md);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    transition: transform 0.1s ease, border-color 0.15s ease;
+  }
+
+  .gl-subject-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--gl-secondary);
+  }
+
+  .gl-subject-card .gl-subject-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--gl-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gl-subject-card .gl-subject-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .gl-subject-card .gl-subject-label {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  /* Fach-Farbcodierung, konsistent zwischen Sidebar und Grid */
+  .gl-tone-mathe   { background: color-mix(in srgb, var(--gl-primary) 22%, var(--gl-surface)); }
+  .gl-tone-mathe svg   { color: var(--gl-primary-shadow); }
+  .gl-tone-deutsch { background: color-mix(in srgb, var(--gl-secondary) 22%, var(--gl-surface)); }
+  .gl-tone-deutsch svg { color: var(--gl-secondary-shadow); }
+  .gl-tone-nmg     { background: color-mix(in srgb, #f7d060 30%, var(--gl-surface)); }
+  .gl-tone-nmg svg     { color: #b9860a; }
+
+  /* ---------- STREAM-PLATZHALTER ---------- */
+  .gl-stream-placeholder {
+    border: 2px dashed var(--gl-border);
+    border-radius: var(--gl-radius-md);
+    padding: var(--gl-space-4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--gl-text-soft);
+    text-align: center;
+  }
+
+  .gl-stream-placeholder svg {
+    width: 32px;
+    height: 32px;
+    opacity: 0.6;
+  }
+
+  .gl-stream-placeholder strong {
+    color: var(--gl-text);
+    font-size: 0.95rem;
+  }
+
+  .gl-stream-placeholder span {
+    font-size: 0.82rem;
+  }
+
+  /* ---------- RECHTE SIDEBAR, FIX AUSGEKLAPPT ---------- */
+  .gl-sidebar {
+    grid-row: 2 / 3;
+    width: clamp(64px, 4vw, 76px); /* ~1.2cm auf typischem Bildschirm */
+    border-left: 1px solid var(--gl-border);
+    background: var(--gl-surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--gl-space-2) 0;
+    gap: var(--gl-space-2);
+  }
+
+  .gl-lp-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 4px;
+    border-radius: var(--gl-radius-sm);
+    background: color-mix(in srgb, #f7d060 22%, var(--gl-bg));
+    border: 1px solid #e8b83c;
+    width: 84%;
+  }
+
+  .gl-lp-badge img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .gl-lp-badge .gl-lp-value {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--gl-text);
+  }
+
+  .gl-sidebar-divider {
+    width: 60%;
+    height: 1px;
+    background: var(--gl-border);
+    margin: 4px 0;
+  }
+
+  .gl-sidebar-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--gl-radius-sm);
+    color: var(--gl-text-soft);
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .gl-sidebar-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .gl-sidebar-icon:hover {
+    background: var(--gl-bg);
+    color: var(--gl-text);
+  }
+
+  .gl-sidebar-icon.gl-active {
+    background: color-mix(in srgb, var(--gl-secondary) 20%, var(--gl-surface));
+    color: var(--gl-secondary-shadow);
+  }
+
+  .gl-sidebar-spacer {
+    flex: 1;
+  }
+
+  .gl-sidebar-icon.gl-settings {
+    margin-bottom: 6px;
   }
 </style>
 </head>
 <body>
 
-<div class="wrap">
-  <h1>🎓 Glaggle Learn</h1>
-  <p class="sub">So sieht das zentrale Button-System aus — nur ein Tag, kein wiederholtes CSS.</p>
+<div class="gl-home">
 
-  <glaggle-card>
-    <div class="btn-row">
-      <glaggle-button text="▶ Lektion 1 starten" variant="primary" full-width id="btnLektion1"></glaggle-button>
-      <glaggle-button text="Weiter" variant="primary" full-width id="btnWeiter"></glaggle-button>
-      <glaggle-button text="Zurück" variant="secondary" full-width></glaggle-button>
-      <glaggle-button text="Abbrechen" variant="danger" full-width></glaggle-button>
-      <glaggle-button text="Deaktiviert" variant="primary" full-width disabled></glaggle-button>
+  <!-- ========== TOPBAR ========== -->
+  <div class="gl-topbar">
+    <a class="gl-brand" href="index.html">
+      <img src="https://glaggle.ch/glagglelogo.png" alt="Glaggle">
+      <span class="gl-brand-name">LEARN</span>
+    </a>
+
+    <button class="gl-search-btn" id="glSearchOpen" title="Lektionen, Themen oder Fächer suchen" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ========== HAUPTBEREICH ========== -->
+  <div class="gl-main">
+
+    <div>
+      <p class="gl-section-title">Weiter lernen</p>
+      <glaggle-card>
+        <a class="gl-continue-card" id="glContinueCard" href="lektionen/lektion1.html">
+          <span class="gl-continue-icon gl-tone-mathe" id="glContinueIconWrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="9" x2="20" y2="9"></line>
+              <line x1="4" y1="15" x2="20" y2="15"></line>
+              <line x1="10" y1="3" x2="8" y2="21"></line>
+              <line x1="16" y1="3" x2="14" y2="21"></line>
+            </svg>
+          </span>
+          <span class="gl-continue-body">
+            <p class="gl-continue-eyebrow" id="glContinueEyebrow">Mathe · Lektion 1</p>
+            <p class="gl-continue-title" id="glContinueTitle">Mathe Grundlagen</p>
+            <glaggle-progress id="glContinueProgress" value="0" max="1"></glaggle-progress>
+          </span>
+          <span class="gl-continue-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </span>
+        </a>
+      </glaggle-card>
     </div>
-  </glaggle-card>
+
+    <div>
+      <p class="gl-section-title">Fächer</p>
+      <div class="gl-subject-grid">
+        <a class="gl-subject-card" href="https://learn.glaggle.ch/icon-mathe">
+          <span class="gl-subject-icon gl-tone-mathe">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="9" x2="20" y2="9"></line>
+              <line x1="4" y1="15" x2="20" y2="15"></line>
+              <line x1="10" y1="3" x2="8" y2="21"></line>
+              <line x1="16" y1="3" x2="14" y2="21"></line>
+            </svg>
+          </span>
+          <span class="gl-subject-label">Mathe</span>
+        </a>
+
+        <a class="gl-subject-card" href="https://learn.glaggle.ch/icon-deutsch">
+          <span class="gl-subject-icon gl-tone-deutsch">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5V6a2 2 0 0 1 2-2h11.5"></path>
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4"></path>
+              <line x1="8" y1="7" x2="15" y2="7"></line>
+            </svg>
+          </span>
+          <span class="gl-subject-label">Deutsch</span>
+        </a>
+
+        <a class="gl-subject-card" href="https://learn.glaggle.ch/icon-nmg">
+          <span class="gl-subject-icon gl-tone-nmg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M3 12h18"></path>
+              <path d="M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z"></path>
+            </svg>
+          </span>
+          <span class="gl-subject-label">NMG</span>
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <p class="gl-section-title">Demnächst</p>
+      <div class="gl-stream-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+          <path d="M9 9l6 3-6 3z"></path>
+        </svg>
+        <strong>Stream-System</strong>
+        <span>Hier entsteht bald ein Bereich für Live-Lernstreams.</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========== RECHTE SIDEBAR ========== -->
+  <div class="gl-sidebar">
+    <div class="gl-lp-badge" title="Deine Learn Points">
+      <img src="shared/lp.png" alt="" onerror="this.remove()">
+      <span class="gl-lp-value" id="glSidebarLP">0</span>
+    </div>
+
+    <div class="gl-sidebar-divider"></div>
+
+    <a class="gl-sidebar-icon gl-tone-mathe" href="https://learn.glaggle.ch/icon-mathe" title="Mathe">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="4" y1="9" x2="20" y2="9"></line>
+        <line x1="4" y1="15" x2="20" y2="15"></line>
+        <line x1="10" y1="3" x2="8" y2="21"></line>
+        <line x1="16" y1="3" x2="14" y2="21"></line>
+      </svg>
+    </a>
+
+    <a class="gl-sidebar-icon gl-tone-deutsch" href="https://learn.glaggle.ch/icon-deutsch" title="Deutsch">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5V6a2 2 0 0 1 2-2h11.5"></path>
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4"></path>
+        <line x1="8" y1="7" x2="15" y2="7"></line>
+      </svg>
+    </a>
+
+    <a class="gl-sidebar-icon gl-tone-nmg" href="https://learn.glaggle.ch/icon-nmg" title="NMG">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M3 12h18"></path>
+        <path d="M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z"></path>
+      </svg>
+    </a>
+
+    <div class="gl-sidebar-divider"></div>
+
+    <a class="gl-sidebar-icon" href="https://learn.glaggle.ch/icon-shop" title="Shop">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 8V6a6 6 0 0 1 12 0v2"></path>
+        <rect x="3" y="8" width="18" height="13" rx="2"></rect>
+      </svg>
+    </a>
+
+    <div class="gl-sidebar-spacer"></div>
+
+    <a class="gl-sidebar-icon gl-settings" href="https://learn.glaggle.ch/icon-einstellungen" title="Einstellungen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </a>
+  </div>
+
+</div>
+
+<!-- ========== SUCH-OVERLAY ========== -->
+<div class="gl-search-overlay" id="glSearchOverlay">
+  <div class="gl-search-box">
+    <input type="text" id="glSearchInput" placeholder="Lektion, Thema oder Fach suchen..." autocomplete="off">
+    <p class="gl-search-hint">Drücke Esc zum Schliessen</p>
+  </div>
 </div>
 
 <script>
-  // So reagierst du auf einen Klick — 'glaggle-click' statt normalem 'click'
-  document.getElementById('btnWeiter').addEventListener('glaggle-click', () => {
-    alert('Weiter geklickt!');
+  /* LP-Anzeige aus localStorage befüllen (gleicher Key wie in lesson-engine.js) */
+  (function () {
+    const raw = localStorage.getItem('glaggleLearnPoints');
+    const lp = Number.isFinite(parseInt(raw, 10)) ? parseInt(raw, 10) : 0;
+    document.getElementById('glSidebarLP').textContent = lp;
+  })();
+
+  /* Zuletzt gelöste Lektion: einfache Platzhalter-Logik über localStorage.
+     Sobald eine Lektionsseite z.B. localStorage.setItem('glaggleLastLesson', JSON.stringify({...}))
+     setzt, zeigt die Fortsetzen-Karte automatisch die richtige Lektion/den Fortschritt an. */
+  (function () {
+    const raw = localStorage.getItem('glaggleLastLesson');
+    if (!raw) return;
+    try {
+      const last = JSON.parse(raw);
+      if (last.href) document.getElementById('glContinueCard').setAttribute('href', last.href);
+      if (last.eyebrow) document.getElementById('glContinueEyebrow').textContent = last.eyebrow;
+      if (last.title) document.getElementById('glContinueTitle').textContent = last.title;
+      if (last.value != null) document.getElementById('glContinueProgress').setAttribute('value', last.value);
+      if (last.max != null) document.getElementById('glContinueProgress').setAttribute('max', last.max);
+    } catch (e) {
+      console.warn('Konnte letzte Lektion nicht laden:', e);
+    }
+  })();
+
+  /* Such-Overlay öffnen/schliessen */
+  const searchOverlay = document.getElementById('glSearchOverlay');
+  const searchInput = document.getElementById('glSearchInput');
+
+  document.getElementById('glSearchOpen').addEventListener('click', () => {
+    searchOverlay.classList.add('gl-open');
+    searchInput.value = '';
+    searchInput.focus();
   });
-  document.getElementById('btnLektion1').addEventListener('glaggle-click', () => {
-    window.location.href = 'lektionen/lektion1.html';
+
+  searchOverlay.addEventListener('click', (e) => {
+    if (e.target === searchOverlay) searchOverlay.classList.remove('gl-open');
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') searchOverlay.classList.remove('gl-open');
   });
 </script>
 
