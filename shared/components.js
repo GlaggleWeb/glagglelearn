@@ -115,18 +115,6 @@ class GlaggleProgress extends HTMLElement {
 
   connectedCallback() {
     this.attachShadow({ mode: 'open' });
-    this.render();
-  }
-
-  attributeChangedCallback() {
-    if (this.shadowRoot) this.render();
-  }
-
-  render() {
-    const value = parseFloat(this.getAttribute('value')) || 0;
-    const max = parseFloat(this.getAttribute('max')) || 100;
-    const pct = Math.max(0, Math.min(100, (value / max) * 100));
-
     this.shadowRoot.innerHTML = `
       <style>
         :host { display: block; width: 100%; }
@@ -140,32 +128,42 @@ class GlaggleProgress extends HTMLElement {
         }
         .fill {
           height: 100%;
-          width: ${pct}%;
+          width: 0%;
           background: linear-gradient(180deg, var(--gl-primary-hover, #b3e070), var(--gl-primary, #a4d65e));
           border-radius: 999px 0 0 999px;
           box-shadow: inset 0 -3px 0 rgba(0,0,0,0.12);
-          transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+          /* Sanftes Gleiten nach vorne statt Aufpump-Effekt */
+          transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1), border-radius 0.6s ease;
         }
         .fill.full { border-radius: 999px; }
-        .fill.pulse { animation: glPulse 0.4s ease-out; }
-        @keyframes glPulse {
-          0% { filter: brightness(1); }
-          40% { filter: brightness(1.35); }
-          100% { filter: brightness(1); }
-        }
       </style>
       <div class="track">
-        <div class="fill ${pct >= 100 ? 'full' : ''}"></div>
+        <div class="fill"></div>
       </div>
     `;
+    this.updateFill();
+  }
 
-  if (value > 0) {
-      const fillEl = this.shadowRoot.querySelector('.fill');
-      fillEl.classList.add('pulse');
-      fillEl.addEventListener('animationend', () => fillEl.classList.remove('pulse'), { once: true });
-    }
-  }   // ← schliesst render()
-}     // ← schliesst die Klasse GlaggleProgress
+  attributeChangedCallback() {
+    if (this.shadowRoot) this.updateFill();
+  }
+
+  updateFill() {
+    const fillEl = this.shadowRoot.querySelector('.fill');
+    if (!fillEl) return;
+    const value = parseFloat(this.getAttribute('value')) || 0;
+    const max = parseFloat(this.getAttribute('max')) || 100;
+    const pct = Math.max(0, Math.min(100, (value / max) * 100));
+
+    // requestAnimationFrame sorgt dafür, dass der Browser den Startwert
+    // (z.B. 0%) erst rendert, bevor die transition zum neuen Wert greift —
+    // sonst gleitet die allererste Füllung nicht sichtbar.
+    requestAnimationFrame(() => {
+      fillEl.style.width = pct + '%';
+      fillEl.classList.toggle('full', pct >= 100);
+    });
+  }
+}
 
 customElements.define('glaggle-button', GlaggleButton);
 customElements.define('glaggle-card', GlaggleCard);
