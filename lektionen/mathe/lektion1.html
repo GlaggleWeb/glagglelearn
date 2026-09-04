@@ -16,53 +16,54 @@
 <div id="glLessonRoot"></div>
 
 <script>
+  // window.onload wartet, bis ALLES (auch lesson-engine.js) komplett fertig geladen ist
+  window.addEventListener("load", function() {
+      
+      // Zur Sicherheit nochmals 0,5 Sekunden warten
+      setTimeout(function() {
+          GlaggleLesson.mount({
+            target: document.getElementById('glLessonRoot'),
+            backHref: '../index.html',
+            steps: [
+              {
+                type: 'info',
+                title: '👋 Willkommen bei Lektion 1',
+                text: 'In dieser Lektion wiederholen wir ein paar Grundlagen der Mathematik. Tippe auf "Weiter", um zu starten.'
+              },
+              {
+                type: 'mc',
+                question: 'Was ist 7 + 5?',
+                options: ['10', '12', '13', '11'],
+                correct: 1
+              },
+              {
+                type: 'mc',
+                question: 'Welche Zahl ist eine Primzahl?',
+                options: ['9', '15', '17', '21'],
+                correct: 2
+              },
+              {
+                type: 'blank',
+                question: 'Ergänze: 9 × 6 = ___',
+                answer: '54'
+              },
+              {
+                type: 'info',
+                title: '💡 Wusstest du?',
+                text: 'Eine Primzahl ist eine Zahl grösser als 1, die nur durch 1 und sich selbst teilbar ist.'
+              },
+              {
+                type: 'blank',
+                question: 'Wie heisst das Ergebnis einer Division?',
+                answer: 'Quotient'
+              }
+            ]
+          });
+      }, 500);
 
-  document.addEventListener("DOMContentLoaded", function() {
-    // Wartet, bis das HTML geladen ist, und wartet DANN nochmals 0,5 Sekunden
-    setTimeout(function() {
-        // Dein restlicher Code
-    }, 500);
-});
-
-  GlaggleLesson.mount({
-    target: document.getElementById('glLessonRoot'),
-    backHref: '../index.html',
-    steps: [
-      {
-        type: 'info',
-        title: '👋 Willkommen bei Lektion 1',
-        text: 'In dieser Lektion wiederholen wir ein paar Grundlagen der Mathematik. Tippe auf "Weiter", um zu starten.'
-      },
-      {
-        type: 'mc',
-        question: 'Was ist 7 + 5?',
-        options: ['10', '12', '13', '11'],
-        correct: 1
-      },
-      {
-        type: 'mc',
-        question: 'Welche Zahl ist eine Primzahl?',
-        options: ['9', '15', '17', '21'],
-        correct: 2
-      },
-      {
-        type: 'blank',
-        question: 'Ergänze: 9 × 6 = ___',
-        answer: '54'
-      },
-      {
-        type: 'info',
-        title: '💡 Wusstest du?',
-        text: 'Eine Primzahl ist eine Zahl grösser als 1, die nur durch 1 und sich selbst teilbar ist.'
-      },
-      {
-        type: 'blank',
-        question: 'Wie heisst das Ergebnis einer Division?',
-        answer: 'Quotient'
-      }
-    ]
   });
 </script>
+
 
 </body>
 </html>
