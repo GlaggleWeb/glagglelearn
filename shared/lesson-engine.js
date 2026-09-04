@@ -321,7 +321,7 @@ class GlaggleLesson {
           </div>
         </div>
         <p class="gl-result-quote">${spruch}</p>
-        <p class="gl-result-quote" style="animation-delay: 2.1s;">💰 Gesamt-LP: <strong id="glTotalLP">${glGetTotalLP() - totalLP}</strong></p>
+        <p class="gl-result-quote" style="animation-delay: 2.1s;">Gesamt-LP: <strong id="glTotalLP">${glGetTotalLP() - totalLP}</strong></p>
       </div>
     `;
 
