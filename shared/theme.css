@@ -27,6 +27,12 @@
 
   --gl-text-on-accent: #1f2a12;
 
+  /* Feedback-Zustände (Prüfen-Ergebnis) */
+  --gl-ok-bg: #e3f8d8;
+  --gl-ok-border: #6ea832;
+  --gl-bad-bg: #fde2e2;
+  --gl-bad-border: #c94848;
+
   /* Radius & Abstände — für konsistente Rundungen überall */
   --gl-radius-sm: 10px;
   --gl-radius-md: 16px;
@@ -56,6 +62,11 @@
     --gl-secondary: #70c4f7;
     --gl-secondary-shadow: #2e94d1;
     --gl-secondary-hover: #8ed0f9;
+
+    --gl-ok-bg: #274224;
+    --gl-ok-border: #6ea832;
+    --gl-bad-bg: #402424;
+    --gl-bad-border: #c94848;
   }
 }
 
@@ -85,6 +96,16 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  /* Hintergrundfarbe wird bei Feedback kurz eingefärbt (grün/rot) */
+  transition: background-color 0.35s ease;
+}
+
+.gl-lesson-wrap.gl-flash-ok {
+  background-color: var(--gl-ok-bg);
+}
+
+.gl-lesson-wrap.gl-flash-bad {
+  background-color: var(--gl-bad-bg);
 }
 
 /* ========== HEADER — OBEN STICKY ========== */
@@ -96,7 +117,7 @@ body {
   align-items: center;
   gap: var(--gl-space-2);
   padding: clamp(12px, 2vw, 16px) clamp(16px, 5vw, 32px);
-  background: var(--gl-bg);
+  background: transparent;
   border-bottom: 1px solid var(--gl-border);
   flex-shrink: 0;
 }
@@ -111,21 +132,6 @@ body {
 
 .gl-lesson-header glaggle-progress {
   flex: 1;
-  /* Animation für Fortschrittsbalken */
-  animation: progressFill 0.8s ease-out;
-  animation-fill-mode: forwards;
-}
-
-
-@keyframes progressFill {
-  from {
-    opacity: 0.7;
-    filter: brightness(0.9);
-  }
-  to {
-    opacity: 1;
-    filter: brightness(1);
-  }
 }
 
 /* ========== CONTENT — SCROLLBAR-BEREICH ========== */
@@ -149,27 +155,19 @@ body {
   bottom: 0;
   z-index: 100;
   padding: 1cm clamp(16px, 4vw, 32px);
-  background: var(--gl-bg);
+  background: transparent;
   border-top: 1px solid var(--gl-border);
   display: flex;
   flex-direction: column;
   gap: 12px;
   flex-shrink: 0;
+  min-height: 24px;
 }
 
 .gl-lesson-buttons glaggle-button {
   display: block;
 }
 
-/* Weiter-Button: versteckt solange disabled (kommt erst nach Prüfen) */
-.gl-lesson-buttons glaggle-button#glNext[disabled] {
-  display: none !important;
-}
-
-/* Prüfen-Button: bleibt sichtbar, wird nur optisch deaktiviert */
-.gl-lesson-buttons glaggle-button#glCheck[disabled] {
-  pointer-events: none;
-}
 /* Auf grossen Screens */
 @media (min-width: 1024px) {
   .gl-step h2 { font-size: 1.6rem; }
@@ -220,6 +218,10 @@ body {
   transform: translateY(-1px);
 }
 
+.gl-option:disabled {
+  cursor: default;
+}
+
 .gl-option.gl-selected {
   border-color: var(--gl-secondary);
   background: color-mix(in srgb, var(--gl-secondary) 18%, var(--gl-surface));
@@ -257,14 +259,44 @@ body {
   cursor: not-allowed;
 }
 
-.gl-feedback {
-  min-height: 24px;
+/* ========== FEEDBACK — ersetzt den Prüfen-Button im Button-Bereich ========== */
+.gl-feedback-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: var(--gl-radius-md);
   font-weight: 700;
-  margin-bottom: var(--gl-space-2);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  animation: glFeedbackIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.gl-feedback-ok { color: var(--gl-primary-shadow); }
-.gl-feedback-bad { color: var(--gl-danger-shadow); }
+.gl-feedback-banner .gl-feedback-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.gl-feedback-banner.gl-feedback-ok {
+  background: var(--gl-ok-bg);
+  color: var(--gl-primary-shadow);
+  border: 2px solid var(--gl-primary-shadow);
+}
+
+.gl-feedback-banner.gl-feedback-bad {
+  background: var(--gl-bad-bg);
+  color: var(--gl-danger-shadow);
+  border: 2px solid var(--gl-danger-shadow);
+}
+
+@keyframes glFeedbackIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+    ERGEBNISSEITE — bunt, mit hochzählenden Werten
+    ========================================================================== */
 
 .gl-result-stats {
   display: grid;
@@ -274,21 +306,52 @@ body {
 }
 
 .gl-result-box {
-  background: var(--gl-bg);
-  border: 2px solid var(--gl-border);
+  position: relative;
+  overflow: hidden;
   border-radius: var(--gl-radius-md);
   padding: var(--gl-space-2) var(--gl-space-1);
   text-align: center;
+  border: 2px solid var(--gl-border);
+  background: var(--gl-bg);
+}
+
+.gl-result-box.gl-box-time {
+  border-color: var(--gl-secondary-shadow);
+  background: color-mix(in srgb, var(--gl-secondary) 14%, var(--gl-bg));
+}
+
+.gl-result-box.gl-box-pct {
+  border-color: var(--gl-primary-shadow);
+  background: color-mix(in srgb, var(--gl-primary) 16%, var(--gl-bg));
+}
+
+.gl-result-box.gl-box-lp {
+  border-color: #e8b83c;
+  background: color-mix(in srgb, #f7d060 22%, var(--gl-bg));
 }
 
 .gl-result-value {
+  position: relative;
+  z-index: 1;
   font-size: 1.6rem;
   font-weight: 800;
   color: var(--gl-text);
   line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.gl-result-value img.gl-lp-icon {
+  width: 1.1em;
+  height: 1.1em;
+  flex-shrink: 0;
 }
 
 .gl-result-label {
+  position: relative;
+  z-index: 1;
   font-size: 0.75rem;
   color: var(--gl-text-soft);
   text-transform: uppercase;
@@ -300,6 +363,13 @@ body {
   font-style: italic;
   color: var(--gl-text-soft);
   margin-top: var(--gl-space-2);
+  opacity: 0;
+  animation: glFadeIn 0.6s ease-out 1.9s forwards;
+}
+
+@keyframes glFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 480px) {
@@ -307,30 +377,15 @@ body {
   .gl-result-label { font-size: 0.65rem; }
 }
 
-/* ========== RESULT BOXES — Farbe + Dauer-Animation ========== */
-.gl-result-box {
-  position: relative;
-  overflow: hidden;
+/* Bounce beim Erreichen der Endzahl */
+.gl-result-value.gl-count-done {
+  animation: glCountBounce 0.4s ease-out;
 }
 
-.gl-result-box.gl-box-time {
-  border-color: var(--gl-secondary-shadow);
-  background: color-mix(in srgb, var(--gl-secondary) 10%, var(--gl-bg));
-}
-
-.gl-result-box.gl-box-pct {
-  border-color: var(--gl-primary-shadow);
-  background: color-mix(in srgb, var(--gl-primary) 12%, var(--gl-bg));
-}
-
-.gl-result-box.gl-box-lp {
-  border-color: #e8b83c;
-  background: color-mix(in srgb, #f7d060 18%, var(--gl-bg));
-}
-
-.gl-result-value {
-  position: relative;
-  z-index: 1;
+@keyframes glCountBounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.18); }
+  100% { transform: scale(1); }
 }
 
 /* Dauerhaftes sanftes Glühen, startet NACH dem Hochzählen */
@@ -355,25 +410,4 @@ body {
 @keyframes glLPPulse {
   0%, 100% { box-shadow: 0 0 0 rgba(232, 184, 60, 0); }
   50% { box-shadow: 0 0 18px rgba(232, 184, 60, 0.5); }
-}
-
-/* Bounce beim Erreichen der Endzahl */
-.gl-result-value.gl-count-done {
-  animation: glCountBounce 0.4s ease-out;
-}
-
-@keyframes glCountBounce {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.18); }
-  100% { transform: scale(1); }
-}
-
-.gl-result-quote {
-  opacity: 0;
-  animation: glFadeIn 0.6s ease-out 1.8s forwards;
-}
-
-@keyframes glFadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
 }
