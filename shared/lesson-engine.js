@@ -176,20 +176,54 @@ class GlaggleLesson {
 
   /* Ersetzt den Prüfen-Button durch ein Feedback-Banner + Weiter-Button.
      isCorrect steuert Text/Farbe des Banners und den Hintergrund-Flash. */
-  showFeedback(isCorrect, correctAnswerText) {
-    this.setFlash(isCorrect ? 'ok' : 'bad');
-    this.clearButtons();
+showFeedback(isCorrect, correctAnswerText) {
+  // Hintergrund grün/rot setzen
+  this.setFlash(isCorrect ? 'ok' : 'bad');
 
-    const banner = document.createElement('div');
-    banner.className = 'gl-feedback-banner ' + (isCorrect ? 'gl-feedback-ok' : 'gl-feedback-bad');
-    banner.innerHTML = isCorrect
-      ? `<span class="gl-feedback-icon">✅</span><span>Richtig!</span>`
-      : `<span class="gl-feedback-icon">❌</span><span>Leider falsch — richtig wäre: ${correctAnswerText}</span>`;
-    this.buttonsContainer.appendChild(banner);
+  // Prüfen-Button entfernen
+  this.clearButtons();
 
-    const nextBtn = this.addButton('Weiter', 'primary', 'glNext', false);
-    nextBtn.addEventListener('glaggle-click', () => this.next());
+  // Sound bei richtiger Antwort abspielen
+  if (isCorrect) {
+    const audio = new Audio('./true.aac');
+
+    audio.play().catch((error) => {
+      console.warn('true.aac konnte nicht abgespielt werden:', error);
+    });
   }
+
+  // Feedback-Banner erstellen
+  const banner = document.createElement('div');
+
+  banner.className =
+    'gl-feedback-banner ' +
+    (isCorrect ? 'gl-feedback-ok' : 'gl-feedback-bad');
+
+  banner.innerHTML = isCorrect
+    ? `
+      <span class="gl-feedback-icon">✅</span>
+      <span>Richtig!</span>
+    `
+    : `
+      <span class="gl-feedback-icon">❌</span>
+      <span>Leider falsch — richtig wäre: ${correctAnswerText}</span>
+    `;
+
+  this.buttonsContainer.appendChild(banner);
+
+  // Weiter-Button erstellen
+  const nextBtn = this.addButton(
+    'Weiter',
+    'primary',
+    'glNext',
+    false
+  );
+
+  // Beim Klicken zur nächsten Frage
+  nextBtn.addEventListener('glaggle-click', () => {
+    this.next();
+  });
+}
 
   renderInfo(step) {
     this.container.innerHTML = `
