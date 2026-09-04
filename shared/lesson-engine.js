@@ -185,7 +185,7 @@ showFeedback(isCorrect, correctAnswerText) {
 
   // Sound bei richtiger Antwort abspielen
   if (isCorrect) {
-    const audio = new Audio('./true.aac');
+    const audio = new Audio('../../shared/true.aac');
 
     audio.play().catch((error) => {
       console.warn('true.aac konnte nicht abgespielt werden:', error);
