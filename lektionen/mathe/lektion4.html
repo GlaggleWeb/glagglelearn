@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Einmaleins 3 — Mathe Grundlagen | Glaggle Learn</title>
+<!-- Zentrales Theme & Components — auf JEDER Lektionsseite gleich einbinden.
+     Kein eigenes <style> hier nötig — alles Layout/Design kommt aus theme.css -->
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../shared/components.js" defer></script>
+<script src="../../shared/lesson-engine.js" defer></script>
+</head>
+<body>
+<div id="glLessonRoot"></div>
+<script>
+// window.onload wartet, bis ALLES (auch lesson-engine.js) komplett fertig geladen ist
+window.addEventListener("load", function() {
+// Zur Sicherheit nochmals 0,5 Sekunden warten
+setTimeout(function() {
+GlaggleLesson.mount({
+target: document.getElementById('glLessonRoot'),
+backHref: '../index.html',
+steps: [
+{
+type: 'info',
+title: '🎲 Einmaleins — Runde 3',
+text: 'Wieder alles bunt gemischt — bereit für die Herausforderung? Tippe auf "Weiter", um zu starten.'
+},
+{
+type: 'mc',
+question: 'Was ist 5 × 6?',
+options: ['30', '25', '35', '24'],
+correct: 0
+},
+{
+type: 'blank',
+question: 'Ergänze: 4 × 8 = ___',
+answer: '32'
+},
+{
+type: 'mc',
+question: 'Was ist 9 × 4?',
+options: ['32', '36', '40', '28'],
+correct: 1
+},
+{
+type: 'blank',
+question: 'Welche Zahl mal 7 ergibt 49?',
+answer: '7'
+},
+{
+type: 'mc',
+question: 'Was ist 3 × 9?',
+options: ['24', '21', '27', '18'],
+correct: 2
+},
+{
+type: 'info',
+title: '💡 Wusstest du?',
+text: 'Beim Malnehmen mit 5 gilt: Ist die andere Zahl gerade, endet das Ergebnis immer auf 0 — bei ungeraden Zahlen auf 5.'
+},
+{
+type: 'blank',
+question: 'Ergänze: 6 × 8 = ___',
+answer: '48'
+},
+{
+type: 'mc',
+question: 'Was ist 2 × 7?',
+options: ['16', '12', '14', '18'],
+correct: 2
+},
+{
+type: 'mc',
+question: 'Was ist 8 × 9?',
+options: ['64', '81', '72', '76'],
+correct: 2
+},
+{
+type: 'blank',
+question: 'Welche Zahl mal 4 ergibt 36?',
+answer: '9'
+},
+{
+type: 'mc',
+question: 'Was ist 5 × 10?',
+options: ['45', '55', '50', '60'],
+correct: 2
+},
+{
+type: 'blank',
+question: 'Ergänze: 3 × 7 = ___',
+answer: '21'
+},
+{
+type: 'mc',
+question: 'Was ist 6 × 6?',
+options: ['30', '42', '36', '32'],
+correct: 2
+},
+{
+type: 'info',
+title: '💡 Tipp',
+text: 'Bei Quadratzahlen wie 6 × 6 oder 7 × 7 multiplizierst du eine Zahl mit sich selbst — das lohnt sich extra gut zu lernen.'
+},
+{
+type: 'blank',
+question: 'Welche Zahl mal 3 ergibt 24?',
+answer: '8'
+},
+{
+type: 'mc',
+question: 'Was ist 9 × 9?',
+options: ['81', '72', '90', '99'],
+correct: 0
+},
+{
+type: 'blank',
+question: 'Ergänze: 7 × 6 = ___',
+answer: '42'
+}
+]
+});
+}, 500);
+});
+</script>
+</body>
+</html>
