@@ -1,1 +1,129 @@
-
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Einmaleins — Mathe Grundlagen | Glaggle Learn</title>
+<!-- Zentrales Theme & Components — auf JEDER Lektionsseite gleich einbinden.
+     Kein eigenes <style> hier nötig — alles Layout/Design kommt aus theme.css -->
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../shared/components.js" defer></script>
+<script src="../../shared/lesson-engine.js" defer></script>
+</head>
+<body>
+<div id="glLessonRoot"></div>
+<script>
+// window.onload wartet, bis ALLES (auch lesson-engine.js) komplett fertig geladen ist
+window.addEventListener("load", function() {
+// Zur Sicherheit nochmals 0,5 Sekunden warten
+setTimeout(function() {
+GlaggleLesson.mount({
+target: document.getElementById('glLessonRoot'),
+backHref: '../index.html',
+steps: [
+{
+type: 'info',
+title: '👋 Willkommen zum Einmaleins',
+text: 'In dieser Lektion übst du das kleine Einmaleins. Tippe auf "Weiter", um zu starten.'
+},
+{
+type: 'mc',
+question: 'Was ist 3 × 4?',
+options: ['7', '12', '9', '10'],
+correct: 1
+},
+{
+type: 'mc',
+question: 'Was ist 6 × 7?',
+options: ['42', '36', '48', '40'],
+correct: 0
+},
+{
+type: 'blank',
+question: 'Ergänze: 8 × 5 = ___',
+answer: '40'
+},
+{
+type: 'mc',
+question: 'Was ist 9 × 3?',
+options: ['24', '27', '21', '30'],
+correct: 1
+},
+{
+type: 'blank',
+question: 'Ergänze: 7 × 8 = ___',
+answer: '56'
+},
+{
+type: 'mc',
+question: 'Was ist 4 × 9?',
+options: ['36', '32', '40', '35'],
+correct: 0
+},
+{
+type: 'info',
+title: '💡 Wusstest du?',
+text: 'Beim Malnehmen spielt die Reihenfolge keine Rolle: 6 × 7 ergibt genau dasselbe wie 7 × 6.'
+},
+{
+type: 'blank',
+question: 'Ergänze: 6 × 6 = ___',
+answer: '36'
+},
+{
+type: 'mc',
+question: 'Was ist 5 × 9?',
+options: ['54', '45', '40', '50'],
+correct: 1
+},
+{
+type: 'mc',
+question: 'Was ist 8 × 8?',
+options: ['64', '72', '56', '60'],
+correct: 0
+},
+{
+type: 'blank',
+question: 'Ergänze: 7 × 7 = ___',
+answer: '49'
+},
+{
+type: 'mc',
+question: 'Was ist 2 × 9?',
+options: ['16', '18', '20', '14'],
+correct: 1
+},
+{
+type: 'blank',
+question: 'Ergänze: 9 × 9 = ___',
+answer: '81'
+},
+{
+type: 'mc',
+question: 'Was ist 3 × 8?',
+options: ['21', '18', '24', '27'],
+correct: 2
+},
+{
+type: 'info',
+title: '💡 Wusstest du?',
+text: 'Das Einmaleins der 9 hat einen Trick: Die Quersumme des Ergebnisses ist immer 9 (z. B. 9 × 4 = 36, und 3 + 6 = 9).'
+},
+{
+type: 'blank',
+question: 'Ergänze: 5 × 7 = ___',
+answer: '35'
+},
+{
+type: 'mc',
+question: 'Was ist 4 × 6?',
+options: ['20', '28', '24', '26'],
+correct: 2
+}
+]
+});
+}, 500);
+});
+</script>
+</body>
+</html>
