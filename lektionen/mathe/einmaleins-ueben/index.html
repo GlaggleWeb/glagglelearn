@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Einmaleins üben | Glaggle Learn</title>
+<!-- Zentrales Theme & Components — gleich eingebunden wie auf den Lektionsseiten -->
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../shared/components.js" defer></script>
+<style>
+  /* Nur Layout-Ergänzungen für diese Übersichtsseite — Grundfarben/Fonts
+     kommen weiterhin komplett aus theme.css */
+
+  .gl-overview-wrap {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gl-overview-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: var(--gl-space-2);
+    padding: clamp(12px, 2vw, 16px) clamp(16px, 5vw, 32px);
+    border-bottom: 1px solid var(--gl-border);
+    flex-shrink: 0;
+  }
+
+  .gl-overview-header a {
+    color: var(--gl-text-soft);
+    text-decoration: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+
+  .gl-overview-header a:hover {
+    color: var(--gl-text);
+    transform: translateX(-3px);
+  }
+
+  .gl-overview-header h1 {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    margin: 0;
+  }
+
+  .gl-overview-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: clamp(32px, 5vw, 48px) clamp(16px, 4vw, 32px);
+    display: flex;
+    justify-content: center;
+  }
+
+  .gl-path {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .gl-path-intro {
+    text-align: center;
+    color: var(--gl-text-soft);
+    line-height: 1.6;
+    margin-bottom: var(--gl-space-3);
+  }
+
+  /* Ein Lektions-Knoten im Pfad — links/rechts versetzt wie bei Duolingo */
+  .gl-node-row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    position: relative;
+  }
+
+  .gl-node-row:nth-child(odd) { justify-content: flex-start; }
+  .gl-node-row:nth-child(even) { justify-content: flex-end; }
+  .gl-node-row:nth-child(3n) { justify-content: center; }
+
+  .gl-node-row {
+    padding: 0 8%;
+    margin-bottom: -6px;
+  }
+
+  .gl-node {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .gl-node-circle {
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 800;
+    border: none;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+
+  /* Freigeschaltet & noch nicht gemacht — nächste anstehende Lektion */
+  .gl-node.gl-node-next .gl-node-circle {
+    background: var(--gl-primary);
+    box-shadow: 0 6px 0 var(--gl-primary-shadow);
+    color: var(--gl-text-on-accent);
+  }
+
+  .gl-node.gl-node-next:hover .gl-node-circle {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 var(--gl-primary-shadow);
+  }
+
+  .gl-node.gl-node-next:active .gl-node-circle {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 var(--gl-primary-shadow);
+  }
+
+  /* Bereits abgeschlossen */
+  .gl-node.gl-node-done .gl-node-circle {
+    background: var(--gl-secondary);
+    box-shadow: 0 6px 0 var(--gl-secondary-shadow);
+    color: var(--gl-text-on-accent);
+  }
+
+  .gl-node.gl-node-done:hover .gl-node-circle {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 var(--gl-secondary-shadow);
+  }
+
+  .gl-node.gl-node-done:active .gl-node-circle {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 var(--gl-secondary-shadow);
+  }
+
+  /* Noch gesperrt */
+  .gl-node.gl-node-locked {
+    cursor: not-allowed;
+  }
+
+  .gl-node.gl-node-locked .gl-node-circle {
+    background: var(--gl-border);
+    box-shadow: 0 6px 0 color-mix(in srgb, var(--gl-border) 60%, #000);
+    color: var(--gl-text-soft);
+  }
+
+  .gl-node-star {
+    position: absolute;
+    top: -10px;
+    right: -6px;
+    font-size: 1.1rem;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+  }
+
+  .gl-node-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gl-text);
+    text-align: center;
+    max-width: 100px;
+  }
+
+  .gl-node.gl-node-locked .gl-node-label {
+    color: var(--gl-text-soft);
+  }
+
+  /* "START"-Sprechblase über der nächsten anstehenden Lektion */
+  .gl-node-badge {
+    position: absolute;
+    top: -34px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gl-surface);
+    color: var(--gl-primary-shadow);
+    border: 2px solid var(--gl-primary);
+    border-radius: 999px;
+    padding: 3px 12px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    animation: glBadgeBounce 1.6s ease-in-out infinite;
+  }
+
+  @keyframes glBadgeBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-4px); }
+  }
+
+  .gl-path-footer {
+    margin-top: var(--gl-space-4);
+    text-align: center;
+    color: var(--gl-text-soft);
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="gl-overview-wrap">
+  <div class="gl-overview-header">
+    <a href="https://learn.glaggle.ch/index.html" title="Zurück">←</a>
+    <h1>✖️ Einmaleins üben</h1>
+  </div>
+
+  <div class="gl-overview-content">
+    <div class="gl-path">
+      <p class="gl-path-intro">Arbeite dich Lektion für Lektion durch das Einmaleins — jede Runde hat 15 Fragen.</p>
+
+      <div id="glPath"></div>
+
+      <p class="gl-path-footer" id="glPathFooter"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Jede Lektion referenziert ihre eigene HTML-Datei im gleichen Ordner.
+  const LEKTIONEN = [
+    { file: 'lektion-einmaleins.html',   label: 'Lektion 1', emoji: '🔢' },
+    { file: 'lektion-einmaleins-2.html', label: 'Lektion 2', emoji: '🎲' },
+    { file: 'lektion-einmaleins-3.html', label: 'Lektion 3', emoji: '🎯' }
+  ];
+
+  // Abgeschlossene Lektionen werden lokal gemerkt (Dateiname als Schlüssel),
+  // damit die Kette sich wie bei Duolingo freischaltet.
+  const GL_DONE_KEY = 'glaggleEinmaleinsDone';
+
+  function glGetDone() {
+    try {
+      const raw = localStorage.getItem(GL_DONE_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function glRenderPath() {
+    const done = glGetDone();
+    const pathEl = document.getElementById('glPath');
+    const footerEl = document.getElementById('glPathFooter');
+    pathEl.innerHTML = '';
+
+    let nextAssigned = false;
+
+    LEKTIONEN.forEach((lek, i) => {
+      const isDone = done.includes(lek.file);
+      const prevDone = i === 0 || done.includes(LEKTIONEN[i - 1].file);
+      const isNext = !isDone && prevDone && !nextAssigned;
+      if (isNext) nextAssigned = true;
+      const isLocked = !isDone && !isNext;
+
+      const row = document.createElement('div');
+      row.className = 'gl-node-row';
+
+      const stateClass = isDone ? 'gl-node-done' : (isNext ? 'gl-node-next' : 'gl-node-locked');
+      const tag = isLocked ? 'div' : 'a';
+
+      const node = document.createElement(tag);
+      node.className = 'gl-node ' + stateClass;
+      if (!isLocked) node.setAttribute('href', lek.file);
+
+      node.innerHTML = `
+        ${isNext ? '<div class="gl-node-badge">Start</div>' : ''}
+        <div class="gl-node-circle">
+          ${isDone ? '✓' : (isLocked ? '🔒' : lek.emoji)}
+          ${isDone ? '<span class="gl-node-star">⭐</span>' : ''}
+        </div>
+        <div class="gl-node-label">${lek.label}</div>
+      `;
+
+      row.appendChild(node);
+      pathEl.appendChild(row);
+    });
+
+    const doneCount = LEKTIONEN.filter(l => done.includes(l.file)).length;
+    footerEl.textContent = doneCount === LEKTIONEN.length
+      ? '🎉 Alle Lektionen geschafft — stark!'
+      : `${doneCount} von ${LEKTIONEN.length} Lektionen abgeschlossen`;
+  }
+
+  document.addEventListener('DOMContentLoaded', glRenderPath);
+</script>
+
+</body>
+</html>
