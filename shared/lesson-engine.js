@@ -73,6 +73,40 @@ function glAddLP(amount) {
   return total;
 }
 
+/* ---------- Lektions-Fortschritt (localStorage) ----------
+   Speichert pro Lektionsseite (Dateiname), ob sie gemacht wurde und mit
+   wie viel Prozent. Wird zentral hier gepflegt, damit jede Übersichtsseite
+   (z.B. die Einmaleins-Lektionsliste) den Fortschritt lesen kann, ohne
+   dass jede einzelne Lektionsseite das selbst implementieren muss. */
+const GL_PROGRESS_KEY = 'glaggleLessonProgress';
+
+function glGetCurrentLessonFile() {
+  // Dateiname aus der aktuellen URL, z.B. "lektion-einmaleins-2.html"
+  const path = window.location.pathname;
+  return path.substring(path.lastIndexOf('/') + 1) || 'unbekannt.html';
+}
+
+function glGetProgress() {
+  try {
+    const raw = localStorage.getItem(GL_PROGRESS_KEY);
+    const obj = raw ? JSON.parse(raw) : {};
+    return (obj && typeof obj === 'object') ? obj : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function glSaveLessonProgress(pct) {
+  const file = glGetCurrentLessonFile();
+  const progress = glGetProgress();
+  progress[file] = {
+    done: true,
+    pct: pct,
+    lastCompleted: new Date().toISOString()
+  };
+  localStorage.setItem(GL_PROGRESS_KEY, JSON.stringify(progress));
+}
+
 /* ---------- Hilfsfunktionen ---------- */
 function glFormatTime(totalSeconds) {
   const min = Math.floor(totalSeconds / 60);
@@ -327,6 +361,10 @@ showFeedback(isCorrect, correctAnswerText) {
      lessonEl/buttonsEl: DOM-Container. finishHref: Ziel des Abschluss-Buttons. */
   static renderResults(lessonEl, buttonsEl, correct, totalQuestions, elapsedSeconds, finishHref) {
     const pct = totalQuestions > 0 ? Math.round((correct / totalQuestions) * 100) : 0;
+
+    // Lektions-Fortschritt speichern: ob gemacht + wie viel Prozent richtig.
+    // Läuft zentral hier, bei jedem Abschluss, unabhängig von der Punktzahl.
+    glSaveLessonProgress(pct);
 
     // LP-Berechnung: 5 LP pro richtige Antwort + Zeit-Bonus pro Frage
     const avgSecPerQuestion = totalQuestions > 0 ? elapsedSeconds / totalQuestions : 999;
