@@ -6,8 +6,8 @@
 <title>Einmaleins üben | Glaggle Learn</title>
 <!-- Zentrales Theme & Components — auf JEDER Seite gleich einbinden.
      Kein eigenes <style> für Grundfarben/Fonts nötig — kommt aus theme.css -->
-<link rel="stylesheet" href="../../../shared/theme.css">
-<script src="../../../shared/components.js" defer></script>
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../shared/components.js" defer></script>
 <style>
   /* Nur Layout-Ergänzungen — Farben, Radien, Schatten und Spacing kommen
      ausschliesslich aus theme.css (--gl-*), genau wie auf den Lektionsseiten. */
@@ -258,9 +258,9 @@
   // "align" bestimmt die horizontale Position im Zickzack, wie in der Skizze:
   // rechts -> links -> rechts (mit Überlappung im Mittel-Slot) usw.
   const LEKTIONEN = [
-    { file: 'lektion1.html', label: 'Lektion 1', sub: '1–10er Reihen',         emoji: '🔢', align: 'right' },
     { file: 'lektion2.html', label: 'Lektion 2', sub: 'Bunt gemischt',          emoji: '🎲', align: 'left'  },
-    { file: 'lektion3.html', label: 'Lektion 3', sub: 'Bunt gemischt, Runde 2', emoji: '🎯', align: 'right' }
+    { file: 'lektion3.html', label: 'Lektion 3', sub: 'Bunt gemischt, Runde 2', emoji: '🎯', align: 'right' },
+    { file: 'lektion4.html', label: 'Lektion 4', sub: 'Bunt gemischt, Runde 3', emoji: '🚀', align: 'left'  }
   ];
 
   // Wird zentral von lesson-engine.js beim Lektionsabschluss befüllt:
