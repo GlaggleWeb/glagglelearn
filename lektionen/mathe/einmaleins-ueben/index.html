@@ -4,12 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Einmaleins üben | Glaggle Learn</title>
-<!-- Zentrales Theme & Components — gleich eingebunden wie auf den Lektionsseiten -->
-<link rel="stylesheet" href="../../../shared/theme.css">
-<script src="../../../shared/components.js" defer></script>
+<!-- Zentrales Theme & Components — auf JEDER Seite gleich einbinden.
+     Kein eigenes <style> für Grundfarben/Fonts nötig — kommt aus theme.css -->
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../shared/components.js" defer></script>
 <style>
-  /* Nur Layout-Ergänzungen für diese Übersichtsseite — Grundfarben/Fonts
-     kommen weiterhin komplett aus theme.css */
+  /* Nur Layout-Ergänzungen für diese Übersichtsseite — Farben, Radien,
+     Spacing kommen weiterhin komplett aus theme.css (--gl-*). */
 
   .gl-overview-wrap {
     width: 100%;
@@ -18,6 +19,7 @@
     flex-direction: column;
   }
 
+  /* Header: identisch zum Lektions-Header (sticky, gleiche Massstäbe) */
   .gl-overview-header {
     position: sticky;
     top: 0;
@@ -45,169 +47,229 @@
   }
 
   .gl-overview-header h1 {
-    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-size: clamp(1.15rem, 2.5vw, 1.4rem);
     margin: 0;
   }
 
+  /* Content: nutzt die volle Breite/Höhe, gleiches Padding-Schema wie
+     .gl-lesson-content, aber ohne die max-width-Deckelung auf 850px —
+     die Liste darf auf breiten Screens als Mehrspalten-Grid wachsen. */
   .gl-overview-content {
     flex: 1;
     overflow-y: auto;
-    padding: clamp(32px, 5vw, 48px) clamp(16px, 4vw, 32px);
-    display: flex;
-    justify-content: center;
+    padding: clamp(24px, 4vw, 40px) clamp(16px, 4vw, 32px) clamp(32px, 6vw, 56px);
   }
 
-  .gl-path {
-    width: 100%;
-    max-width: 480px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .gl-path-intro {
-    text-align: center;
+  .gl-overview-intro {
+    max-width: 900px;
+    margin: 0 auto var(--gl-space-3);
     color: var(--gl-text-soft);
     line-height: 1.6;
-    margin-bottom: var(--gl-space-3);
   }
 
-  /* Ein Lektions-Knoten im Pfad — links/rechts versetzt wie bei Duolingo */
-  .gl-node-row {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    position: relative;
+  /* Gesamtfortschritt oben — eigene Card im gleichen Stil wie die
+     Ergebnis-Kästchen der Lesson Engine (gl-result-box) */
+  .gl-summary {
+    max-width: 900px;
+    margin: 0 auto var(--gl-space-4);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gl-space-2);
   }
 
-  .gl-node-row:nth-child(odd) { justify-content: flex-start; }
-  .gl-node-row:nth-child(even) { justify-content: flex-end; }
-  .gl-node-row:nth-child(3n) { justify-content: center; }
-
-  .gl-node-row {
-    padding: 0 8%;
-    margin-bottom: -6px;
+  .gl-summary-box {
+    border-radius: var(--gl-radius-md);
+    padding: var(--gl-space-2) var(--gl-space-1);
+    text-align: center;
+    border: 2px solid var(--gl-border);
+    background: var(--gl-bg);
   }
 
-  .gl-node {
-    position: relative;
+  .gl-summary-box.gl-sum-done {
+    border-color: var(--gl-secondary-shadow);
+    background: color-mix(in srgb, var(--gl-secondary) 14%, var(--gl-bg));
+  }
+
+  .gl-summary-box.gl-sum-avg {
+    border-color: var(--gl-primary-shadow);
+    background: color-mix(in srgb, var(--gl-primary) 16%, var(--gl-bg));
+  }
+
+  .gl-summary-box.gl-sum-best {
+    border-color: #e8b83c;
+    background: color-mix(in srgb, #f7d060 22%, var(--gl-bg));
+  }
+
+  .gl-summary-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--gl-text);
+    line-height: 1.2;
+  }
+
+  .gl-summary-label {
+    font-size: 0.75rem;
+    color: var(--gl-text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-top: 4px;
+  }
+
+  /* Lektionsliste als Grid aus glaggle-card-Elementen — nutzt die
+     komplette verfügbare Breite, mehrspaltig auf grossen Screens */
+  .gl-lesson-grid {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--gl-space-2);
+  }
+
+  @media (min-width: 640px) {
+    .gl-lesson-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (min-width: 1024px) {
+    .gl-lesson-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .gl-lesson-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+  }
+
+  .gl-lesson-card-link.gl-locked {
+    pointer-events: none;
+  }
+
+  glaggle-card.gl-lesson-card {
+    height: 100%;
+    transition: transform 0.1s ease;
+  }
+
+  .gl-lesson-card-link:not(.gl-locked):hover glaggle-card.gl-lesson-card {
+    transform: translateY(-2px);
+  }
+
+  .gl-lesson-card-inner {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    text-decoration: none;
-    cursor: pointer;
+    gap: var(--gl-space-1);
+    height: 100%;
   }
 
-  .gl-node-circle {
-    width: 74px;
-    height: 74px;
+  .gl-lesson-card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .gl-lesson-icon {
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.8rem;
-    font-weight: 800;
-    border: none;
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    font-size: 1.5rem;
+    flex-shrink: 0;
   }
 
-  /* Freigeschaltet & noch nicht gemacht — nächste anstehende Lektion */
-  .gl-node.gl-node-next .gl-node-circle {
+  .gl-lesson-icon.gl-icon-next {
     background: var(--gl-primary);
-    box-shadow: 0 6px 0 var(--gl-primary-shadow);
+    box-shadow: 0 4px 0 var(--gl-primary-shadow);
     color: var(--gl-text-on-accent);
   }
 
-  .gl-node.gl-node-next:hover .gl-node-circle {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 0 var(--gl-primary-shadow);
-  }
-
-  .gl-node.gl-node-next:active .gl-node-circle {
-    transform: translateY(4px);
-    box-shadow: 0 2px 0 var(--gl-primary-shadow);
-  }
-
-  /* Bereits abgeschlossen */
-  .gl-node.gl-node-done .gl-node-circle {
+  .gl-lesson-icon.gl-icon-done {
     background: var(--gl-secondary);
-    box-shadow: 0 6px 0 var(--gl-secondary-shadow);
+    box-shadow: 0 4px 0 var(--gl-secondary-shadow);
     color: var(--gl-text-on-accent);
   }
 
-  .gl-node.gl-node-done:hover .gl-node-circle {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 0 var(--gl-secondary-shadow);
-  }
-
-  .gl-node.gl-node-done:active .gl-node-circle {
-    transform: translateY(4px);
-    box-shadow: 0 2px 0 var(--gl-secondary-shadow);
-  }
-
-  /* Noch gesperrt */
-  .gl-node.gl-node-locked {
-    cursor: not-allowed;
-  }
-
-  .gl-node.gl-node-locked .gl-node-circle {
+  .gl-lesson-icon.gl-icon-locked {
     background: var(--gl-border);
-    box-shadow: 0 6px 0 color-mix(in srgb, var(--gl-border) 60%, #000);
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--gl-border) 60%, #000);
     color: var(--gl-text-soft);
   }
 
-  .gl-node-star {
-    position: absolute;
-    top: -10px;
-    right: -6px;
-    font-size: 1.1rem;
-    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
-  }
-
-  .gl-node-label {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--gl-text);
-    text-align: center;
-    max-width: 100px;
-  }
-
-  .gl-node.gl-node-locked .gl-node-label {
-    color: var(--gl-text-soft);
-  }
-
-  /* "START"-Sprechblase über der nächsten anstehenden Lektion */
-  .gl-node-badge {
-    position: absolute;
-    top: -34px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--gl-surface);
-    color: var(--gl-primary-shadow);
-    border: 2px solid var(--gl-primary);
-    border-radius: 999px;
-    padding: 3px 12px;
-    font-size: 0.7rem;
+  .gl-lesson-title {
     font-weight: 800;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    animation: glBadgeBounce 1.6s ease-in-out infinite;
+    font-size: 1.05rem;
+    color: var(--gl-text);
   }
 
-  @keyframes glBadgeBounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(-4px); }
-  }
-
-  .gl-path-footer {
-    margin-top: var(--gl-space-4);
-    text-align: center;
+  .gl-lesson-card-link.gl-locked .gl-lesson-title {
     color: var(--gl-text-soft);
+  }
+
+  .gl-lesson-sub {
+    font-size: 0.8rem;
+    color: var(--gl-text-soft);
+  }
+
+  .gl-lesson-badge {
+    align-self: flex-start;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 2px solid var(--gl-primary);
+    color: var(--gl-primary-shadow);
+    background: color-mix(in srgb, var(--gl-primary) 12%, var(--gl-surface));
+  }
+
+  /* Fortschrittsbalken + Prozentzahl pro Lektion */
+  .gl-lesson-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 8px;
+  }
+
+  .gl-lesson-bar-track {
+    flex: 1;
+    height: 10px;
+    background: var(--gl-border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .gl-lesson-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--gl-primary-hover), var(--gl-primary));
+    transition: width 0.5s ease;
+  }
+
+  .gl-lesson-bar-fill.gl-bar-low {
+    background: linear-gradient(180deg, #f9a8a8, var(--gl-danger));
+  }
+
+  .gl-lesson-bar-fill.gl-bar-mid {
+    background: linear-gradient(180deg, #ffd98a, #f0b94c);
+  }
+
+  .gl-lesson-pct {
     font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--gl-text);
+    min-width: 34px;
+    text-align: right;
+  }
+
+  .gl-lesson-pct.gl-pct-empty {
+    color: var(--gl-text-soft);
+    font-weight: 600;
+  }
+
+  @media (min-width: 1024px) {
+    .gl-lesson-title { font-size: 1.15rem; }
   }
 </style>
 </head>
@@ -220,83 +282,126 @@
   </div>
 
   <div class="gl-overview-content">
-    <div class="gl-path">
-      <p class="gl-path-intro">Arbeite dich Lektion für Lektion durch das Einmaleins — jede Runde hat 15 Fragen.</p>
+    <p class="gl-overview-intro">Arbeite dich Lektion für Lektion durch das Einmaleins — jede Runde hat 15 Fragen. Dein bestes Ergebnis pro Lektion wird gespeichert.</p>
 
-      <div id="glPath"></div>
+    <div class="gl-summary" id="glSummary"></div>
 
-      <p class="gl-path-footer" id="glPathFooter"></p>
-    </div>
+    <div class="gl-lesson-grid" id="glLessonGrid"></div>
   </div>
 </div>
 
 <script>
   // Jede Lektion referenziert ihre eigene HTML-Datei im gleichen Ordner.
   const LEKTIONEN = [
-    { file: 'lektion-einmaleins.html',   label: 'Lektion 1', emoji: '🔢' },
-    { file: 'lektion-einmaleins-2.html', label: 'Lektion 2', emoji: '🎲' },
-    { file: 'lektion-einmaleins-3.html', label: 'Lektion 3', emoji: '🎯' }
+    { file: 'lektion-einmaleins.html',   label: 'Lektion 1', sub: '1–10er Reihen',         emoji: '🔢' },
+    { file: 'lektion-einmaleins-2.html', label: 'Lektion 2', sub: 'Bunt gemischt',          emoji: '🎲' },
+    { file: 'lektion-einmaleins-3.html', label: 'Lektion 3', sub: 'Bunt gemischt, Runde 2', emoji: '🎯' }
   ];
 
-  // Abgeschlossene Lektionen werden lokal gemerkt (Dateiname als Schlüssel),
-  // damit die Kette sich wie bei Duolingo freischaltet.
-  const GL_DONE_KEY = 'glaggleEinmaleinsDone';
+  // Wird zentral von lesson-engine.js beim Lektionsabschluss befüllt:
+  // { "<dateiname>.html": { done: true, pct: 87, lastCompleted: "..." }, ... }
+  const GL_PROGRESS_KEY = 'glaggleLessonProgress';
 
-  function glGetDone() {
+  function glGetProgress() {
     try {
-      const raw = localStorage.getItem(GL_DONE_KEY);
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
+      const raw = localStorage.getItem(GL_PROGRESS_KEY);
+      const obj = raw ? JSON.parse(raw) : {};
+      return (obj && typeof obj === 'object') ? obj : {};
     } catch (e) {
-      return [];
+      return {};
     }
   }
 
-  function glRenderPath() {
-    const done = glGetDone();
-    const pathEl = document.getElementById('glPath');
-    const footerEl = document.getElementById('glPathFooter');
-    pathEl.innerHTML = '';
+  function glBarClass(pct) {
+    if (pct >= 70) return '';
+    if (pct >= 40) return 'gl-bar-mid';
+    return 'gl-bar-low';
+  }
+
+  function glRenderSummary(progress) {
+    const summaryEl = document.getElementById('glSummary');
+    const entries = LEKTIONEN.map(l => progress[l.file]).filter(Boolean);
+    const doneCount = entries.length;
+    const avgPct = doneCount > 0
+      ? Math.round(entries.reduce((sum, e) => sum + e.pct, 0) / doneCount)
+      : 0;
+    const bestPct = doneCount > 0
+      ? Math.max(...entries.map(e => e.pct))
+      : 0;
+
+    summaryEl.innerHTML = `
+      <div class="gl-summary-box gl-sum-done">
+        <div class="gl-summary-value">${doneCount}/${LEKTIONEN.length}</div>
+        <div class="gl-summary-label">Gemacht</div>
+      </div>
+      <div class="gl-summary-box gl-sum-avg">
+        <div class="gl-summary-value">${doneCount > 0 ? avgPct + '%' : '—'}</div>
+        <div class="gl-summary-label">Ø Richtig</div>
+      </div>
+      <div class="gl-summary-box gl-sum-best">
+        <div class="gl-summary-value">${doneCount > 0 ? bestPct + '%' : '—'}</div>
+        <div class="gl-summary-label">Bestwert</div>
+      </div>
+    `;
+  }
+
+  function glRenderGrid(progress) {
+    const gridEl = document.getElementById('glLessonGrid');
+    gridEl.innerHTML = '';
 
     let nextAssigned = false;
 
     LEKTIONEN.forEach((lek, i) => {
-      const isDone = done.includes(lek.file);
-      const prevDone = i === 0 || done.includes(LEKTIONEN[i - 1].file);
+      const entry = progress[lek.file];
+      const isDone = !!entry;
+      const prevDone = i === 0 || !!progress[LEKTIONEN[i - 1].file];
       const isNext = !isDone && prevDone && !nextAssigned;
       if (isNext) nextAssigned = true;
       const isLocked = !isDone && !isNext;
 
-      const row = document.createElement('div');
-      row.className = 'gl-node-row';
+      const iconClass = isDone ? 'gl-icon-done' : (isLocked ? 'gl-icon-locked' : 'gl-icon-next');
+      const iconContent = isDone ? '✓' : (isLocked ? '🔒' : lek.emoji);
 
-      const stateClass = isDone ? 'gl-node-done' : (isNext ? 'gl-node-next' : 'gl-node-locked');
-      const tag = isLocked ? 'div' : 'a';
+      const pct = isDone ? entry.pct : 0;
+      const pctLabel = isDone ? `${pct}%` : '– %';
+      const pctClass = isDone ? '' : 'gl-pct-empty';
 
-      const node = document.createElement(tag);
-      node.className = 'gl-node ' + stateClass;
-      if (!isLocked) node.setAttribute('href', lek.file);
+      const link = document.createElement(isLocked ? 'div' : 'a');
+      link.className = 'gl-lesson-card-link' + (isLocked ? ' gl-locked' : '');
+      if (!isLocked) link.setAttribute('href', lek.file);
 
-      node.innerHTML = `
-        ${isNext ? '<div class="gl-node-badge">Start</div>' : ''}
-        <div class="gl-node-circle">
-          ${isDone ? '✓' : (isLocked ? '🔒' : lek.emoji)}
-          ${isDone ? '<span class="gl-node-star">⭐</span>' : ''}
-        </div>
-        <div class="gl-node-label">${lek.label}</div>
+      link.innerHTML = `
+        <glaggle-card class="gl-lesson-card">
+          <div class="gl-lesson-card-inner">
+            <div class="gl-lesson-card-top">
+              <div class="gl-lesson-icon ${iconClass}">${iconContent}</div>
+              <div>
+                <div class="gl-lesson-title">${lek.label}</div>
+                <div class="gl-lesson-sub">${lek.sub}</div>
+              </div>
+            </div>
+            ${isNext ? '<div class="gl-lesson-badge">Weiter hier</div>' : ''}
+            <div class="gl-lesson-progress-row">
+              <div class="gl-lesson-bar-track">
+                <div class="gl-lesson-bar-fill ${glBarClass(pct)}" style="width:${pct}%"></div>
+              </div>
+              <div class="gl-lesson-pct ${pctClass}">${pctLabel}</div>
+            </div>
+          </div>
+        </glaggle-card>
       `;
 
-      row.appendChild(node);
-      pathEl.appendChild(row);
+      gridEl.appendChild(link);
     });
-
-    const doneCount = LEKTIONEN.filter(l => done.includes(l.file)).length;
-    footerEl.textContent = doneCount === LEKTIONEN.length
-      ? '🎉 Alle Lektionen geschafft — stark!'
-      : `${doneCount} von ${LEKTIONEN.length} Lektionen abgeschlossen`;
   }
 
-  document.addEventListener('DOMContentLoaded', glRenderPath);
+  function glRenderAll() {
+    const progress = glGetProgress();
+    glRenderSummary(progress);
+    glRenderGrid(progress);
+  }
+
+  customElements.whenDefined('glaggle-card').then(glRenderAll);
 </script>
 
 </body>
