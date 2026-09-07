@@ -6,14 +6,12 @@
 <title>Einmaleins üben | Glaggle Learn</title>
 <!-- Zentrales Theme & Components — auf JEDER Seite gleich einbinden.
      Kein eigenes <style> für Grundfarben/Fonts nötig — kommt aus theme.css -->
-<link rel="stylesheet" href="../../../shared/theme.css">
-<script src="../../../shared/components.js" defer></script>
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../shared/components.js" defer></script>
 <style>
-  /* Nur Layout-Ergänzungen für diese Übersichtsseite — Farben, Radien,
-     Schatten und Spacing kommen ausschliesslich aus theme.css (--gl-*),
-     genau wie bei den Lektionsseiten selbst. */
+  /* Nur Layout-Ergänzungen — Farben, Radien, Schatten und Spacing kommen
+     ausschliesslich aus theme.css (--gl-*), genau wie auf den Lektionsseiten. */
 
-  /* Header: 1:1 Kopie von .gl-lesson-header, inkl. sticky Progress-Zeile */
   .gl-overview-wrap {
     width: 100%;
     height: 100vh;
@@ -21,6 +19,7 @@
     flex-direction: column;
   }
 
+  /* Header: 1:1 wie .gl-lesson-header (sticky, gleiche Masse, Kreuz statt Pfeil) */
   .gl-overview-header {
     position: sticky;
     top: 0;
@@ -51,7 +50,6 @@
     color: var(--gl-text);
   }
 
-  /* Content-Bereich: gleiches Padding-Schema wie .gl-lesson-content */
   .gl-overview-content {
     flex: 1;
     overflow-y: auto;
@@ -60,35 +58,48 @@
     justify-content: center;
   }
 
+  /* Der Pfad selbst: relative Positionierung, damit die SVG-Verbindungs-
+     linien absolut darüber liegen können, exakt wie in der Skizze. */
   .gl-path {
+    position: relative;
     width: 100%;
-    max-width: 560px;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--gl-space-2);
+    max-width: 640px;
   }
 
   .gl-path-intro {
     text-align: center;
     color: var(--gl-text-soft);
     line-height: 1.6;
-    margin-bottom: var(--gl-space-2);
+    margin-bottom: var(--gl-space-4);
   }
 
-  /* Jede Lektion ist ein Rechteck (glaggle-card-artig), aber
-     wegmässig versetzt platziert statt in einer geraden Liste. */
-  .gl-node-row {
+  .gl-path-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    display: flex;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
   }
 
-  .gl-node-row:nth-child(3n+1) { justify-content: flex-start; }
-  .gl-node-row:nth-child(3n+2) { justify-content: flex-end; }
-  .gl-node-row:nth-child(3n)   { justify-content: center; }
+  .gl-path-svg path {
+    fill: none;
+    stroke: var(--gl-danger);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
 
+  .gl-nodes {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Jedes Rechteck sitzt absolut im Pfad-Container, X/Y kommen aus JS
+     gemäss der Zickzack-Anordnung aus der Skizze. */
   .gl-node {
-    width: 78%;
+    position: absolute;
+    width: 46%;
     text-decoration: none;
     display: block;
   }
@@ -98,7 +109,7 @@
     align-items: center;
     gap: var(--gl-space-2);
     background: var(--gl-surface);
-    border: 1px solid var(--gl-border);
+    border: 2px solid var(--gl-border);
     border-radius: var(--gl-radius-md);
     padding: var(--gl-space-2);
     box-shadow: 0 4px 14px rgba(0,0,0,0.06);
@@ -108,7 +119,7 @@
 
   .gl-node:not(.gl-locked):hover .gl-node-box {
     transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.09);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
   }
 
   .gl-node.gl-locked {
@@ -116,14 +127,14 @@
   }
 
   .gl-node-icon {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
     border-radius: var(--gl-radius-sm);
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 800;
   }
 
@@ -152,7 +163,7 @@
 
   .gl-node-title {
     font-weight: 800;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--gl-text);
     margin-bottom: 2px;
   }
@@ -162,19 +173,17 @@
   }
 
   .gl-node-sub {
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     color: var(--gl-text-soft);
+    margin-bottom: 6px;
   }
 
-  /* Fortschrittsbalken je Lektion — nutzt die gl-input/gl-border-Radien
-     aus dem Theme statt eigener Erfindung */
   .gl-node-bar-track {
     width: 100%;
-    height: 8px;
+    height: 7px;
     background: var(--gl-border);
     border-radius: 999px;
     overflow: hidden;
-    margin-top: 8px;
   }
 
   .gl-node-bar-fill {
@@ -186,9 +195,9 @@
   .gl-node-pct {
     flex-shrink: 0;
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     color: var(--gl-text);
-    min-width: 40px;
+    min-width: 34px;
     text-align: right;
   }
 
@@ -206,23 +215,27 @@
     border: 2px solid var(--gl-primary);
     border-radius: 999px;
     padding: 2px 10px;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     font-weight: 800;
     letter-spacing: 0.03em;
     text-transform: uppercase;
+    white-space: nowrap;
   }
 
   .gl-path-footer {
-    margin-top: var(--gl-space-2);
     text-align: center;
     color: var(--gl-text-soft);
     font-size: 0.85rem;
+  }
+
+  @media (max-width: 560px) {
+    .gl-node { width: 60%; }
   }
 </style>
 </head>
 <body>
 
-<div class="gl-overview-wrap" id="glWrap">
+<div class="gl-overview-wrap">
   <div class="gl-overview-header">
     <a href="https://learn.glaggle.ch/index.html" title="Zurück">✕</a>
     <h1>Einmaleins üben</h1>
@@ -232,7 +245,8 @@
     <div class="gl-path">
       <p class="gl-path-intro">Arbeite dich Lektion für Lektion durch das Einmaleins — jede Runde hat 15 Fragen.</p>
 
-      <div id="glPath"></div>
+      <svg class="gl-path-svg" id="glPathSvg" preserveAspectRatio="none"></svg>
+      <div class="gl-nodes" id="glNodes"></div>
 
       <p class="gl-path-footer" id="glPathFooter"></p>
     </div>
@@ -241,10 +255,12 @@
 
 <script>
   // Jede Lektion referenziert ihre eigene HTML-Datei im gleichen Ordner.
+  // "align" bestimmt die horizontale Position im Zickzack, wie in der Skizze:
+  // rechts -> links -> rechts (mit Überlappung im Mittel-Slot) usw.
   const LEKTIONEN = [
-    { file: 'lektion-einmaleins.html',   label: 'Lektion 1', sub: '1–10er Reihen',         emoji: '🔢' },
-    { file: 'lektion-einmaleins-2.html', label: 'Lektion 2', sub: 'Bunt gemischt',          emoji: '🎲' },
-    { file: 'lektion-einmaleins-3.html', label: 'Lektion 3', sub: 'Bunt gemischt, Runde 2', emoji: '🎯' }
+    { file: 'lektion-einmaleins.html',   label: 'Lektion 1', sub: '1–10er Reihen',         emoji: '🔢', align: 'right' },
+    { file: 'lektion-einmaleins-2.html', label: 'Lektion 2', sub: 'Bunt gemischt',          emoji: '🎲', align: 'left'  },
+    { file: 'lektion-einmaleins-3.html', label: 'Lektion 3', sub: 'Bunt gemischt, Runde 2', emoji: '🎯', align: 'right' }
   ];
 
   // Wird zentral von lesson-engine.js beim Lektionsabschluss befüllt:
@@ -257,19 +273,65 @@
       const obj = raw ? JSON.parse(raw) : {};
       return (obj && typeof obj === 'object') ? obj : {};
     } catch (e) {
+      console.warn('Konnte glaggleLessonProgress nicht lesen:', e);
       return {};
     }
   }
 
-  function glRenderPath() {
-    const progress = glGetProgress();
-    const pathEl = document.getElementById('glPath');
-    const footerEl = document.getElementById('glPathFooter');
-    pathEl.innerHTML = '';
+  const NODE_HEIGHT = 96;   // ungefähre Höhe einer Karte inkl. Abstand
+  const ROW_GAP = 56;       // vertikaler Abstand zwischen den Reihen
+
+  function glBuildLayout() {
+    const nodesEl = document.getElementById('glNodes');
+    const pathEl = document.querySelector('.gl-path');
+    const containerWidth = pathEl.clientWidth;
+    const nodeWidthPct = containerWidth <= 560 ? 0.60 : 0.46;
+    const nodeWidth = containerWidth * nodeWidthPct;
+
+    const positions = LEKTIONEN.map((lek, i) => {
+      const y = i * (NODE_HEIGHT + ROW_GAP);
+      let x;
+      if (lek.align === 'right') x = containerWidth - nodeWidth;
+      else if (lek.align === 'left') x = 0;
+      else x = (containerWidth - nodeWidth) / 2;
+      return { x, y, w: nodeWidth };
+    });
+
+    return { positions, totalHeight: (LEKTIONEN.length - 1) * (NODE_HEIGHT + ROW_GAP) + NODE_HEIGHT };
+  }
+
+  function glRenderConnectors(positions, totalHeight) {
+    const svg = document.getElementById('glPathSvg');
+    svg.setAttribute('viewBox', `0 0 ${document.querySelector('.gl-path').clientWidth} ${totalHeight}`);
+    svg.style.height = totalHeight + 'px';
+
+    let pathsHtml = '';
+    for (let i = 0; i < positions.length - 1; i++) {
+      const from = positions[i];
+      const to = positions[i + 1];
+      // Startpunkt: unten an der Kante, die zur nächsten Karte zeigt
+      const fromX = from.x + (to.x > from.x ? from.w : 0);
+      const fromY = from.y + NODE_HEIGHT * 0.55;
+      const toX = to.x + (to.x > from.x ? 0 : to.w);
+      const toY = to.y + NODE_HEIGHT * 0.45;
+
+      // Sanfte S-Kurve zwischen den beiden Punkten, wie in der Skizze
+      const midY = (fromY + toY) / 2;
+      const d = `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY}`;
+      pathsHtml += `<path d="${d}" />`;
+    }
+    svg.innerHTML = pathsHtml;
+  }
+
+  function glRenderNodes(positions, progress) {
+    const nodesEl = document.getElementById('glNodes');
+    nodesEl.innerHTML = '';
+    nodesEl.style.height = (positions[positions.length - 1].y + NODE_HEIGHT) + 'px';
 
     let nextAssigned = false;
 
     LEKTIONEN.forEach((lek, i) => {
+      const pos = positions[i];
       const entry = progress[lek.file];
       const isDone = !!entry;
       const prevDone = i === 0 || !!progress[LEKTIONEN[i - 1].file];
@@ -283,12 +345,12 @@
       const pct = isDone ? entry.pct : 0;
       const pctLabel = isDone ? `${pct}%` : '–';
 
-      const row = document.createElement('div');
-      row.className = 'gl-node-row';
-
       const node = document.createElement(tag);
       node.className = 'gl-node ' + stateClass;
       if (!isLocked) node.setAttribute('href', lek.file);
+      node.style.left = pos.x + 'px';
+      node.style.top = pos.y + 'px';
+      node.style.width = pos.w + 'px';
 
       node.innerHTML = `
         <div class="gl-node-box">
@@ -305,17 +367,34 @@
         </div>
       `;
 
-      row.appendChild(node);
-      pathEl.appendChild(row);
+      nodesEl.appendChild(node);
     });
 
     const doneCount = LEKTIONEN.filter(l => progress[l.file]).length;
-    footerEl.textContent = doneCount === LEKTIONEN.length
+    document.getElementById('glPathFooter').textContent = doneCount === LEKTIONEN.length
       ? '🎉 Alle Lektionen geschafft — stark!'
       : `${doneCount} von ${LEKTIONEN.length} Lektionen abgeschlossen`;
   }
 
-  document.addEventListener('DOMContentLoaded', glRenderPath);
+  function glRenderAll() {
+    const progress = glGetProgress();
+    console.log('[Einmaleins] gelesener Fortschritt aus localStorage:', progress);
+    if (Object.keys(progress).length === 0) {
+      console.warn('[Einmaleins] "glaggleLessonProgress" ist leer oder nicht vorhanden. ' +
+        'Prüfe: 1) läuft diese Seite auf demselben Origin (Domain+Pfad-Basis) wie die Lektionsseiten? ' +
+        '2) wurde die aktualisierte lesson-engine.js wirklich hochgeladen/eingebunden? ' +
+        '3) wurde mindestens eine Lektion tatsächlich bis zum Ende durchgespielt?');
+    }
+    const { positions, totalHeight } = glBuildLayout();
+    glRenderConnectors(positions, totalHeight);
+    glRenderNodes(positions, progress);
+  }
+
+  // Wichtig: erst rendern, wenn Layout-Masse (clientWidth) verfügbar sind —
+  // dafür reicht DOMContentLoaded, aber wir bauen zusätzlich bei Resize neu,
+  // damit die SVG-Linien nicht verrutschen.
+  window.addEventListener('DOMContentLoaded', glRenderAll);
+  window.addEventListener('resize', glRenderAll);
 </script>
 
 </body>
