@@ -1,1 +1,128 @@
-
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Einmaleins 4 — Mathe Grundlagen | Glaggle Learn</title>
+<!-- Zentrales Theme & Components — auf JEDER Lektionsseite gleich einbinden.
+     Kein eigenes <style> hier nötig — alles Layout/Design kommt aus theme.css -->
+<link rel="stylesheet" href="../../../shared/theme.css">
+<script src="../../../shared/components.js" defer></script>
+<script src="../../../shared/lesson-engine.js" defer></script>
+</head>
+<body>
+<div id="glLessonRoot"></div>
+<script>
+// window.onload wartet, bis ALLES (auch lesson-engine.js) komplett fertig geladen ist
+window.addEventListener("load", function() {
+// Zur Sicherheit nochmals 0,5 Sekunden warten
+setTimeout(function() {
+GlaggleLesson.mount({
+target: document.getElementById('glLessonRoot'),
+backHref: 'https://learn.glaggle.ch/lektionen/mathe/einmaleins-ueben/',
+steps: [
+{
+type: 'info',
+title: '🎲 Einmaleins — Runde 4',
+text: 'Neue Aufgaben, neue Tricks — schaffst du sie alle? Tippe auf "Weiter", um zu starten.'
+},
+{
+type: 'mc',
+question: 'Was ist 7 × 8?',
+options: ['54', '56', '63', '58'],
+correct: 1
+},
+{
+type: 'blank',
+question: 'Ergänze: 6 × 9 = ___',
+answer: '54'
+},
+{
+type: 'mc',
+question: 'Was ist 8 × 7?',
+options: ['54', '63', '56', '48'],
+correct: 2
+},
+{
+type: 'blank',
+question: 'Welche Zahl mal 6 ergibt 54?',
+answer: '9'
+},
+{
+type: 'mc',
+question: 'Was ist 4 × 7?',
+options: ['21', '24', '28', '32'],
+correct: 2
+},
+{
+type: 'info',
+title: '💡 Wusstest du?',
+text: 'Die 4er-Reihe ist einfach das Doppelte der 2er-Reihe: Wenn du weißt, dass 5 × 2 = 10 ist, verdoppelst du die 10 einfach auf 20, um das Ergebnis für 5 × 4 zu erhalten.'
+},
+{
+type: 'blank',
+question: 'Ergänze: 7 × 7 = ___',
+answer: '49'
+},
+{
+type: 'mc',
+question: 'Was ist 3 × 6?',
+options: ['15', '18', '21', '24'],
+correct: 1
+},
+{
+type: 'mc',
+question: 'Was ist 7 × 8?',
+options: ['54', '63', '48', '56'],
+correct: 3
+},
+{
+type: 'blank',
+question: 'Welche Zahl mal 8 ergibt 56?',
+answer: '7'
+},
+{
+type: 'mc',
+question: 'Was ist 2 × 9?',
+options: ['16', '18', '20', '14'],
+correct: 1
+},
+{
+type: 'blank',
+question: 'Ergänze: 4 × 4 = ___',
+answer: '16'
+},
+{
+type: 'mc',
+question: 'Was ist 8 × 8?',
+options: ['54', '56', '64', '72'],
+correct: 2
+},
+{
+type: 'info',
+title: '💡 Tipp',
+text: 'Die 0 löscht jede Zahl komplett aus: Egal wie riesig eine Zahl ist, multipliziert man sie mit 0, ist das Ergebnis immer 0 (z. B. 1.000 × 0 = 0).'
+},
+{
+type: 'blank',
+question: 'Welche Zahl mal 6 ergibt 36?',
+answer: '6'
+},
+{
+type: 'mc',
+question: 'Was ist 6 × 9?',
+options: ['45', '48', '54', '56'],
+correct: 2
+},
+{
+type: 'blank',
+question: 'Ergänze: 5 × 8 = ___',
+answer: '40'
+}
+]
+});
+}, 500);
+});
+</script>
+</body>
+</html>
