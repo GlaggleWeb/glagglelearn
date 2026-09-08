@@ -74,6 +74,30 @@
     }
   }
 
+  /* ---------- v2.1: echten Themen-Fortschritt veröffentlichen ----------
+     Schreibt unter "glaggleTopicProgress" einen Eintrag mit der Ordner-
+     Kennung des Themas (z.B. "einmaleins-ueben"), damit die Fach-Übersicht
+     themenscharfe Werte lesen kann — keine Kollisionen mehr zwischen
+     gleich benannten Lektions-Dateien verschiedener Themen. */
+  const TOPIC_PROGRESS_KEY = 'glaggleTopicProgress';
+
+  function glTopicIdFromPath() {
+    const parts = location.pathname.split('/').filter(Boolean);
+    if (parts.length && parts[parts.length - 1].toLowerCase().endsWith('.html')) parts.pop();
+    return parts.length ? decodeURIComponent(parts[parts.length - 1]) : '';
+  }
+
+  function glPublishTopicProgress(progress) {
+    const total = (CFG.lektionen || []).length;
+    const id = CFG.topicId || glTopicIdFromPath();
+    if (!id || total === 0) return;
+    const done = CFG.lektionen.filter((l) => !!progress[l.file]).length;
+    let map = {};
+    try { map = JSON.parse(localStorage.getItem(TOPIC_PROGRESS_KEY) || '{}') || {}; } catch (e) { map = {}; }
+    map[id] = { done, total, pct: Math.round((done / total) * 100), updated: new Date().toISOString() };
+    try { localStorage.setItem(TOPIC_PROGRESS_KEY, JSON.stringify(map)); } catch (e) {}
+  }
+
   /* ---------- horizontale Position einer Karte ---------- */
   function glAlignFor(lek, i, mobile) {
     if (lek.align) return lek.align;                       // pro Lektion überschreibbar
@@ -222,6 +246,7 @@
   /* ---------- alles rendern (2 Durchläufe: bauen → messen → exakt setzen) ---------- */
   function glRenderAll() {
     const progress = glGetProgress();
+    glPublishTopicProgress(progress);
     console.log('[Übersicht] gelesener Fortschritt aus localStorage:', progress);
     if (Object.keys(progress).length === 0) {
       console.warn('[Übersicht] "' + CFG.progressKey + '" ist leer oder nicht vorhanden. ' +
@@ -253,6 +278,9 @@
       cancelAnimationFrame(glRafId);
       glRafId = requestAnimationFrame(glRenderAll);   // SVG-Linien verrutschen nicht
     });
+        // Nach Zurück-Navigieren (z.B. von einer Lektion) neu rendern,
+    // damit der veröffentlichte Themen-Fortschritt aktuell bleibt.
+    window.addEventListener('pageshow', function () { glRenderAll(); });
   }
 
   window.GlaggleOverview = {
