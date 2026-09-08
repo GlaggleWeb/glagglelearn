@@ -477,21 +477,37 @@ body {
   margin-bottom: var(--gl-space-4);
 }
 
+/* Canvas um Karten + Linien, damit das SVG exakt am Karten-Nullpunkt startet */
+.gl-path-canvas {
+  position: relative;
+}
+
 .gl-path-svg {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  overflow: visible;
   pointer-events: none;
   z-index: 0;
 }
 
-.gl-path-svg path {
+/* Pfad-Segmente: offen = grau gepunktete Spur, erledigt = grün durchgezogen */
+.gl-seg {
   fill: none;
-  stroke: var(--gl-danger);
-  stroke-width: 3;
+  stroke-width: 4;
   stroke-linecap: round;
+}
+
+.gl-seg-open {
+  stroke: var(--gl-text-soft);
+  opacity: 0.35;
+  stroke-dasharray: 0.1 14;   /*runde Punkte statt roter Linie*/
+}
+
+.gl-seg-done {
+  stroke: var(--gl-primary-shadow);
+  opacity: 0.9;
 }
 
 .gl-nodes {
@@ -633,5 +649,12 @@ body {
 }
 
 @media (max-width: 560px) {
-  .gl-node { width: 60%; }
+  .gl-overview-content { padding: 28px 14px 40px; }
+  .gl-path-intro { font-size: 0.92rem; margin-bottom: 28px; }
+  .gl-node-box { padding: 12px; gap: 12px; }
+  .gl-node-icon { width: 40px; height: 40px; font-size: 1.2rem; }
+  .gl-node-title { font-size: 0.9rem; }
+  .gl-node-sub { font-size: 0.7rem; }
+  .gl-node-pct { min-width: 26px; font-size: 0.8rem; }
+  .gl-node-badge { top: -9px; left: 12px; }
 }
