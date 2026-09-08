@@ -211,6 +211,8 @@ class GlaggleLesson {
   /* Ersetzt den Prüfen-Button durch ein Feedback-Banner + Weiter-Button.
      isCorrect steuert Text/Farbe des Banners und den Hintergrund-Flash. */
 
+const GL_SOUNDS = { true: new Audio('../../shared/true.aac'), false: new Audio('../../shared/false.aac') }; GL_SOUNDS.true.preload = 'auto'; GL_SOUNDS.false.preload = 'auto';
+   
 showFeedback(isCorrect, correctAnswerText) {
   // Hintergrund grün/rot setzen
   this.setFlash(isCorrect ? 'ok' : 'bad');
@@ -218,10 +220,11 @@ showFeedback(isCorrect, correctAnswerText) {
   // Prüfen-Button entfernen
   this.clearButtons();
 
-  // Sound abspielen
-  const audio = new Audio(
-    isCorrect ? '../../shared/true.aac' : '../../shared/false.aac'
-  );
+  // Sound wiederverwenden
+  const audio = isCorrect ? GL_SOUNDS.true : GL_SOUNDS.false;
+
+  // Sound von vorne starten
+  audio.currentTime = 0;
 
   audio.play().catch((error) => {
     console.warn(
