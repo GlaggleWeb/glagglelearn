@@ -18,26 +18,22 @@
       intro:   'Wähle ein Thema, um zu üben.',
       searchPlaceholder: 'Thema suchen…',
 
-      gruppen: [
-        {
-          label: 'Grundrechenarten',
-          themen: [
-            {
-              url:   'einmaleins-ueben/index.html',
-              label: 'Einmaleins üben',
-              sub:   '3 Lektionen',
-              emoji: '✖️',
-              lektionen: ['lektion2.html', 'lektion3.html', 'lektion4.html']
-            },
-            {
-              url:   'plus-minus/index.html',
-              label: 'Plus & Minus',
-              sub:   '4 Lektionen',
-              emoji: '➕',
-              lektionen: ['lektion1.html', 'lektion2.html', 'lektion3.html', 'lektion4.html']
-            },
-          ]
-        },
+    gruppen: [
+      {
+        label: 'Grundrechenarten',
+        themen: [
+          { url: 'einmaleins-ueben/index.html', label: 'Einmaleins üben', emoji: '✖️' },
+          // Fortschritt kommt automatisch aus der overview-engine (2 von 3 → 67 %)
+          { url: 'plus-minus/index.html', label: 'Plus & Minus', emoji: '➕', sub: 'kommt bald' },
+        ]
+      },
+      {
+        label: 'Geometrie',
+        themen: [
+          { url: 'flaechen-berechnen/index.html', label: 'Flächen berechnen', emoji: '📐', sub: 'kommt bald' },
+        ]
+      },
+    ],
         {
           label: 'Geometrie',
           themen: [
