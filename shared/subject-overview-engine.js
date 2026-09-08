@@ -1,54 +1,25 @@
 /* ==========================================================================
    GLAGGLE LEARN — FACH-ÜBERSICHTS-ENGINE (shared/subject-overview-engine.js)
-   Baut eine Fach-Seite (z.B. "Mathe") NUR aus einer Config-Liste von Themen.
+   v2.2 — Fach-Seite im Look der overview-engine (Zickzack-Pfad mit
+   S-Kurven auf dem Computer, Spalte auf dem Handy).
 
-   v2 — sieht jetzt aus wie die Lernpfad-Übersicht (overview-engine.js):
-   - Themen liegen als Pfad-Karten im Zickzack (Desktop) bzw. in einer
-     Spalte (Handy), verbunden mit S-Kurven — keine Listen-Kacheln mehr.
-   - Gruppen-Labels werden als zentrierte Trennzeile über jedem Teilpfad
-     dargestellt.
-   - Suchfeld sitzt als zentrierte Pille unter dem Intro (mit Löschen-
-     Button), filtert live und baut den Pfad neu auf.
-   - Fortschritt = ECHTE Werte: abgeschlossene Lektionen / Gesamt-Lektionen
-     des Themas (1 von 3 Lektionen geschafft → 33 %). Keine gemittelten
-     Punkte-Prozente mehr. Die Dateinamen in "lektionen" sind dieselben wie
-     in der overview-engine-Config des Themas.
-   - Die sub-Zeile wird automatisch zu "x von y Lektionen", sobald
-     "lektionen" angegeben ist (config.sub nur noch als Fallback).
-
-   Benutzung (unverändert):
-     GlaggleSubjectOverview.mount({
-       title: 'Mathe',
-       homeUrl: 'https://learn.glaggle.ch/index.html',
-       intro: 'Wähle ein Thema, um zu üben.',
-       gruppen: [
-         {
-           label: 'Grundrechenarten',
-           themen: [
-             {
-               url:   'einmaleins-ueben/index.html',
-               label: 'Einmaleins üben',
-               emoji: '✖️',
-               lektionen: ['lektion2.html', 'lektion3.html', 'lektion4.html']
-             },
-           ]
-         },
-       ],
-       siteName: 'Glaggle Learn',
-       homeIcon: '✕',
-       searchPlaceholder: 'Thema suchen…',
-       progressKey: 'glaggleLessonProgress',
-       emptyText: 'Kein Thema gefunden.',
-       footerAllDone: '🎉 Alle Themen geschafft — stark!',
-     });
+   Fortschritt = ECHTE, themenscharfe Werte:
+   - Primärquelle: "glaggleTopicProgress", veröffentlicht von der
+     overview-engine des Themas (Key = Ordnername, z.B. "einmaleins-ueben").
+     1 von 3 Lektionen geschafft → 33 %.
+   - Fallback (nur falls die Themen-Übersicht noch nicht aktualisiert ist):
+     optionales "lektionen"-Array wie früher. Themen OHNE Lektionen bekommen
+     keinerlei Fortschritt mehr angezeigt ("–", leerer Balken).
+   - Suche: Lupe oben rechts im Header, Klick klappt das Suchfeld auf.
    ========================================================================== */
 (function () {
   'use strict';
 
-  const FALLBACK_NODE_HEIGHT = 96;  // nur für den ersten Mess-Durchlauf
-  const ROW_GAP = 72;               // Desktop: Luft für die S-Kurve
+  const FALLBACK_NODE_HEIGHT = 96;
+  const ROW_GAP = 72;
   const ROW_GAP_MOBILE = 56;
   const MOBILE_BREAK = 560;
+  const TOPIC_PROGRESS_KEY = 'glaggleTopicProgress';
 
   const DEFAULTS = {
     title: 'Übersicht',
@@ -65,7 +36,7 @@
   };
 
   let CFG = null;
-  let ALL_GROUPS = [];   // normalisiert: [{ label, themen: [...] }]
+  let ALL_GROUPS = [];
   let glQuery = '';
   let glRafId = 0;
 
@@ -79,48 +50,51 @@
     return String(value ?? '')
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, ''); // Umlaute/Akzente für die Suche vereinheitlichen
+      .replace(/[\u0300-\u036f]/g, '');
   }
 
-  /* ---------- Fortschritt aus localStorage ---------- */
-  function glGetProgress() {
+  function glReadJson(key) {
     try {
-      const raw = localStorage.getItem(CFG.progressKey);
-      const obj = raw ? JSON.parse(raw) : {};
+      const obj = JSON.parse(localStorage.getItem(key) || '{}');
       return (obj && typeof obj === 'object') ? obj : {};
     } catch (e) {
-      console.warn('Konnte "' + CFG.progressKey + '" nicht lesen:', e);
+      console.warn('Konnte "' + key + '" nicht lesen:', e);
       return {};
     }
   }
 
-  /* ---------- ECHTER Fortschritt eines Themas ----------
-     pct = abgeschlossene Lektionen / Gesamt-Lektionen.
-     Beispiel: 1 von 3 Lektionen geschafft → 33 %. */
-  function glThemaProgress(thema, progress) {
-    const files = thema.lektionen || [];
+  /* ---------- Kennung eines Themas = Ordnername der URL ----------
+     'einmaleins-ueben/index.html' → 'einmaleins-ueben'
+     (identisch zur Kennung, die die overview-engine veröffentlicht) */
+  function glThemaId(thema) {
+    if (thema.topicId) return thema.topicId;
+    const parts = String(thema.url || '').split('#')[0].split('?')[0].split('/').filter(Boolean);
+    if (parts.length && parts[parts.length - 1].toLowerCase().endsWith('.html')) parts.pop();
+    return parts.length ? decodeURIComponent(parts[parts.length - 1]) : glNorm(thema.label);
+  }
+
+  /* ---------- ECHTER Fortschritt: erst Themen-Sammelwert, dann Fallback ---------- */
+  function glThemaProgress(thema, progress, topicMap) {
+    const agg = topicMap[glThemaId(thema)];
+    if (agg && typeof agg.total === 'number' && agg.total > 0) {
+      const done = Math.min(Math.max(agg.done | 0, 0), agg.total);
+      return { pct: Math.round((done / agg.total) * 100), done, total: agg.total };
+    }
+    const files = thema.lektionen || [];           // Legacy-Fallback, optional
     if (files.length === 0) return { pct: 0, done: 0, total: 0 };
-    const done = files.filter((file) => !!progress[file]).length;
-    const pct = Math.round((done / files.length) * 100);
-    return { pct, done, total: files.length };
+    const done = files.filter((f) => !!progress[f]).length;
+    return { pct: Math.round((done / files.length) * 100), done, total: files.length };
   }
 
-  function glIsThemaDone(thema, progress) {
-    const s = glThemaProgress(thema, progress);
-    return s.total > 0 && s.done === s.total;
+  function glIsThemaDone(stat) {
+    return stat.total > 0 && stat.done === stat.total;
   }
 
-  /* ---------- Config normalisieren: immer Gruppen-Form intern ---------- */
   function glNormalizeGroups() {
     if (Array.isArray(CFG.gruppen) && CFG.gruppen.length) {
-      return CFG.gruppen.map((g) => ({
-        label: g.label || '',
-        themen: g.themen || []
-      }));
+      return CFG.gruppen.map((g) => ({ label: g.label || '', themen: g.themen || [] }));
     }
-    if (Array.isArray(CFG.themen)) {
-      return [{ label: '', themen: CFG.themen }];
-    }
+    if (Array.isArray(CFG.themen)) return [{ label: '', themen: CFG.themen }];
     return [];
   }
 
@@ -128,25 +102,27 @@
     return ALL_GROUPS.reduce((acc, g) => acc.concat(g.themen), []);
   }
 
-  /* ---------- Grundgerüst: Header + Content wie overview-engine ---------- */
+  /* ---------- Grundgerüst: Header wie overview + Lupe rechts ---------- */
   function glBuildSkeleton() {
     document.title = CFG.siteName ? CFG.title + ' | ' + CFG.siteName : CFG.title;
 
     const wrap = document.createElement('div');
-    wrap.className = 'gl-overview-wrap';   // gleiche Optik wie overview-engine
+    wrap.className = 'gl-overview-wrap';
     wrap.innerHTML =
       '<div class="gl-overview-header">' +
         '<a href="' + glEsc(CFG.homeUrl) + '" title="Zurück">' + glEsc(CFG.homeIcon) + '</a>' +
         '<h1></h1>' +
-      '</div>' +
-      '<div class="gl-overview-content">' +
-        '<div class="gl-subject-main">' +
-          (CFG.intro ? '<p class="gl-path-intro"></p>' : '') +
-          '<div class="gl-subject-searchwrap">' +
-            '<span class="gl-subject-search-icon">🔎</span>' +
+        '<div class="gl-subject-search" id="glSubjectSearchWrap">' +
+          '<div class="gl-subject-search-field">' +
             '<input type="search" id="glSubjectSearch" placeholder="' + glEsc(CFG.searchPlaceholder) + '" autocomplete="off">' +
             '<button type="button" class="gl-subject-search-clear" id="glSubjectSearchClear" title="Suche leeren" hidden>✕</button>' +
           '</div>' +
+          '<button type="button" class="gl-subject-search-btn" id="glSubjectSearchBtn" title="Thema suchen">🔎</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="gl-overview-content">' +
+        '<div class="gl-subject-main" id="glSubjectMain">' +
+          (CFG.intro ? '<p class="gl-path-intro"></p>' : '') +
           '<div id="glSubjectGroups"></div>' +
           '<p class="gl-subject-empty" id="glSubjectEmpty" hidden></p>' +
           '<p class="gl-subject-footer" id="glSubjectFooter"></p>' +
@@ -154,12 +130,17 @@
       '</div>';
     document.body.appendChild(wrap);
 
+    // Sicherheits-Inline-Styles, damit die Spalte auch ohne CSS stimmt
+    const main = document.getElementById('glSubjectMain');
+    main.style.width = '100%';
+    main.style.maxWidth = '640px';
+
     wrap.querySelector('h1').textContent = CFG.title;
     if (CFG.intro) wrap.querySelector('.gl-path-intro').textContent = CFG.intro;
     document.getElementById('glSubjectEmpty').textContent = CFG.emptyText;
   }
 
-  /* ---------- Layout: Positionen der Karten (Zickzack wie overview) ---------- */
+  /* ---------- Layout: Zickzack wie overview-engine ---------- */
   function glBuildLayout(count, heights, containerWidth) {
     const mobile = containerWidth <= MOBILE_BREAK;
     const nodeWidth = containerWidth * (mobile ? 0.92 : 0.46);
@@ -168,7 +149,6 @@
     let y = 0;
     const positions = [];
     for (let i = 0; i < count; i++) {
-      // Handy: eine Spalte. Desktop: Zickzack; Einzelkarte zentriert.
       const align = mobile ? 'center' : (count === 1 ? 'center' : (i % 2 === 0 ? 'left' : 'right'));
       let x = 0;
       if (align === 'right') x = containerWidth - nodeWidth;
@@ -177,55 +157,52 @@
       positions.push({ x, y, w: nodeWidth, h });
       y += h + rowGap;
     }
-
     const totalHeight = positions.length
       ? positions[positions.length - 1].y + positions[positions.length - 1].h
       : 0;
     return { positions, totalHeight };
   }
 
-  /* ---------- SVG-Verbindungslinien (S-Kurven von Karte zu Karte) ---------- */
-  function glRenderConnectors(svg, positions, themen, progress, width, totalHeight) {
+  /* ---------- S-Kurven von Karte zu Karte ---------- */
+  function glRenderConnectors(svg, positions, themen, stats, width, totalHeight) {
     svg.setAttribute('viewBox', '0 0 ' + width + ' ' + Math.max(totalHeight, 1));
     svg.style.height = totalHeight + 'px';
 
-    let pathsHtml = '';
+    let html = '';
     for (let i = 0; i < positions.length - 1; i++) {
       const from = positions[i];
       const to = positions[i + 1];
       const dir = to.x > from.x ? 1 : (to.x < from.x ? -1 : 0);
-      const anchor = 0.5 + dir * 0.14;        // Anker leicht zur Zielseite verschoben
-      const fromX = from.x + from.w * anchor; // Unterkante Karte i
+      const anchor = 0.5 + dir * 0.14;
+      const fromX = from.x + from.w * anchor;
       const fromY = from.y + from.h;
-      const toX = to.x + to.w * anchor;       // Oberkante Karte i+1
+      const toX = to.x + to.w * anchor;
       const toY = to.y;
       const bend = (toY - fromY) * 0.45;
-      const done = glIsThemaDone(themen[i], progress); // grün erst, wenn Thema komplett geschafft
+      const done = glIsThemaDone(stats[i]);
 
-      pathsHtml +=
+      html +=
         '<path class="gl-seg ' + (done ? 'gl-seg-done' : 'gl-seg-open') + '" ' +
         'd="M ' + fromX + ' ' + fromY +
         ' C ' + fromX + ' ' + (fromY + bend) + ', ' +
               toX + ' ' + (toY - bend) + ', ' +
               toX + ' ' + toY + '" />';
     }
-    svg.innerHTML = pathsHtml;
+    svg.innerHTML = html;
   }
 
-  /* ---------- eine Themen-Karte im Node-Stil der overview rendern ---------- */
-  function glRenderThemaNode(thema, progress) {
-    const stat = glThemaProgress(thema, progress);
+  /* ---------- Themen-Karte im Node-Stil der overview ---------- */
+  function glRenderThemaNode(thema, stat) {
     const hasLektionen = stat.total > 0;
-    const isDone = glIsThemaDone(thema, progress);
+    const isDone = glIsThemaDone(stat);
     const pctLabel = (hasLektionen && stat.done > 0) ? stat.pct + '%' : '–';
     const sub = hasLektionen
-      ? stat.done + ' von ' + stat.total + ' Lektionen'   // echter Wert statt config-Text
+      ? stat.done + ' von ' + stat.total + ' Lektionen'
       : (thema.sub || '');
 
     const el = document.createElement('a');
     el.className = 'gl-node ' + (isDone ? 'gl-done' : 'gl-next');
     el.href = thema.url;
-
     el.innerHTML =
       '<div class="gl-node-box">' +
         '<div class="gl-node-icon">' + (isDone ? '✓' : glEsc(thema.emoji || '⭐')) + '</div>' +
@@ -241,13 +218,12 @@
     return el;
   }
 
-  /* ---------- einen Teilpfad (Gruppe) bauen, messen, Linien zeichnen ---------- */
-  function glLayoutPath(pathEl, themen, progress) {
+  /* ---------- Teilpfad bauen → messen → Linien zeichnen ---------- */
+  function glLayoutPath(pathEl, themen, stats, progressUnused) {
     const nodesEl = pathEl.querySelector('.gl-nodes');
     const svg = pathEl.querySelector('.gl-path-svg');
     const width = pathEl.clientWidth;
 
-    // Durchlauf 1: mit geschätzter Höhe setzen …
     let layout = glBuildLayout(themen.length, null, width);
     Array.from(nodesEl.children).forEach((n, i) => {
       n.style.left = layout.positions[i].x + 'px';
@@ -255,7 +231,6 @@
       n.style.width = layout.positions[i].w + 'px';
     });
 
-    // … Durchlauf 2: echte Höhen messen und exakt nachpositionieren.
     const heights = Array.from(nodesEl.children).map((n) => n.offsetHeight);
     layout = glBuildLayout(themen.length, heights, width);
     Array.from(nodesEl.children).forEach((n, i) => {
@@ -263,11 +238,11 @@
     });
     nodesEl.style.height = layout.totalHeight + 'px';
 
-    glRenderConnectors(svg, layout.positions, themen, progress, width, layout.totalHeight);
+    glRenderConnectors(svg, layout.positions, themen, stats, width, layout.totalHeight);
   }
 
-  /* ---------- alle Gruppen rendern (mit Live-Filter) ---------- */
-  function glRenderGroups(progress) {
+  /* ---------- Gruppen rendern (mit Live-Filter) ---------- */
+  function glRenderGroups(progress, topicMap) {
     const q = glNorm(glQuery.trim());
     const container = document.getElementById('glSubjectGroups');
     container.innerHTML = '';
@@ -278,6 +253,8 @@
         q === '' || glNorm(t.label + ' ' + (t.sub || '')).includes(q));
       if (!themen.length) return;
       anyVisible = true;
+
+      const stats = themen.map((t) => glThemaProgress(t, progress, topicMap));
 
       const section = document.createElement('section');
       section.className = 'gl-subject-group';
@@ -299,19 +276,19 @@
       container.appendChild(section);
 
       const nodesEl = pathEl.querySelector('.gl-nodes');
-      themen.forEach((t) => nodesEl.appendChild(glRenderThemaNode(t, progress)));
-      glLayoutPath(pathEl, themen, progress);
+      themen.forEach((t, i) => nodesEl.appendChild(glRenderThemaNode(t, stats[i])));
+      glLayoutPath(pathEl, themen, stats);
     });
 
     document.getElementById('glSubjectEmpty').hidden = anyVisible;
   }
 
   /* ---------- Footer: x von y Themen abgeschlossen ---------- */
-  function glRenderFooter(progress) {
+  function glRenderFooter(progress, topicMap) {
     const all = glAllThemen();
     const el = document.getElementById('glSubjectFooter');
     if (!all.length) { el.hidden = true; return; }
-    const doneCount = all.filter((t) => glIsThemaDone(t, progress)).length;
+    const doneCount = all.filter((t) => glIsThemaDone(glThemaProgress(t, progress, topicMap))).length;
     el.hidden = false;
     el.textContent = (doneCount === all.length)
       ? CFG.footerAllDone
@@ -319,37 +296,52 @@
   }
 
   function glRenderAll() {
-    const progress = glGetProgress();
-    glRenderGroups(progress);
-    glRenderFooter(progress);
+    const progress = glReadJson(CFG.progressKey);
+    const topicMap = glReadJson(TOPIC_PROGRESS_KEY);
+    glRenderGroups(progress, topicMap);
+    glRenderFooter(progress, topicMap);
+  }
+
+  /* ---------- Lupe: Klick → Suchfeld klappt auf ---------- */
+  function glInitSearch() {
+    const wrap = document.getElementById('glSubjectSearchWrap');
+    const btn = document.getElementById('glSubjectSearchBtn');
+    const input = document.getElementById('glSubjectSearch');
+    const clear = document.getElementById('glSubjectSearchClear');
+
+    function setQuery(value) {
+      glQuery = value;
+      clear.hidden = value === '';
+      glRenderAll();
+    }
+    function open() { wrap.classList.add('gl-open'); input.focus(); }
+    function close(reset) {
+      if (reset) { input.value = ''; setQuery(''); }
+      wrap.classList.remove('gl-open');
+    }
+
+    btn.addEventListener('click', () => {
+      if (wrap.classList.contains('gl-open')) close(true);
+      else open();
+    });
+    input.addEventListener('input', () => setQuery(input.value));
+    clear.addEventListener('click', () => { input.value = ''; setQuery(''); input.focus(); });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(true); });
+    input.addEventListener('blur', () => { if (input.value === '') close(false); });
   }
 
   function glInit() {
     ALL_GROUPS = glNormalizeGroups();
     glBuildSkeleton();
+    glInitSearch();
     glRenderAll();
-
-    const searchEl = document.getElementById('glSubjectSearch');
-    const clearEl = document.getElementById('glSubjectSearchClear');
-
-    searchEl.addEventListener('input', () => {
-      glQuery = searchEl.value;
-      clearEl.hidden = glQuery === '';
-      glRenderGroups(glGetProgress());   // Pfad wird mit Treffern neu aufgebaut
-    });
-
-    clearEl.addEventListener('click', () => {
-      searchEl.value = '';
-      glQuery = '';
-      clearEl.hidden = true;
-      glRenderGroups(glGetProgress());
-      searchEl.focus();
-    });
 
     window.addEventListener('resize', () => {
       cancelAnimationFrame(glRafId);
-      glRafId = requestAnimationFrame(() => glRenderGroups(glGetProgress()));
+      glRafId = requestAnimationFrame(glRenderAll);
     });
+    // frisch lesen, wenn man z.B. von einer Lektion zurückkommt
+    window.addEventListener('pageshow', glRenderAll);
   }
 
   window.GlaggleSubjectOverview = {
@@ -361,6 +353,6 @@
         glInit();
       }
     },
-    render() { if (CFG) glRenderAll(); }   // manuelles Neu-Rendern, z.B. zum Testen
+    render() { if (CFG) glRenderAll(); }
   };
 })();
