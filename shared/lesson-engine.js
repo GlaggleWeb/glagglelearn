@@ -58,6 +58,8 @@ function glGetSprueche(pct) {
   return GL_SPRUECHE.schwach;
 }
 
+const GL_SOUNDS = { true: new Audio('../../shared/true.aac'), false: new Audio('../../shared/false.aac') }; GL_SOUNDS.true.preload = 'auto'; GL_SOUNDS.false.preload = 'auto';
+
 /* ---------- LP-Speicherung (localStorage) ---------- */
 const GL_LP_KEY = 'glaggleLearnPoints';
 
@@ -210,8 +212,6 @@ class GlaggleLesson {
 
   /* Ersetzt den Prüfen-Button durch ein Feedback-Banner + Weiter-Button.
      isCorrect steuert Text/Farbe des Banners und den Hintergrund-Flash. */
-
-const GL_SOUNDS = { true: new Audio('../../shared/true.aac'), false: new Audio('../../shared/false.aac') }; GL_SOUNDS.true.preload = 'auto'; GL_SOUNDS.false.preload = 'auto';
    
 showFeedback(isCorrect, correctAnswerText) {
   // Hintergrund grün/rot setzen
