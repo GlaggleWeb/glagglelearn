@@ -1,16 +1,6 @@
 /* ==========================================================================
    GLAGGLE LEARN — FACH-ÜBERSICHTS-ENGINE (shared/subject-overview-engine.js)
-   v2.2 — Fach-Seite im Look der overview-engine (Zickzack-Pfad mit
-   S-Kurven auf dem Computer, Spalte auf dem Handy).
-
-   Fortschritt = ECHTE, themenscharfe Werte:
-   - Primärquelle: "glaggleTopicProgress", veröffentlicht von der
-     overview-engine des Themas (Key = Ordnername, z.B. "einmaleins-ueben").
-     1 von 3 Lektionen geschafft → 33 %.
-   - Fallback (nur falls die Themen-Übersicht noch nicht aktualisiert ist):
-     optionales "lektionen"-Array wie früher. Themen OHNE Lektionen bekommen
-     keinerlei Fortschritt mehr angezeigt ("–", leerer Balken).
-   - Suche: Lupe oben rechts im Header, Klick klappt das Suchfeld auf.
+   v3.0 — Vereinheitlicht mit Lesson-Engine + Learn Crystals
    ========================================================================== */
 (function () {
   'use strict';
@@ -20,6 +10,7 @@
   const ROW_GAP_MOBILE = 56;
   const MOBILE_BREAK = 560;
   const TOPIC_PROGRESS_KEY = 'glaggleTopicProgress';
+  const CRYSTALS_KEY = 'glaggleLearnCrystals'; // 💎 NEU
 
   const DEFAULTS = {
     title: 'Übersicht',
@@ -63,9 +54,40 @@
     }
   }
 
-  /* ---------- Kennung eines Themas = Ordnername der URL ----------
-     'einmaleins-ueben/index.html' → 'einmaleins-ueben'
-     (identisch zur Kennung, die die overview-engine veröffentlicht) */
+  /* ---------- 💎 CRYSTALS ---------- */
+  function glGetCrystals() {
+    try {
+      const raw = localStorage.getItem(CRYSTALS_KEY);
+      const obj = raw ? JSON.parse(raw) : { collected: {}, total: 0 };
+      return (obj && typeof obj === 'object') ? obj : { collected: {}, total: 0 };
+    } catch (e) { return { collected: {}, total: 0 }; }
+  }
+
+  function glCrystalKey(thema) {
+    return glThemaId(thema);
+  }
+
+  function glHasCrystal(thema) {
+    return !!glGetCrystals().collected[glCrystalKey(thema)];
+  }
+
+  function glCollectCrystal(thema) {
+    const data = glGetCrystals();
+    const key = glCrystalKey(thema);
+    if (!data.collected[key]) {
+      data.collected[key] = new Date().toISOString();
+      data.total = Object.keys(data.collected).length;
+      localStorage.setItem(CRYSTALS_KEY, JSON.stringify(data));
+      // Event feuern, damit Lesson-Engine mitbekommt
+      window.dispatchEvent(new CustomEvent('glaggle-crystal-collected', {
+        detail: { themaId: key, total: data.total }
+      }));
+      return true;
+    }
+    return false;
+  }
+  /* ---------- /CRYSTALS ---------- */
+
   function glThemaId(thema) {
     if (thema.topicId) return thema.topicId;
     const parts = String(thema.url || '').split('#')[0].split('?')[0].split('/').filter(Boolean);
@@ -73,14 +95,13 @@
     return parts.length ? decodeURIComponent(parts[parts.length - 1]) : glNorm(thema.label);
   }
 
-  /* ---------- ECHTER Fortschritt: erst Themen-Sammelwert, dann Fallback ---------- */
   function glThemaProgress(thema, progress, topicMap) {
     const agg = topicMap[glThemaId(thema)];
     if (agg && typeof agg.total === 'number' && agg.total > 0) {
       const done = Math.min(Math.max(agg.done | 0, 0), agg.total);
       return { pct: Math.round((done / agg.total) * 100), done, total: agg.total };
     }
-    const files = thema.lektionen || [];           // Legacy-Fallback, optional
+    const files = thema.lektionen || [];
     if (files.length === 0) return { pct: 0, done: 0, total: 0 };
     const done = files.filter((f) => !!progress[f]).length;
     return { pct: Math.round((done / files.length) * 100), done, total: files.length };
@@ -102,7 +123,6 @@
     return ALL_GROUPS.reduce((acc, g) => acc.concat(g.themen), []);
   }
 
-  /* ---------- Grundgerüst: Header wie overview + Lupe rechts ---------- */
   function glBuildSkeleton() {
     document.title = CFG.siteName ? CFG.title + ' | ' + CFG.siteName : CFG.title;
 
@@ -120,6 +140,11 @@
           '<button type="button" class="gl-subject-search-btn" id="glSubjectSearchBtn" title="Thema suchen">🔎</button>' +
         '</div>' +
       '</div>' +
+      '<div class="gl-crystal-summary" id="glCrystalSummary" hidden>' +
+        '<span class="gl-crystal-icon">💎</span>' +
+        '<span id="glCrystalCount">0</span>' +
+        '<span> Learn Crystals gesammelt</span>' +
+      '</div>' +
       '<div class="gl-overview-content">' +
         '<div class="gl-subject-main" id="glSubjectMain">' +
           (CFG.intro ? '<p class="gl-path-intro"></p>' : '') +
@@ -130,7 +155,6 @@
       '</div>';
     document.body.appendChild(wrap);
 
-    // Sicherheits-Inline-Styles, damit die Spalte auch ohne CSS stimmt
     const main = document.getElementById('glSubjectMain');
     main.style.width = '100%';
     main.style.maxWidth = '640px';
@@ -140,7 +164,16 @@
     document.getElementById('glSubjectEmpty').textContent = CFG.emptyText;
   }
 
-  /* ---------- Layout: Zickzack wie overview-engine ---------- */
+  /* Crystal-Counter oben im Header aktualisieren */
+  function glUpdateCrystalSummary() {
+    const data = glGetCrystals();
+    const el = document.getElementById('glCrystalSummary');
+    const count = document.getElementById('glCrystalCount');
+    if (!el) return;
+    el.hidden = data.total === 0;
+    if (count) count.textContent = String(data.total);
+  }
+
   function glBuildLayout(count, heights, containerWidth) {
     const mobile = containerWidth <= MOBILE_BREAK;
     const nodeWidth = containerWidth * (mobile ? 0.92 : 0.46);
@@ -163,7 +196,6 @@
     return { positions, totalHeight };
   }
 
-  /* ---------- S-Kurven von Karte zu Karte ---------- */
   function glRenderConnectors(svg, positions, themen, stats, width, totalHeight) {
     svg.setAttribute('viewBox', '0 0 ' + width + ' ' + Math.max(totalHeight, 1));
     svg.style.height = totalHeight + 'px';
@@ -191,7 +223,6 @@
     svg.innerHTML = html;
   }
 
-  /* ---------- Themen-Karte im Node-Stil der overview ---------- */
   function glRenderThemaNode(thema, stat) {
     const hasLektionen = stat.total > 0;
     const isDone = glIsThemaDone(stat);
@@ -218,13 +249,64 @@
     return el;
   }
 
-  /* ---------- Teilpfad bauen → messen → Linien zeichnen ---------- */
+  /* 💎 Crystal-Node zwischen zwei Lektionen */
+  function glRenderCrystalNode(prevThema, nextThema, prevDone) {
+    const key = glCrystalKey(prevThema);
+    const collected = glHasCrystal(prevThema);
+    const available = prevDone; // Crystal verfügbar, wenn vorherige Lektion fertig
+
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'gl-crystal-node ' +
+      (collected ? 'gl-crystal-collected' : (available ? 'gl-crystal-available' : 'gl-crystal-locked'));
+    el.title = collected
+      ? 'Crystal gesammelt 💎'
+      : (available ? 'Klicke zum Einsammeln!' : 'Erst ' + glEsc(prevThema.label) + ' abschließen');
+    el.disabled = !available || collected;
+    el.innerHTML = collected
+      ? '<span class="gl-crystal-gem">💎</span>'
+      : (available
+        ? '<span class="gl-crystal-gem gl-crystal-pulse">✨</span>'
+        : '<span class="gl-crystal-gem">🔒</span>');
+
+    if (available && !collected) {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (glCollectCrystal(prevThema)) {
+          // Mini-Burst-Animation
+          el.classList.add('gl-crystal-burst');
+          setTimeout(() => {
+            el.className = 'gl-crystal-node gl-crystal-collected';
+            el.innerHTML = '<span class="gl-crystal-gem">💎</span>';
+            el.disabled = true;
+            glUpdateCrystalSummary();
+          }, 500);
+        }
+      });
+    }
+    return el;
+  }
+
   function glLayoutPath(pathEl, themen, stats, progressUnused) {
     const nodesEl = pathEl.querySelector('.gl-nodes');
     const svg = pathEl.querySelector('.gl-path-svg');
     const width = pathEl.clientWidth;
 
-    let layout = glBuildLayout(themen.length, null, width);
+    // 💎 Crystals zwischen den Themata einfügen:
+    // Reihenfolge: Thema0, Crystal0, Thema1, Crystal1, ..., ThemaN
+    // Gesamt = themen.length + (themen.length - 1) = 2*N - 1
+    const items = [];
+    themen.forEach((t, i) => {
+      items.push({ type: 'thema', thema: t, stat: stats[i], idx: i });
+      if (i < themen.length - 1) {
+        items.push({ type: 'crystal', prevThema: t, nextThema: themen[i + 1], prevStat: stats[i] });
+      }
+    });
+
+    const allCount = items.length;
+    let layout = glBuildLayout(allCount, null, width);
+
+    // Erst grob positionieren (DOM-Kinder sind bereits da)
     Array.from(nodesEl.children).forEach((n, i) => {
       n.style.left = layout.positions[i].x + 'px';
       n.style.top = layout.positions[i].y + 'px';
@@ -232,16 +314,20 @@
     });
 
     const heights = Array.from(nodesEl.children).map((n) => n.offsetHeight);
-    layout = glBuildLayout(themen.length, heights, width);
+    layout = glBuildLayout(allCount, heights, width);
     Array.from(nodesEl.children).forEach((n, i) => {
       n.style.top = layout.positions[i].y + 'px';
     });
     nodesEl.style.height = layout.totalHeight + 'px';
 
-    glRenderConnectors(svg, layout.positions, themen, stats, width, layout.totalHeight);
+    // Connector-Linien: nur zwischen "echten" Themata, nicht Crystals
+    // Wir brauchen die Positionen der Themata im Items-Array
+    const themaPositions = items
+      .map((it, i) => it.type === 'thema' ? layout.positions[i] : null)
+      .filter(Boolean);
+    glRenderConnectors(svg, themaPositions, themen, stats, width, layout.totalHeight);
   }
 
-  /* ---------- Gruppen rendern (mit Live-Filter) ---------- */
   function glRenderGroups(progress, topicMap) {
     const q = glNorm(glQuery.trim());
     const container = document.getElementById('glSubjectGroups');
@@ -276,14 +362,22 @@
       container.appendChild(section);
 
       const nodesEl = pathEl.querySelector('.gl-nodes');
-      themen.forEach((t, i) => nodesEl.appendChild(glRenderThemaNode(t, stats[i])));
+
+      // 💎 Abwechselnd Themen und Crystals einfügen
+      themen.forEach((t, i) => {
+        nodesEl.appendChild(glRenderThemaNode(t, stats[i]));
+        if (i < themen.length - 1) {
+          const prevDone = glIsThemaDone(stats[i]);
+          nodesEl.appendChild(glRenderCrystalNode(t, themen[i + 1], prevDone));
+        }
+      });
       glLayoutPath(pathEl, themen, stats);
     });
 
     document.getElementById('glSubjectEmpty').hidden = anyVisible;
+    glUpdateCrystalSummary();
   }
 
-  /* ---------- Footer: x von y Themen abgeschlossen ---------- */
   function glRenderFooter(progress, topicMap) {
     const all = glAllThemen();
     const el = document.getElementById('glSubjectFooter');
@@ -302,7 +396,6 @@
     glRenderFooter(progress, topicMap);
   }
 
-  /* ---------- Lupe: Klick → Suchfeld klappt auf ---------- */
   function glInitSearch() {
     const wrap = document.getElementById('glSubjectSearchWrap');
     const btn = document.getElementById('glSubjectSearchBtn');
@@ -340,7 +433,6 @@
       cancelAnimationFrame(glRafId);
       glRafId = requestAnimationFrame(glRenderAll);
     });
-    // frisch lesen, wenn man z.B. von einer Lektion zurückkommt
     window.addEventListener('pageshow', glRenderAll);
   }
 
@@ -353,6 +445,16 @@
         glInit();
       }
     },
-    render() { if (CFG) glRenderAll(); }
+    render() { if (CFG) glRenderAll(); },
+    /* 💎 Public API für Lesson-Engine */
+    collectCrystal(themaId) {
+      const data = glGetCrystals();
+      if (!data.collected[themaId]) {
+        data.collected[themaId] = new Date().toISOString();
+        data.total = Object.keys(data.collected).length;
+        localStorage.setItem(CRYSTALS_KEY, JSON.stringify(data));
+      }
+    },
+    getCrystalCount() { return glGetCrystals().total; }
   };
 })();
