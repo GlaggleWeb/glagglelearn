@@ -20,6 +20,7 @@
   const ROW_GAP_MOBILE = 56;
   const MOBILE_BREAK = 560;
   const TOPIC_PROGRESS_KEY = 'glaggleTopicProgress';
+  const CRYSTAL_KEY = 'glaggleCrystalData';
 
   const DEFAULTS = {
     title: 'Übersicht',
@@ -112,12 +113,15 @@
       '<div class="gl-overview-header">' +
         '<a href="' + glEsc(CFG.homeUrl) + '" title="Zurück">' + glEsc(CFG.homeIcon) + '</a>' +
         '<h1></h1>' +
-        '<div class="gl-subject-search" id="glSubjectSearchWrap">' +
-          '<div class="gl-subject-search-field">' +
-            '<input type="search" id="glSubjectSearch" placeholder="' + glEsc(CFG.searchPlaceholder) + '" autocomplete="off">' +
-            '<button type="button" class="gl-subject-search-clear" id="glSubjectSearchClear" title="Suche leeren" hidden>✕</button>' +
+        '<div class="gl-header-tools">' +
+          '<div class="gl-crystal-pill" id="glCrystalCount" title="Deine Crystals">💎 <span>0</span></div>' +
+          '<div class="gl-subject-search" id="glSubjectSearchWrap">' +
+            '<div class="gl-subject-search-field">' +
+              '<input type="search" id="glSubjectSearch" placeholder="' + glEsc(CFG.searchPlaceholder) + '" autocomplete="off">' +
+              '<button type="button" class="gl-subject-search-clear" id="glSubjectSearchClear" title="Suche leeren" hidden>✕</button>' +
+            '</div>' +
+            '<button type="button" class="gl-subject-search-btn" id="glSubjectSearchBtn" title="Thema suchen">🔎</button>' +
           '</div>' +
-          '<button type="button" class="gl-subject-search-btn" id="glSubjectSearchBtn" title="Thema suchen">🔎</button>' +
         '</div>' +
       '</div>' +
       '<div class="gl-overview-content">' +
@@ -139,6 +143,13 @@
     if (CFG.intro) wrap.querySelector('.gl-path-intro').textContent = CFG.intro;
     document.getElementById('glSubjectEmpty').textContent = CFG.emptyText;
   }
+
+  function glUpdateCrystals() {
+  const count = document.querySelector('#glCrystalCount span');
+  if (!count) return;
+  const d = glReadJson(CRYSTAL_KEY);
+  count.textContent = (typeof d.total === 'number') ? d.total : 0;
+}
 
   /* ---------- Layout: Zickzack wie overview-engine ---------- */
   function glBuildLayout(count, heights, containerWidth) {
@@ -295,12 +306,13 @@
       : doneCount + ' von ' + all.length + ' Themen abgeschlossen';
   }
 
-  function glRenderAll() {
-    const progress = glReadJson(CFG.progressKey);
-    const topicMap = glReadJson(TOPIC_PROGRESS_KEY);
-    glRenderGroups(progress, topicMap);
-    glRenderFooter(progress, topicMap);
-  }
+function glRenderAll() {
+  glUpdateCrystals();                // ← NEU
+  const progress = glReadJson(CFG.progressKey);
+  const topicMap = glReadJson(TOPIC_PROGRESS_KEY);
+  glRenderGroups(progress, topicMap);
+  glRenderFooter(progress, topicMap);
+}
 
   /* ---------- Lupe: Klick → Suchfeld klappt auf ---------- */
   function glInitSearch() {
