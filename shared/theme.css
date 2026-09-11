@@ -1158,3 +1158,116 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
   .gl-lp-pill, .gl-crystal-pill { height: 36px; padding: 0 10px; font-size: 0.85rem; }
   a.gl-subject-search-btn.gl-home-optional { display: none; }
 }
+
+/* ==========================================================================
+   STARTSEITE — SIDEBAR (rechts) + Responsive
+   Desktop: schmale Icon-Schiene rechts (LP, Fächer, Shop, Settings).
+   Mobil (< 560px): Sidebar wird zur unteren Navigationsleiste.
+   ========================================================================== */
+
+.gl-home-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: 100%;
+}
+
+.gl-home-body > .gl-overview-content { min-height: 0; }
+
+/* ---------- Sidebar (Desktop: rechts) ---------- */
+.gl-sidebar {
+  width: clamp(64px, 4vw, 76px);
+  border-left: 1px solid var(--gl-border);
+  background: var(--gl-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--gl-space-2) 0;
+  gap: var(--gl-space-2);
+  overflow-y: auto;
+}
+
+.gl-lp-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: var(--gl-radius-sm);
+  background: color-mix(in srgb, #f7d060 22%, var(--gl-bg));
+  border: 1px solid #e8b83c;
+  width: 84%;
+  flex-shrink: 0;
+}
+.gl-lp-badge img { width: 20px; height: 20px; }
+.gl-lp-badge .gl-lp-value { font-size: 0.85rem; font-weight: 800; color: var(--gl-text); }
+
+.gl-sidebar-divider {
+  width: 60%;
+  height: 1px;
+  background: var(--gl-border);
+  margin: 4px 0;
+  flex-shrink: 0;
+}
+
+.gl-sidebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--gl-radius-sm);
+  color: var(--gl-text-soft);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  flex-shrink: 0;
+}
+.gl-sidebar-icon svg { width: 22px; height: 22px; }
+.gl-sidebar-icon:hover { transform: translateY(-1px); }
+.gl-sidebar-icon:not([class*="gl-tone-"]):hover {
+  background: var(--gl-bg);
+  color: var(--gl-text);
+}
+
+/* Farbtöne für Sidebar-Icons (Spezifität schlägt .gl-sidebar-icon-Farbe) */
+.gl-sidebar-icon.gl-tone-mathe   { background: color-mix(in srgb, var(--gl-primary) 22%, var(--gl-surface));  color: var(--gl-primary-shadow); }
+.gl-sidebar-icon.gl-tone-deutsch { background: color-mix(in srgb, var(--gl-secondary) 22%, var(--gl-surface)); color: var(--gl-secondary-shadow); }
+.gl-sidebar-icon.gl-tone-nmg     { background: color-mix(in srgb, #f7d060 30%, var(--gl-surface));             color: #b9860a; }
+
+.gl-sidebar-spacer { flex: 1; }
+.gl-sidebar-icon.gl-settings { margin-bottom: 6px; }
+
+/* ---------- MOBIL: Sidebar → untere Navigationsleiste ---------- */
+@media (max-width: 560px) {
+  .gl-home-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+
+  .gl-sidebar {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    gap: 6px;
+    padding: 8px calc(8px + env(safe-area-inset-left))
+             calc(8px + env(safe-area-inset-bottom))
+             calc(8px + env(safe-area-inset-right));
+    border-left: none;
+    border-top: 1px solid var(--gl-border);
+    overflow-x: auto;
+  }
+
+  .gl-lp-badge {
+    flex-direction: row;
+    width: auto;
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .gl-sidebar-divider { width: 1px; height: 28px; margin: 0 2px; }
+  .gl-sidebar-spacer { display: none; }
+  .gl-sidebar-icon { width: 42px; height: 42px; }
+  .gl-sidebar-icon.gl-settings { margin-bottom: 0; }
+}
