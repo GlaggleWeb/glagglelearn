@@ -1,1 +1,39 @@
-hhh
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Platzhalter, wird von der Engine aus `title` + `siteName` gesetzt -->
+  <title>Glaggle Learn</title>
+
+  <!-- Pfade: diese Seite liegt 3 Ordner tief, shared/ liegt im Repo-Root
+       → drei Stufen hoch (gleich wie in deinen Lektionsseiten verwenden). -->
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <script src="../../../shared/components.js" defer></script>
+  <script src="../../../shared/overview-engine.js"></script>
+
+  <script>
+    /* ==========================================================
+       NUR HIER EDITIEREN — alles andere macht overview-engine.js
+       ========================================================== */
+    GlaggleOverview.mount({
+      title:   'Plus und Minus rechnen üben',
+      homeUrl: 'https://learn.glaggle.ch/lektionen/mathe/',
+      intro:   'Arbeite dich Lektion für Lektion durch das addieren und subtrahieren — jede Runde hat 15 Fragen.',
+
+      /* Die Lektionsliste: Reihenfolge = Reihenfolge im Pfad.
+         "align" ist optional — ohne Angabe automatisch Zickzack
+         (links, rechts, links …). Werte: 'left' | 'center' | 'right' */
+      lektionen: [
+        { file: 'einmaleins-ueben1.html', label: 'Lektion 1', sub: 'Bunt gemischt',          emoji: '🎲' },
+        { file: 'einmaleins-ueben2.html', label: 'Lektion 2', sub: 'Bunt gemischt, Runde 2', emoji: '🛫' },
+        { file: 'einmaleins-ueben3.html', label: 'Lektion 3', sub: 'Bunt gemischt, Runde 3', emoji: '🎯' },
+        { file: 'einmaleins-ueben4.html', label: 'Lektion 4', sub: 'Bunt gemischt, Runde 4', emoji: '🚀' },
+      ],
+    });
+  </script>
+</head>
+<body>
+  <!-- Kein HTML nötig — das Grundgerüst baut overview-engine.js -->
+</body>
+</html>
