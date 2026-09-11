@@ -18,25 +18,7 @@
     </a>
 
     <div class="gl-header-tools">
-      <div class="gl-lp-pill" title="Deine Learn Points">
-        <img src="shared/lp.png" alt="" onerror="this.remove()">
-        <span id="glHomeLP">0</span>
-      </div>
       <div class="gl-crystal-pill" id="glCrystalPill" title="Deine Crystals">💎 <span id="glCrystalCount">0</span></div>
-
-      <!-- Pfade bei Bedarf anpassen -->
-      <a class="gl-subject-search-btn gl-home-optional" href="shop.html" title="Shop">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M6 8V6a6 6 0 0 1 12 0v2"></path>
-          <rect x="3" y="8" width="18" height="13" rx="2"></rect>
-        </svg>
-      </a>
-      <a class="gl-subject-search-btn gl-home-optional" href="einstellungen.html" title="Einstellungen">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82V9a1.65 1.65 0 0 0 1.51-1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-        </svg>
-      </a>
 
       <!-- Lupe: 100% identisch zu den Overviews -->
       <div class="gl-subject-search" id="glSearchWrap">
@@ -49,92 +31,149 @@
     </div>
   </div>
 
-  <!-- ========== CONTENT ========== -->
-  <div class="gl-overview-content">
-    <div class="gl-subject-main">
+  <!-- ========== BODY: Content links, Sidebar rechts (mobil: unten) ========== -->
+  <div class="gl-home-body">
 
-      <section class="gl-subject-group" id="glSectionContinue">
-        <h2 class="gl-subject-group-label">Weiter lernen</h2>
-        <a class="gl-node gl-static gl-next" id="glContinueCard" href="lektionen/lektion1.html"
-           data-search="mathe grundlagen lektion 1">
-          <div class="gl-node-box">
-            <div class="gl-node-icon">
-              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="4" y1="9" x2="20" y2="9"></line>
-                <line x1="4" y1="15" x2="20" y2="15"></line>
-                <line x1="10" y1="3" x2="8" y2="21"></line>
-                <line x1="16" y1="3" x2="14" y2="21"></line>
-              </svg>
-            </div>
-            <div class="gl-node-body">
-              <div class="gl-node-sub" id="glContinueEyebrow">Mathe · Lektion 1</div>
-              <div class="gl-node-title" id="glContinueTitle">Mathe Grundlagen</div>
-              <div class="gl-node-bar-track"><div class="gl-node-bar-fill" id="glContinueFill" style="width:0%"></div></div>
-            </div>
-            <div class="gl-node-pct gl-empty" id="glContinuePct">–</div>
-          </div>
-        </a>
-      </section>
+    <div class="gl-overview-content">
+      <div class="gl-subject-main">
 
-      <section class="gl-subject-group" id="glSectionSubjects">
-        <h2 class="gl-subject-group-label">Fächer</h2>
-        <div class="gl-home-grid">
-          <!-- Pfade zu den Fach-Übersichten bei Bedarf anpassen -->
-          <a class="gl-node gl-static" href="lektionen/mathe/index.html" data-search="mathe">
-            <div class="gl-node-box gl-home-subject">
-              <div class="gl-node-icon gl-tone-mathe">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <section class="gl-subject-group" id="glSectionContinue">
+          <h2 class="gl-subject-group-label">Weiter lernen</h2>
+          <a class="gl-node gl-static gl-next" id="glContinueCard" href="lektionen/lektion1.html"
+             data-search="mathe grundlagen lektion 1">
+            <div class="gl-node-box">
+              <div class="gl-node-icon">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="4" y1="9" x2="20" y2="9"></line>
                   <line x1="4" y1="15" x2="20" y2="15"></line>
                   <line x1="10" y1="3" x2="8" y2="21"></line>
                   <line x1="16" y1="3" x2="14" y2="21"></line>
                 </svg>
               </div>
-              <div class="gl-node-title">Mathe</div>
-            </div>
-          </a>
-
-          <a class="gl-node gl-static" href="lektionen/deutsch/index.html" data-search="deutsch">
-            <div class="gl-node-box gl-home-subject">
-              <div class="gl-node-icon gl-tone-deutsch">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M4 19.5V6a2 2 0 0 1 2-2h11.5"></path>
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4"></path>
-                  <line x1="8" y1="7" x2="15" y2="7"></line>
-                </svg>
+              <div class="gl-node-body">
+                <div class="gl-node-sub" id="glContinueEyebrow">Mathe · Lektion 1</div>
+                <div class="gl-node-title" id="glContinueTitle">Mathe Grundlagen</div>
+                <div class="gl-node-bar-track"><div class="gl-node-bar-fill" id="glContinueFill" style="width:0%"></div></div>
               </div>
-              <div class="gl-node-title">Deutsch</div>
+              <div class="gl-node-pct gl-empty" id="glContinuePct">–</div>
             </div>
           </a>
+        </section>
 
-          <a class="gl-node gl-static" href="lektionen/nmg/index.html" data-search="nmg natur mensch gesellschaft">
-            <div class="gl-node-box gl-home-subject">
-              <div class="gl-node-icon gl-tone-nmg">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="9"></circle>
-                  <path d="M3 12h18"></path>
-                  <path d="M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z"></path>
-                </svg>
+        <section class="gl-subject-group" id="glSectionSubjects">
+          <h2 class="gl-subject-group-label">Fächer</h2>
+          <div class="gl-home-grid">
+            <!-- Pfade zu den Fach-Übersichten bei Bedarf anpassen -->
+            <a class="gl-node gl-static" href="lektionen/mathe/index.html" data-search="mathe">
+              <div class="gl-node-box gl-home-subject">
+                <div class="gl-node-icon gl-tone-mathe">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="9" x2="20" y2="9"></line>
+                    <line x1="4" y1="15" x2="20" y2="15"></line>
+                    <line x1="10" y1="3" x2="8" y2="21"></line>
+                    <line x1="16" y1="3" x2="14" y2="21"></line>
+                  </svg>
+                </div>
+                <div class="gl-node-title">Mathe</div>
               </div>
-              <div class="gl-node-title">NMG</div>
-            </div>
-          </a>
-        </div>
-      </section>
+            </a>
 
-      <section class="gl-subject-group" id="glSectionSoon">
-        <h2 class="gl-subject-group-label">Demnächst</h2>
-        <div class="gl-home-placeholder" data-search="stream system live lernen">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-            <path d="M9 9l6 3-6 3z"></path>
-          </svg>
-          <strong>Stream-System</strong>
-          <span>Hier entsteht bald ein Bereich für Live-Lernstreams.</span>
-        </div>
-      </section>
+            <a class="gl-node gl-static" href="lektionen/deutsch/index.html" data-search="deutsch">
+              <div class="gl-node-box gl-home-subject">
+                <div class="gl-node-icon gl-tone-deutsch">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5V6a2 2 0 0 1 2-2h11.5"></path>
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4"></path>
+                    <line x1="8" y1="7" x2="15" y2="7"></line>
+                  </svg>
+                </div>
+                <div class="gl-node-title">Deutsch</div>
+              </div>
+            </a>
 
+            <a class="gl-node gl-static" href="lektionen/nmg/index.html" data-search="nmg natur mensch gesellschaft">
+              <div class="gl-node-box gl-home-subject">
+                <div class="gl-node-icon gl-tone-nmg">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <path d="M3 12h18"></path>
+                    <path d="M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z"></path>
+                  </svg>
+                </div>
+                <div class="gl-node-title">NMG</div>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <section class="gl-subject-group" id="glSectionSoon">
+          <h2 class="gl-subject-group-label">Demnächst</h2>
+          <div class="gl-home-placeholder" data-search="stream system live lernen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+              <path d="M9 9l6 3-6 3z"></path>
+            </svg>
+            <strong>Stream-System</strong>
+            <span>Hier entsteht bald ein Bereich für Live-Lernstreams.</span>
+          </div>
+        </section>
+
+      </div>
     </div>
+
+    <!-- ========== SIDEBAR: LP, Fächer, Shop, Settings ========== -->
+    <nav class="gl-sidebar" aria-label="Schnellnavigation">
+      <div class="gl-lp-badge" title="Deine Learn Points">
+        <img src="shared/lp.png" alt="" onerror="this.remove()">
+        <span class="gl-lp-value" id="glSidebarLP">0</span>
+      </div>
+
+      <div class="gl-sidebar-divider"></div>
+
+      <a class="gl-sidebar-icon gl-tone-mathe" href="lektionen/mathe/index.html" title="Mathe">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="9" x2="20" y2="9"></line>
+          <line x1="4" y1="15" x2="20" y2="15"></line>
+          <line x1="10" y1="3" x2="8" y2="21"></line>
+          <line x1="16" y1="3" x2="14" y2="21"></line>
+        </svg>
+      </a>
+
+      <a class="gl-sidebar-icon gl-tone-deutsch" href="lektionen/deutsch/index.html" title="Deutsch">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5V6a2 2 0 0 1 2-2h11.5"></path>
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4"></path>
+          <line x1="8" y1="7" x2="15" y2="7"></line>
+        </svg>
+      </a>
+
+      <a class="gl-sidebar-icon gl-tone-nmg" href="lektionen/nmg/index.html" title="NMG">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M3 12h18"></path>
+          <path d="M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z"></path>
+        </svg>
+      </a>
+
+      <div class="gl-sidebar-divider"></div>
+
+      <a class="gl-sidebar-icon" href="shop.html" title="Shop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 8V6a6 6 0 0 1 12 0v2"></path>
+          <rect x="3" y="8" width="18" height="13" rx="2"></rect>
+        </svg>
+      </a>
+
+      <div class="gl-sidebar-spacer"></div>
+
+      <a class="gl-sidebar-icon gl-settings" href="einstellungen.html" title="Einstellungen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82V9a1.65 1.65 0 0 0 1.51-1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </a>
+    </nav>
+
   </div>
 </div>
 
@@ -154,10 +193,10 @@
       return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
-    /* ---------- LP- und Crystal-Pill befüllen ---------- */
+    /* ---------- LP (Sidebar) und Crystals (Navbar) befüllen ---------- */
     function fillPills() {
       const lp = parseInt(localStorage.getItem('glaggleLearnPoints'), 10);
-      document.getElementById('glHomeLP').textContent = Number.isFinite(lp) ? lp : 0;
+      document.getElementById('glSidebarLP').textContent = Number.isFinite(lp) ? lp : 0;
       const c = readJson('glaggleCrystalData');
       document.getElementById('glCrystalCount').textContent =
         (typeof c.total === 'number') ? c.total : 0;
