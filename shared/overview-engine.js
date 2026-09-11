@@ -328,7 +328,8 @@
 
   /* ---------- v3: Truhen auf dem Pfad ----------
      Sitzt jeweils auf der Mitte der Verbindungslinie nach der Lektion;
-     die letzte Truhe sitzt unterhalb der letzten Karte. */
+     die letzte Truhe sitzt unterhalb der letzten Karte.
+     Bereits geöffnete Truhen verschwinden komplett vom Pfad. */
   function glChestSize(mobile) { return mobile ? 46 : 56; }
 
   function glRenderChests(items, positions, progress, crystals, mobile, rowGap) {
@@ -339,6 +340,15 @@
     const size = glChestSize(mobile);
 
     items.forEach((item, i) => {
+      const done = !!progress[item.lek.file];
+      const id = glChestId(item.lek);
+      const isOpened = crystals.opened[id] !== undefined;
+
+      // NEU: geöffnete Truhe wird nicht mehr angezeigt → verschwindet
+      if (done && isOpened) return;
+
+      const state = done ? 'ready' : 'locked';
+
       const pos = positions[i];
       let cx, cy;
       if (i < positions.length - 1) {
@@ -356,11 +366,6 @@
         cy = pos.y + pos.h + rowGap * 0.55;
       }
 
-      const done = !!progress[item.lek.file];
-      const id = glChestId(item.lek);
-      const openedAmt = crystals.opened[id];
-      const state = !done ? 'locked' : (openedAmt !== undefined ? 'opened' : 'ready');
-
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'gl-chest gl-chest-' + state;
@@ -368,14 +373,12 @@
       btn.style.top = (cy - size / 2) + 'px';
       btn.style.width = size + 'px';
       btn.style.height = size + 'px';
-      btn.title = state === 'ready' ? 'Truhe öffnen'
-        : (state === 'locked' ? 'Erst die Lektion abschliessen' : 'Bereits geöffnet');
+      btn.title = state === 'ready' ? 'Truhe öffnen' : 'Erst die Lektion abschliessen';
 
       btn.innerHTML =
         '<span class="gl-chest-icon">📦</span>' +
         (state === 'locked' ? '<span class="gl-chest-lock">🔒</span>' : '') +
-        (state === 'ready' ? '<span class="gl-chest-badge">Öffnen</span>' : '') +
-        (state === 'opened' ? '<span class="gl-chest-badge">+' + openedAmt + ' 💎</span>' : '');
+        (state === 'ready' ? '<span class="gl-chest-badge">Öffnen</span>' : '');
 
       if (state === 'ready') {
         btn.addEventListener('click', function () {
@@ -385,7 +388,7 @@
             data.opened[id] = amount;      // 1x insgesamt → merke Öffnung
             glSaveCrystals(data);
             glUpdatePill(true);
-            glRenderAll();
+            glRenderAll();                 // NEU rendern → Truhe ist jetzt weg
           });
         });
       } else {
@@ -498,12 +501,19 @@
     });
 
     // Platz für die letzte Truhe unterhalb der letzten Karte reservieren
+    // (nur solange sie noch sichtbar ist — geöffnete Truhen sind weg)
     let totalHeight = layout.totalHeight;
     if (CFG.chests && layout.positions.length) {
-      const last = layout.positions[layout.positions.length - 1];
-      const size = glChestSize(mobile);
-      const need = last.y + last.h + layout.rowGap * 0.55 + size / 2 + 8;
-      totalHeight = Math.max(totalHeight, need);
+      const lastItem = items[items.length - 1];
+      const lastDone = !!progress[lastItem.lek.file];
+      const lastOpened = crystals.opened[glChestId(lastItem.lek)] !== undefined;
+      const lastChestVisible = !(lastDone && lastOpened);
+      if (lastChestVisible) {
+        const last = layout.positions[layout.positions.length - 1];
+        const size = glChestSize(mobile);
+        const need = last.y + last.h + layout.rowGap * 0.55 + size / 2 + 8;
+        totalHeight = Math.max(totalHeight, need);
+      }
     }
     nodesEl.style.height = totalHeight + 'px';
 
