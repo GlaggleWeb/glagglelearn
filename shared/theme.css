@@ -876,7 +876,6 @@ body {
 }
 
 .gl-chest:disabled { cursor: not-allowed; }
-.gl-chest.gl-chest-opened:disabled { cursor: default; }
 
 .gl-chest-icon {
   display: block;
@@ -893,10 +892,6 @@ body {
   filter: drop-shadow(0 0 10px rgba(164, 214, 94, 0.75));
 }
 
-.gl-chest.gl-chest-opened .gl-chest-icon {
-  filter: grayscale(0.7);
-  opacity: 0.45;
-}
 
 .gl-chest-lock {
   position: absolute;
@@ -922,10 +917,6 @@ body {
   white-space: nowrap;
 }
 
-.gl-chest.gl-chest-opened .gl-chest-badge {
-  color: var(--gl-secondary-shadow);
-  border-color: var(--gl-secondary);
-}
 
 @keyframes glChestBob {
   0%, 100% { transform: translateY(0); }
