@@ -20,6 +20,9 @@
                               // oder fest 'left'/'center'/'right'
        progressKey: 'glaggleLessonProgress',
        footerAllDone: '🎉 Alle Lektionen geschafft — stark!',
+       chests:      true,     // Belohnungs-Truhen auf dem Pfad (an/aus)
+       searchPlaceholder: 'Lektion suchen…',
+       emptyText:   'Keine Lektion gefunden.',
      });
 
    Fortschritt kommt aus localStorage (Key "glaggleLessonProgress"),
@@ -32,6 +35,17 @@
    - Kartenhöhen werden gemessen statt geschätzt → Linien sitzen exakt.
    - Offene Abschnitte: grau gepunktete Spur; erledigte: grün durchgezogen.
    - Mobil (< 560px): zentrierte Spalte, Karten ~92% breit, gerade Spur.
+
+   v3:
+   - Navbar: nutzt dieselbe .gl-overview-header-Klasse wie die Subject-
+     Overview → beide Navbars sind exakt gleich hoch (CSS: fixe Höhe).
+   - Suchfeld: 100% identisch zur Subject-Overview (Lupe oben rechts,
+     aufklappbares Feld, ✕-Clear, Escape, Blur). Filtert die Lektionen.
+   - Belohnungssystem: pro Lektion eine Truhe auf dem Pfad. Entsperrt,
+     sobald die Lektion geschafft ist; genau 1x insgesamt öffbar.
+     Beim Öffnen: Popup mit kurzer Animation, danach 10–30 Crystals.
+     Crystal-Stand + geöffnete Truhen liegen in localStorage
+     ("glaggleCrystalData") — NUR diese Engine fasst den Key an.
    ========================================================================== */
 (function () {
   'use strict';
@@ -40,6 +54,10 @@
   const ROW_GAP = 72;               // Desktop: Luft für die S-Kurve
   const ROW_GAP_MOBILE = 56;
   const MOBILE_BREAK = 560;
+
+  const CRYSTAL_KEY = 'glaggleCrystalData';
+  const CHEST_MIN = 10;
+  const CHEST_MAX = 30;
 
   const DEFAULTS = {
     title: 'Übersicht',
@@ -50,11 +68,16 @@
     progressKey: 'glaggleLessonProgress',
     footerAllDone: '🎉 Alle Lektionen geschafft — stark!',
     align: 'auto',
-    lektionen: []
+    lektionen: [],
+    chests: true,
+    searchPlaceholder: 'Lektion suchen…',
+    emptyText: 'Keine Lektion gefunden.'
   };
 
   let CFG = null;
+  let glQuery = '';
   let glRafId = 0;
+  let glModalOpen = false;
 
   function glEsc(value) {
     return String(value ?? '').replace(/[&<>"']/g, (c) => ({
@@ -62,16 +85,26 @@
     }[c]));
   }
 
-  /* ---------- Fortschritt aus localStorage ---------- */
-  function glGetProgress() {
+  function glNorm(value) {
+    return String(value ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function glReadJson(key) {
     try {
-      const raw = localStorage.getItem(CFG.progressKey);
-      const obj = raw ? JSON.parse(raw) : {};
+      const obj = JSON.parse(localStorage.getItem(key) || '{}');
       return (obj && typeof obj === 'object') ? obj : {};
     } catch (e) {
-      console.warn('Konnte "' + CFG.progressKey + '" nicht lesen:', e);
+      console.warn('Konnte "' + key + '" nicht lesen:', e);
       return {};
     }
+  }
+
+  /* ---------- Fortschritt aus localStorage ---------- */
+  function glGetProgress() {
+    return glReadJson(CFG.progressKey);
   }
 
   /* ---------- v2.1: echten Themen-Fortschritt veröffentlichen ----------
@@ -98,6 +131,36 @@
     try { localStorage.setItem(TOPIC_PROGRESS_KEY, JSON.stringify(map)); } catch (e) {}
   }
 
+  /* ---------- v3: Crystals / Truhen (NUR diese Engine!) ---------- */
+  function glReadCrystals() {
+    const d = glReadJson(CRYSTAL_KEY);
+    return {
+      total: (typeof d.total === 'number') ? d.total : 0,
+      opened: (d.opened && typeof d.opened === 'object') ? d.opened : {}
+    };
+  }
+
+  function glSaveCrystals(data) {
+    try { localStorage.setItem(CRYSTAL_KEY, JSON.stringify(data)); } catch (e) {}
+  }
+
+  function glChestId(lek) {
+    return (CFG.topicId || glTopicIdFromPath()) + '::' + lek.file;
+  }
+
+  function glUpdatePill(pulse) {
+    const count = document.getElementById('glCrystalCount');
+    if (count) count.textContent = glReadCrystals().total;
+    if (pulse) {
+      const pill = document.getElementById('glCrystalPill');
+      if (pill) {
+        pill.classList.remove('gl-pulse');
+        void pill.offsetWidth;
+        pill.classList.add('gl-pulse');
+      }
+    }
+  }
+
   /* ---------- horizontale Position einer Karte ---------- */
   function glAlignFor(lek, i, mobile) {
     if (lek.align) return lek.align;                       // pro Lektion überschreibbar
@@ -116,6 +179,16 @@
       '<div class="gl-overview-header">' +
         '<a href="' + glEsc(CFG.homeUrl) + '" title="Zurück">' + glEsc(CFG.homeIcon) + '</a>' +
         '<h1></h1>' +
+        '<div class="gl-header-tools">' +
+          '<div class="gl-crystal-pill" id="glCrystalPill" title="Deine Crystals">💎 <span id="glCrystalCount">0</span></div>' +
+          '<div class="gl-subject-search" id="glSearchWrap">' +
+            '<div class="gl-subject-search-field">' +
+              '<input type="search" id="glSearch" placeholder="' + glEsc(CFG.searchPlaceholder) + '" autocomplete="off">' +
+              '<button type="button" class="gl-subject-search-clear" id="glSearchClear" title="Suche leeren" hidden>✕</button>' +
+            '</div>' +
+            '<button type="button" class="gl-subject-search-btn" id="glSearchBtn" title="Lektion suchen">🔎</button>' +
+          '</div>' +
+        '</div>' +
       '</div>' +
       '<div class="gl-overview-content">' +
         '<div class="gl-path">' +
@@ -123,7 +196,9 @@
           '<div class="gl-path-canvas">' +
             '<svg class="gl-path-svg" id="glPathSvg" preserveAspectRatio="none"></svg>' +
             '<div class="gl-nodes" id="glNodes"></div>' +
+            '<div class="gl-chests" id="glChests"></div>' +
           '</div>' +
+          '<p class="gl-subject-empty" id="glOverviewEmpty" hidden></p>' +
           '<p class="gl-path-footer" id="glPathFooter"></p>' +
         '</div>' +
       '</div>';
@@ -131,20 +206,18 @@
 
     wrap.querySelector('h1').textContent = CFG.title;
     if (CFG.intro) wrap.querySelector('.gl-path-intro').textContent = CFG.intro;
+    document.getElementById('glOverviewEmpty').textContent = CFG.emptyText;
   }
 
   /* ---------- Layout: Positionen der Karten berechnen ----------
      heights = gemessene Kartenhöhen (null → Fallbackwerte) */
-  function glBuildLayout(heights) {
-    const pathEl = document.querySelector('.gl-path');
-    const containerWidth = pathEl.clientWidth;
-    const mobile = containerWidth <= MOBILE_BREAK;
+  function glBuildLayout(items, heights, containerWidth, mobile) {
     const nodeWidth = containerWidth * (mobile ? 0.92 : 0.46);
     const rowGap = mobile ? ROW_GAP_MOBILE : ROW_GAP;
 
     let y = 0;
-    const positions = CFG.lektionen.map((lek, i) => {
-      const align = glAlignFor(lek, i, mobile);
+    const positions = items.map((item, i) => {
+      const align = glAlignFor(item.lek, item.fi, mobile);
       let x = 0;
       if (align === 'right') x = containerWidth - nodeWidth;
       else if (align === 'center') x = (containerWidth - nodeWidth) / 2;
@@ -157,11 +230,11 @@
     const totalHeight = positions.length
       ? positions[positions.length - 1].y + positions[positions.length - 1].h
       : 0;
-    return { positions, totalHeight };
+    return { positions, totalHeight, rowGap };
   }
 
   /* ---------- SVG-Verbindungslinien (S-Kurven von Karte zu Karte) ---------- */
-  function glRenderConnectors(positions, totalHeight, progress) {
+  function glRenderConnectors(positions, doneFlags, totalHeight) {
     const svg = document.getElementById('glPathSvg');
     const width = document.querySelector('.gl-path').clientWidth;
     svg.setAttribute('viewBox', '0 0 ' + width + ' ' + Math.max(totalHeight, 1));
@@ -178,7 +251,7 @@
       const toX = to.x + to.w * anchor;       // Oberkante Karte i+1
       const toY = to.y;
       const bend = (toY - fromY) * 0.45;
-      const done = !!progress[CFG.lektionen[i].file];
+      const done = !!doneFlags[i];
 
       pathsHtml +=
         '<path class="gl-seg ' + (done ? 'gl-seg-done' : 'gl-seg-open') + '" ' +
@@ -191,17 +264,27 @@
   }
 
   /* ---------- Lektions-Karten (done / next / locked) ---------- */
-  function glRenderNodes(positions, progress) {
+  function glRenderNodes(items, positions, progress) {
     const nodesEl = document.getElementById('glNodes');
     nodesEl.innerHTML = '';
 
+    // Prefix-Done über die VOLLE Liste, damit next/locked auch beim
+    // Filtern exakt wie vorher stimmt.
+    const prefixDone = [];
+    let acc = true;
+    CFG.lektionen.forEach((l, i) => {
+      acc = acc && !!progress[l.file];
+      prefixDone[i] = acc;
+    });
+
     let nextAssigned = false;
 
-    CFG.lektionen.forEach((lek, i) => {
+    items.forEach((item, i) => {
+      const lek = item.lek;
       const pos = positions[i];
       const entry = progress[lek.file];
       const isDone = !!entry;
-      const prevDone = i === 0 || !!progress[CFG.lektionen[i - 1].file];
+      const prevDone = item.fi === 0 || prefixDone[item.fi - 1];
       const isNext = !isDone && prevDone && !nextAssigned;
       if (isNext) nextAssigned = true;
       const isLocked = !isDone && !isNext;
@@ -243,10 +326,144 @@
         : doneCount + ' von ' + CFG.lektionen.length + ' Lektionen abgeschlossen';
   }
 
+  /* ---------- v3: Truhen auf dem Pfad ----------
+     Sitzt jeweils auf der Mitte der Verbindungslinie nach der Lektion;
+     die letzte Truhe sitzt unterhalb der letzten Karte. */
+  function glChestSize(mobile) { return mobile ? 46 : 56; }
+
+  function glRenderChests(items, positions, progress, crystals, mobile, rowGap) {
+    const box = document.getElementById('glChests');
+    box.innerHTML = '';
+    if (!CFG.chests) return;
+
+    const size = glChestSize(mobile);
+
+    items.forEach((item, i) => {
+      const pos = positions[i];
+      let cx, cy;
+      if (i < positions.length - 1) {
+        const to = positions[i + 1];
+        const dir = to.x > pos.x ? 1 : (to.x < pos.x ? -1 : 0);
+        const anchor = 0.5 + dir * 0.14;
+        const fromX = pos.x + pos.w * anchor;
+        const toX = to.x + to.w * anchor;
+        const fromY = pos.y + pos.h;
+        const toY = to.y;
+        cx = (fromX + toX) / 2;
+        cy = (fromY + toY) / 2;
+      } else {
+        cx = pos.x + pos.w / 2;
+        cy = pos.y + pos.h + rowGap * 0.55;
+      }
+
+      const done = !!progress[item.lek.file];
+      const id = glChestId(item.lek);
+      const openedAmt = crystals.opened[id];
+      const state = !done ? 'locked' : (openedAmt !== undefined ? 'opened' : 'ready');
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'gl-chest gl-chest-' + state;
+      btn.style.left = (cx - size / 2) + 'px';
+      btn.style.top = (cy - size / 2) + 'px';
+      btn.style.width = size + 'px';
+      btn.style.height = size + 'px';
+      btn.title = state === 'ready' ? 'Truhe öffnen'
+        : (state === 'locked' ? 'Erst die Lektion abschliessen' : 'Bereits geöffnet');
+
+      btn.innerHTML =
+        '<span class="gl-chest-icon">📦</span>' +
+        (state === 'locked' ? '<span class="gl-chest-lock">🔒</span>' : '') +
+        (state === 'ready' ? '<span class="gl-chest-badge">Öffnen</span>' : '') +
+        (state === 'opened' ? '<span class="gl-chest-badge">+' + openedAmt + ' 💎</span>' : '');
+
+      if (state === 'ready') {
+        btn.addEventListener('click', function () {
+          glOpenChestModal(id, function (amount) {
+            const data = glReadCrystals();
+            data.total += amount;
+            data.opened[id] = amount;      // 1x insgesamt → merke Öffnung
+            glSaveCrystals(data);
+            glUpdatePill(true);
+            glRenderAll();
+          });
+        });
+      } else {
+        btn.disabled = true;
+      }
+      box.appendChild(btn);
+    });
+  }
+
+  /* ---------- v3: Truhen-Popup mit Animation ---------- */
+  function glSpawnSparks(container) {
+    for (let k = 0; k < 8; k++) {
+      const s = document.createElement('span');
+      s.textContent = (k % 2 === 0) ? '💎' : '✨';
+      const angle = (k / 8) * Math.PI * 2;
+      const dist = 70 + Math.random() * 45;
+      s.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+      s.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+      s.style.animationDelay = (k * 0.04) + 's';
+      container.appendChild(s);
+    }
+  }
+
+  function glCountUp(el, target) {
+    const start = performance.now();
+    const dur = 700;
+    function step(t) {
+      const p = Math.min(1, (t - start) / dur);
+      el.textContent = '💎 +' + Math.round(target * p);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function glOpenChestModal(chestId, onCollect) {
+    if (glModalOpen) return;
+    glModalOpen = true;
+
+    const amount = CHEST_MIN + Math.floor(Math.random() * (CHEST_MAX - CHEST_MIN + 1));
+
+    const ov = document.createElement('div');
+    ov.className = 'gl-chest-overlay';
+    ov.innerHTML =
+      '<div class="gl-chest-modal">' +
+        '<h2 class="gl-chest-modal-title">Truhe geöffnet!</h2>' +
+        '<div class="gl-chest-modal-stage">' +
+          '<div class="gl-chest-modal-chest">📦</div>' +
+          '<div class="gl-chest-sparks"></div>' +
+        '</div>' +
+        '<div class="gl-chest-modal-amount">💎 +0</div>' +
+        '<div class="gl-chest-modal-total"></div>' +
+        '<button type="button" class="gl-chest-modal-btn">Einkassieren</button>' +
+      '</div>';
+    document.body.appendChild(ov);
+
+    const modal = ov.querySelector('.gl-chest-modal');
+
+    setTimeout(function () {
+      modal.classList.add('gl-burst');
+      glSpawnSparks(ov.querySelector('.gl-chest-sparks'));
+      glCountUp(ov.querySelector('.gl-chest-modal-amount'), amount);
+      ov.querySelector('.gl-chest-modal-total').textContent =
+        'Gesamt: ' + (glReadCrystals().total + amount) + ' Crystals';
+    }, 850);
+
+    ov.querySelector('.gl-chest-modal-btn').addEventListener('click', function () {
+      ov.remove();
+      glModalOpen = false;
+      onCollect(amount);
+    });
+  }
+
   /* ---------- alles rendern (2 Durchläufe: bauen → messen → exakt setzen) ---------- */
   function glRenderAll() {
     const progress = glGetProgress();
     glPublishTopicProgress(progress);
+    const crystals = glReadCrystals();
+    glUpdatePill(false);
     console.log('[Übersicht] gelesener Fortschritt aus localStorage:', progress);
     if (Object.keys(progress).length === 0) {
       console.warn('[Übersicht] "' + CFG.progressKey + '" ist leer oder nicht vorhanden. ' +
@@ -255,30 +472,83 @@
         '3) wurde mindestens eine Lektion bis zum Ende durchgespielt?');
     }
 
+    // Suche: sichtbare Lektionen bestimmen (Zustände bleiben vom vollen Pfad)
+    const q = glNorm(glQuery.trim());
+    const items = CFG.lektionen
+      .map(function (lek, fi) { return { lek: lek, fi: fi }; })
+      .filter(function (item) {
+        return q === '' || glNorm(item.lek.label + ' ' + (item.lek.sub || '')).includes(q);
+      });
+    document.getElementById('glOverviewEmpty').hidden = items.length > 0;
+
+    const pathEl = document.querySelector('.gl-path');
+    const containerWidth = pathEl.clientWidth;
+    const mobile = containerWidth <= MOBILE_BREAK;
+
     // Durchlauf 1: Karten mit geschätzter Höhe bauen …
-    let layout = glBuildLayout(null);
-    glRenderNodes(layout.positions, progress);
+    let layout = glBuildLayout(items, null, containerWidth, mobile);
+    glRenderNodes(items, layout.positions, progress);
 
     // … dann echte Höhen messen und exakt nachpositionieren.
     const nodesEl = document.getElementById('glNodes');
     const heights = Array.from(nodesEl.children).map((n) => n.offsetHeight);
-    layout = glBuildLayout(heights);
+    layout = glBuildLayout(items, heights, containerWidth, mobile);
     Array.from(nodesEl.children).forEach((n, i) => {
       n.style.top = layout.positions[i].y + 'px';
     });
-    nodesEl.style.height = layout.totalHeight + 'px';
 
-    glRenderConnectors(layout.positions, layout.totalHeight, progress);
+    // Platz für die letzte Truhe unterhalb der letzten Karte reservieren
+    let totalHeight = layout.totalHeight;
+    if (CFG.chests && layout.positions.length) {
+      const last = layout.positions[layout.positions.length - 1];
+      const size = glChestSize(mobile);
+      const need = last.y + last.h + layout.rowGap * 0.55 + size / 2 + 8;
+      totalHeight = Math.max(totalHeight, need);
+    }
+    nodesEl.style.height = totalHeight + 'px';
+
+    const doneFlags = items.map(function (item) { return !!progress[item.lek.file]; });
+    glRenderConnectors(layout.positions, doneFlags, totalHeight);
+    glRenderChests(items, layout.positions, progress, crystals, mobile, layout.rowGap);
+  }
+
+  /* ---------- v3: Lupe — 100% identisch zur Subject-Overview ---------- */
+  function glInitSearch() {
+    const wrap = document.getElementById('glSearchWrap');
+    const btn = document.getElementById('glSearchBtn');
+    const input = document.getElementById('glSearch');
+    const clear = document.getElementById('glSearchClear');
+
+    function setQuery(value) {
+      glQuery = value;
+      clear.hidden = value === '';
+      glRenderAll();
+    }
+    function open() { wrap.classList.add('gl-open'); input.focus(); }
+    function close(reset) {
+      if (reset) { input.value = ''; setQuery(''); }
+      wrap.classList.remove('gl-open');
+    }
+
+    btn.addEventListener('click', function () {
+      if (wrap.classList.contains('gl-open')) close(true);
+      else open();
+    });
+    input.addEventListener('input', function () { setQuery(input.value); });
+    clear.addEventListener('click', function () { input.value = ''; setQuery(''); input.focus(); });
+    input.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(true); });
+    input.addEventListener('blur', function () { if (input.value === '') close(false); });
   }
 
   function glInit() {
     glBuildSkeleton();
+    glInitSearch();
     glRenderAll();
     window.addEventListener('resize', function () {
       cancelAnimationFrame(glRafId);
       glRafId = requestAnimationFrame(glRenderAll);   // SVG-Linien verrutschen nicht
     });
-        // Nach Zurück-Navigieren (z.B. von einer Lektion) neu rendern,
+    // Nach Zurück-Navigieren (z.B. von einer Lektion) neu rendern,
     // damit der veröffentlichte Themen-Fortschritt aktuell bleibt.
     window.addEventListener('pageshow', function () { glRenderAll(); });
   }
