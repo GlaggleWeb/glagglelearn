@@ -1057,3 +1057,104 @@ body {
   15%  { opacity: 1; }
   100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.1); opacity: 0; }
 }
+
+/* ==========================================================================
+   STARTSEITE (index.html) — v3: kein eigenes <style> mehr.
+   Navbar  = .gl-overview-header (dadurch exakt gleiche Höhe wie Overviews)
+   Karten  = .gl-node / .gl-node-box, via .gl-static statisch statt absolut
+   Titel   = .gl-subject-group-label   |   Suche = .gl-subject-search
+   ========================================================================== */
+
+.gl-hidden { display: none !important; }
+
+.gl-home-wrap {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Brand links in der Navbar ---------- */
+.gl-home-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.gl-home-brand img {
+  height: 34px;
+  width: 34px;
+  object-fit: contain;
+  border-radius: var(--gl-radius-sm);
+}
+.gl-home-brand-name {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--gl-primary-shadow);
+}
+
+/* ---------- Learn-Points-Pill (Gold) neben der Crystal-Pill ---------- */
+.gl-lp-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 14px;
+  border: 2px solid #e8b83c;
+  border-radius: 999px;
+  background: color-mix(in srgb, #f7d060 22%, var(--gl-surface));
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--gl-text);
+}
+.gl-lp-pill img { width: 18px; height: 18px; }
+
+/* ---------- Nodes statisch nutzbar (Grid/Listen statt Pfad) ---------- */
+.gl-node.gl-static { position: static; width: auto; }
+
+/* ---------- Fächer-Grid ---------- */
+.gl-home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--gl-space-2);
+}
+.gl-node-box.gl-home-subject {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* ---------- Fach-Farbtöne (konsistent wie früher) ---------- */
+.gl-tone-mathe   { background: color-mix(in srgb, var(--gl-primary) 22%, var(--gl-surface));  color: var(--gl-primary-shadow); }
+.gl-tone-deutsch { background: color-mix(in srgb, var(--gl-secondary) 22%, var(--gl-surface)); color: var(--gl-secondary-shadow); }
+.gl-tone-nmg     { background: color-mix(in srgb, #f7d060 30%, var(--gl-surface));             color: #b9860a; }
+
+/* ---------- Stream-Platzhalter ---------- */
+.gl-home-placeholder {
+  border: 2px dashed var(--gl-border);
+  border-radius: var(--gl-radius-md);
+  padding: var(--gl-space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--gl-text-soft);
+  text-align: center;
+}
+.gl-home-placeholder svg { width: 32px; height: 32px; opacity: 0.6; }
+.gl-home-placeholder strong { color: var(--gl-text); font-size: 0.95rem; }
+.gl-home-placeholder span { font-size: 0.82rem; }
+
+/* ---------- runde Icon-Buttons als Links (Shop/Settings) ---------- */
+a.gl-subject-search-btn { text-decoration: none; }
+a.gl-subject-search-btn svg { width: 20px; height: 20px; }
+
+/* ---------- Mobil: Navbar schlank halten ---------- */
+@media (max-width: 560px) {
+  .gl-home-brand-name { display: none; }
+  .gl-header-tools { gap: 6px; }
+  .gl-lp-pill, .gl-crystal-pill { height: 36px; padding: 0 10px; font-size: 0.85rem; }
+  a.gl-subject-search-btn.gl-home-optional { display: none; }
+}
