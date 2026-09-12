@@ -1165,23 +1165,18 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
    Mobil (< 560px): Sidebar wird zur unteren Navigationsleiste.
    ========================================================================== */
 
-/* NEU */
 .gl-home-body {
   flex: 1;
   min-height: 0;
-  height: 100%;              /* ← NEU: explizite Höhe */
   display: grid;
   grid-template-columns: clamp(64px, 4vw, 76px) 1fr;
-  /* grid-template-rows entfernt - Grid berechnet Höhe automatisch */
-  align-items: stretch;      /* ← NEU: Items nehmen volle Höhe */
-  overflow: hidden;          /* ← NEU: verhindert Overflow */
+  grid-template-rows: minmax(0, 1fr);   /* eine Zeile, füllt die Höhe */
 }
+
 .gl-sidebar {
   grid-column: 1;
-  width: 100%;
-  min-height: 0;             /* ← NEU statt height: 100% */
-  align-self: stretch;       /* ← NEU: füllt Grid-Cell */
-  border-left: none;
+  grid-row: 1;            /* ← NEU: beide in dieselbe Zeile zwingen */
+  min-height: 0;
   border-right: 1px solid var(--gl-border);
   background: var(--gl-surface);
   display: flex;
@@ -1194,6 +1189,7 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
 
 .gl-overview-content {
   grid-column: 2;
+  grid-row: 1;            /* ← NEU */
 }
 
 .gl-lp-badge {
@@ -1249,13 +1245,18 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
 /* ---------- MOBIL: Sidebar → untere Navigationsleiste ---------- */
 @media (max-width: 560px) {
   .gl-home-body {
-    grid-template-columns: 1fr;   /* wieder einspaltig */
-    grid-template-rows: 1fr auto;
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .gl-overview-content {
+    grid-column: 1;
+    grid-row: 1;          /* Content oben */
   }
 
   .gl-sidebar {
     grid-column: 1;
-    width: 100%;
+    grid-row: 2;          /* Sidebar als untere Leiste */
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
@@ -1263,19 +1264,12 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
     padding: 8px calc(8px + env(safe-area-inset-left))
              calc(8px + env(safe-area-inset-bottom))
              calc(8px + env(safe-area-inset-right));
-    border-left: none;
+    border-right: none;
     border-top: 1px solid var(--gl-border);
     overflow-x: auto;
   }
 
-
-  .gl-lp-badge {
-    flex-direction: row;
-    width: auto;
-    padding: 6px 10px;
-    gap: 6px;
-  }
-
+  .gl-lp-badge { flex-direction: row; width: auto; padding: 6px 10px; gap: 6px; }
   .gl-sidebar-divider { width: 1px; height: 28px; margin: 0 2px; }
   .gl-sidebar-spacer { display: none; }
   .gl-sidebar-icon { width: 42px; height: 42px; }
