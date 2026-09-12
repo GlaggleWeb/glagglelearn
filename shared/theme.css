@@ -1169,7 +1169,7 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto 1fr;   /* Sidebar zuerst, dann Content */
   grid-template-rows: 100%;
 }
 
