@@ -1276,3 +1276,12 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
   .gl-sidebar-icon { width: 42px; height: 42px; }
   .gl-sidebar-icon.gl-settings { margin-bottom: 0; }
 }
+
+.gl-sidebar {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  grid-column: 1 !important;
+  width: 100% !important;
+  min-width: 64px !important;
+}
