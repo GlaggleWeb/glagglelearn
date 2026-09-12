@@ -1165,18 +1165,22 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
    Mobil (< 560px): Sidebar wird zur unteren Navigationsleiste.
    ========================================================================== */
 
+/* NEU */
 .gl-home-body {
   flex: 1;
   min-height: 0;
+  height: 100%;              /* ← NEU: explizite Höhe */
   display: grid;
   grid-template-columns: clamp(64px, 4vw, 76px) 1fr;
-  grid-template-rows: 100%;
+  /* grid-template-rows entfernt - Grid berechnet Höhe automatisch */
+  align-items: stretch;      /* ← NEU: Items nehmen volle Höhe */
+  overflow: hidden;          /* ← NEU: verhindert Overflow */
 }
-
 .gl-sidebar {
   grid-column: 1;
   width: 100%;
-  height: 100%;              /* ← NEU: verhindert Höhen-Kollaps */
+  min-height: 0;             /* ← NEU statt height: 100% */
+  align-self: stretch;       /* ← NEU: füllt Grid-Cell */
   border-left: none;
   border-right: 1px solid var(--gl-border);
   background: var(--gl-surface);
