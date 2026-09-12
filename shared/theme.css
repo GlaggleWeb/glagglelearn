@@ -1169,16 +1169,15 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: auto 1fr;   /* Sidebar zuerst, dann Content */
+  grid-template-columns: clamp(64px, 4vw, 76px) 1fr clamp(64px, 4vw, 76px);
   grid-template-rows: 100%;
 }
 
-.gl-home-body > .gl-overview-content { min-height: 0; }
-
-/* ---------- Sidebar (Desktop: rechts) ---------- */
 .gl-sidebar {
-  width: clamp(64px, 4vw, 76px);
-  border-left: 1px solid var(--gl-border);
+  grid-column: 1;
+  width: 100%;               /* füllt jetzt die feste Spalte */
+  border-left: none;
+  border-right: 1px solid var(--gl-border);
   background: var(--gl-surface);
   display: flex;
   flex-direction: column;
@@ -1186,6 +1185,10 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
   padding: var(--gl-space-2) 0;
   gap: var(--gl-space-2);
   overflow-y: auto;
+}
+
+.gl-overview-content {
+  grid-column: 2;
 }
 
 .gl-lp-badge {
@@ -1241,11 +1244,12 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
 /* ---------- MOBIL: Sidebar → untere Navigationsleiste ---------- */
 @media (max-width: 560px) {
   .gl-home-body {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr;   /* wieder einspaltig */
     grid-template-rows: 1fr auto;
   }
 
   .gl-sidebar {
+    grid-column: 1;
     width: 100%;
     flex-direction: row;
     justify-content: space-around;
@@ -1258,6 +1262,7 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
     border-top: 1px solid var(--gl-border);
     overflow-x: auto;
   }
+
 
   .gl-lp-badge {
     flex-direction: row;
