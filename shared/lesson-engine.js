@@ -279,14 +279,6 @@ showFeedback(isCorrect, correctAnswerText) {
     const nextBtn = this.addButton('Weiter', 'primary', 'glNext', false);
 
     nextBtn.addEventListener('glaggle-click', () => this.next());
-
-        // Enter-Taste für Weiter aktivieren
-    document.addEventListener('keydown', function handleEnter(e) {
-      if (e.key === 'Enter') {
-        document.removeEventListener('keydown', handleEnter); // Cleanup
-        this.next();
-      }
-    }.bind(this));
   }
 
   renderMC(step) {
@@ -333,15 +325,6 @@ showFeedback(isCorrect, correctAnswerText) {
 
       this.showFeedback(isCorrect, step.options[step.correct]);
     });
-
-        // Enter-Taste für Prüfen aktivieren
-    const mcHandler = (e) => {
-      if (e.key === 'Enter' && !checked && selected !== null) {
-        document.removeEventListener('keydown', mcHandler); // Cleanup
-        checkBtn.click(); // Löst den bestehenden Klick-Listener aus
-      }
-    };
-    document.addEventListener('keydown', mcHandler);
   }
 
   renderBlank(step) {
@@ -375,14 +358,6 @@ showFeedback(isCorrect, correctAnswerText) {
     });
     checkBtn.addEventListener('glaggle-click', check);
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !answered) check(); });
-        // Enter-Taste für Prüfen aktivieren (falls Fokus nicht im Input ist)
-    const blankHandler = (e) => {
-      if (e.key === 'Enter' && !answered && input.value.trim().length > 0) {
-        document.removeEventListener('keydown', blankHandler); // Cleanup
-        checkBtn.click(); // Löst den bestehenden Klick-Listener aus
-      }
-    };
-    document.addEventListener('keydown', blankHandler);
   }
 
   /* Rendert die animierte, bunte Ergebnisseite und speichert die LP.
