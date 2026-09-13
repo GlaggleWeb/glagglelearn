@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plus & Minus bis 20 — Mathe Grundlagen | Glaggle Learn</title>
+<!-- Zentrales Theme & Components — auf JEDER Lektionsseite gleich einbinden.
+     Kein eigenes <style> hier nötig — alles Layout/Design kommt aus theme.css -->
+<link rel="stylesheet" href="../../../shared/theme.css">
+<script src="../../../shared/components.js" defer></script>
+<script src="../../../shared/lesson-engine.js" defer></script>
+</head>
+<body>
+<div id="glLessonRoot"></div>
+<script>
+// window.onload wartet, bis ALLES (auch lesson-engine.js) komplett fertig geladen ist
+window.addEventListener("load", function() {
+// Zur Sicherheit nochmals 0,5 Sekunden warten
+setTimeout(function() {
+GlaggleLesson.mount({
+target: document.getElementById('glLessonRoot'),
+backHref: 'https://learn.glaggle.ch/lektionen/mathe/plus-minus-bis-20/',
+steps: [
+{
+type: 'info',
+title: '👋 Willkommen bei Plus & Minus bis 20',
+text: 'In dieser Lektion übst du das Rechnen mit Plus und Minus bis 20. Tippe auf "Weiter", um zu starten.'
+},
+{
+type: 'mc',
+question: 'Was ist 7 + 5?',
+options: ['11', '12', '13', '10'],
+correct: 1
+},
+{
+type: 'mc',
+question: 'Was ist 14 − 6?',
+options: ['9', '7', '8', '6'],
+correct: 2
+},
+{
+type: 'blank',
+question: 'Ergänze: 9 + 8 = ___',
+answer: '17'
+},
+{
+type: 'mc',
+question: 'Was ist 16 − 9?',
+options: ['6', '8', '7', '5'],
+correct: 2
+},
+{
+type: 'blank',
+question: 'Ergänze: 6 + 6 = ___',
+answer: '12'
+},
+{
+type: 'mc',
+question: 'Was ist 18 − 5?',
+options: ['12', '14', '13', '11'],
+correct: 2
+},
+{
+type: 'info',
+title: '💡 Wusstest du?',
+text: 'Beim Plusrechnen spielt die Reihenfolge keine Rolle: 7 + 5 ergibt genau dasselbe wie 5 + 7.'
+},
+{
+type: 'blank',
+question: 'Ergänze: 11 − 4 = ___',
+answer: '7'
+},
+{
+type: 'mc',
+question: 'Was ist 8 + 9?',
+options: ['16', '17', '15', '18'],
+correct: 1
+},
+{
+type: 'mc',
+question: 'Was ist 20 − 8?',
+options: ['11', '13', '12', '10'],
+correct: 2
+},
+{
+type: 'blank',
+question: 'Ergänze: 5 + 9 = ___',
+answer: '14'
+},
+{
+type: 'mc',
+question: 'Was ist 15 − 7?',
+options: ['9', '8', '7', '6'],
+correct: 1
+},
+{
+type: 'blank',
+question: 'Ergänze: 13 − 5 = ___',
+answer: '8'
+},
+{
+type: 'mc',
+question: 'Was ist 4 + 8?',
+options: ['13', '11', '12', '10'],
+correct: 2
+},
+{
+type: 'info',
+title: '💡 Wusstest du?',
+text: 'Ein Trick: Zähle bei Plus und Minus immer bis zur nächsten 10, dann geht der Rest leichter (z. B. 9 + 8 = 9 + 1 + 7 = 17).'
+},
+{
+type: 'blank',
+question: 'Ergänze: 17 − 9 = ___',
+answer: '8'
+},
+{
+type: 'mc',
+question: 'Was ist 6 + 7?',
+options: ['12', '14', '13', '11'],
+correct: 2
+}
+]
+});
+}, 500);
+});
+</script>
+</body>
+</html>
