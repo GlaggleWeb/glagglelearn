@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plus & Minus bis 100 (mit Zehnerübergang) — Mathe Grundlagen | Glaggle Learn</title>
+<!-- Zentrales Theme & Components — auf JEDER Lektionsseite gleich einbinden.
+     Kein eigenes <style> hier nötig — alles Layout/Design kommt aus theme.css -->
+<link rel="stylesheet" href="../../../shared/theme.css">
+<script src="../../../shared/components.js" defer></script>
+<script src="../../../shared/lesson-engine.js" defer></script>
+</head>
+<body>
+<div id="glLessonRoot"></div>
+<script>
+// window.onload wartet, bis ALLES (auch lesson-engine.js) komplett fertig geladen ist
+window.addEventListener("load", function() {
+// Zur Sicherheit nochmals 0,5 Sekunden warten
+setTimeout(function() {
+GlaggleLesson.mount({
+target: document.getElementById('glLessonRoot'),
+backHref: 'https://learn.glaggle.ch/lektionen/mathe/plus-minus-bis-100-gemischt/',
+steps: [
+{
+type: 'info',
+title: '👋 Willkommen bei Plus & Minus mit Zehnerübergang',
+text: 'In dieser Lektion übst du schwierigere Aufgaben bis 100, bei denen du über den Zehner rechnen musst. Tippe auf "Weiter", um zu starten.'
+},
+{
+type: 'mc',
+question: 'Was ist 27 + 15?',
+options: ['42', '38', '40', '44'],
+correct: 0
+},
+{
+type: 'mc',
+question: 'Was ist 52 − 18?',
+options: ['44', '36', '30', '34'],
+correct: 3
+},
+{
+type: 'blank',
+question: 'Ergänze: 38 + 24 = ___',
+answer: '62'
+},
+{
+type: 'mc',
+question: 'Was ist 73 − 46?',
+options: ['27', '37', '29', '33'],
+correct: 0
+},
+{
+type: 'blank',
+question: 'Ergänze: 19 + 26 = ___',
+answer: '45'
+},
+{
+type: 'mc',
+question: 'Was ist 61 − 27?',
+options: ['44', '34', '38', '36'],
+correct: 1
+},
+{
+type: 'info',
+title: '💡 Wusstest du?',
+text: 'Beim Rechnen über den Zehner hilft es, die Zahl zuerst bis zum nächsten Zehner zu ergänzen (z. B. 27 + 15 = 27 + 3 + 12 = 42).'
+},
+{
+type: 'blank',
+question: 'Ergänze: 47 + 38 = ___',
+answer: '85'
+},
+{
+type: 'mc',
+question: 'Was ist 84 − 29?',
+options: ['65', '55', '53', '57'],
+correct: 1
+},
+{
+type: 'mc',
+question: 'Was ist 36 + 49?',
+options: ['85', '75', '95', '80'],
+correct: 0
+},
+{
+type: 'blank',
+question: 'Ergänze: 92 − 57 = ___',
+answer: '35'
+},
+{
+type: 'mc',
+question: 'Was ist 58 + 27?',
+options: ['75', '95', '85', '90'],
+correct: 2
+},
+{
+type: 'blank',
+question: 'Ergänze: 66 − 28 = ___',
+answer: '38'
+},
+{
+type: 'mc',
+question: 'Was ist 29 + 34?',
+options: ['53', '73', '63', '67'],
+correct: 2
+},
+{
+type: 'info',
+title: '💡 Wusstest du?',
+text: 'Kontrolliere dein Ergebnis mit der Umkehraufgabe: Wenn 52 − 18 = 34 stimmt, dann muss 34 + 18 = 52 sein.'
+},
+{
+type: 'blank',
+question: 'Ergänze: 45 + 48 = ___',
+answer: '93'
+},
+{
+type: 'mc',
+question: 'Was ist 81 − 34?',
+options: ['57', '47', '37', '43'],
+correct: 1
+}
+]
+});
+}, 500);
+});
+</script>
+</body>
+</html>
