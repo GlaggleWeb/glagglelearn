@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plus & Minus bis 100 (Zehner Zahlen) — Mathe Grundlagen | Glaggle Learn</title>
+<!-- Zentrales Theme & Components — auf JEDER Lektionsseite gleich einbinden.
+     Kein eigenes <style> hier nötig — alles Layout/Design kommt aus theme.css -->
+<link rel="stylesheet" href="../../../shared/theme.css">
+<script src="../../../shared/components.js" defer></script>
+<script src="../../../shared/lesson-engine.js" defer></script>
+</head>
+<body>
+<div id="glLessonRoot"></div>
+<script>
+// window.onload wartet, bis ALLES (auch lesson-engine.js) komplett fertig geladen ist
+window.addEventListener("load", function() {
+// Zur Sicherheit nochmals 0,5 Sekunden warten
+setTimeout(function() {
+GlaggleLesson.mount({
+target: document.getElementById('glLessonRoot'),
+backHref: 'https://learn.glaggle.ch/lektionen/mathe/plus-minus-bis-100-glatt/',
+steps: [
+{
+type: 'info',
+title: '👋 Willkommen bei Plus & Minus bis 100',
+text: 'In dieser Lektion übst du das Rechnen mit runden Zahlen bis 100. Tippe auf "Weiter", um zu starten.'
+},
+{
+type: 'mc',
+question: 'Was ist 30 + 20?',
+options: ['40', '60', '50', '45'],
+correct: 2
+},
+{
+type: 'mc',
+question: 'Was ist 70 − 30?',
+options: ['30', '50', '35', '40'],
+correct: 3
+},
+{
+type: 'blank',
+question: 'Ergänze: 40 + 40 = ___',
+answer: '80'
+},
+{
+type: 'mc',
+question: 'Was ist 90 − 60?',
+options: ['20', '40', '30', '25'],
+correct: 2
+},
+{
+type: 'blank',
+question: 'Ergänze: 50 + 25 = ___',
+answer: '75'
+},
+{
+type: 'mc',
+question: 'Was ist 60 + 15?',
+options: ['65', '85', '75', '70'],
+correct: 2
+},
+{
+type: 'info',
+title: '💡 Wusstest du?',
+text: 'Runde Zahlen wie 10, 20 oder 50 kannst du oft im Kopf rechnen, wenn du zuerst die Zehner zusammenzählst.'
+},
+{
+type: 'blank',
+question: 'Ergänze: 80 − 25 = ___',
+answer: '55'
+},
+{
+type: 'mc',
+question: 'Was ist 45 + 30?',
+options: ['65', '85', '75', '70'],
+correct: 2
+},
+{
+type: 'mc',
+question: 'Was ist 100 − 40?',
+options: ['50', '70', '55', '60'],
+correct: 3
+},
+{
+type: 'blank',
+question: 'Ergänze: 35 + 45 = ___',
+answer: '80'
+},
+{
+type: 'mc',
+question: 'Was ist 90 − 15?',
+options: ['65', '75', '80', '70'],
+correct: 1
+},
+{
+type: 'blank',
+question: 'Ergänze: 55 − 20 = ___',
+answer: '35'
+},
+{
+type: 'mc',
+question: 'Was ist 25 + 65?',
+options: ['80', '95', '90', '85'],
+correct: 2
+},
+{
+type: 'info',
+title: '💡 Wusstest du?',
+text: 'Ein Trick: Rechne zuerst mit den Zehnern und dann mit den Einern separat, z. B. 45 + 30 = 40 + 30 + 5 = 75.'
+},
+{
+type: 'blank',
+question: 'Ergänze: 95 − 35 = ___',
+answer: '60'
+},
+{
+type: 'mc',
+question: 'Was ist 50 + 48?',
+options: ['88', '108', '98', '96'],
+correct: 2
+}
+]
+});
+}, 500);
+});
+</script>
+</body>
+</html>
