@@ -56,8 +56,26 @@
   const MOBILE_BREAK = 560;
 
   const CRYSTAL_KEY = 'glaggleCrystalData';
-  const CHEST_MIN = 10;
-  const CHEST_MAX = 30;
+  // ENTFERNEN:
+// const CHEST_MIN = 10;
+// const CHEST_MAX = 30;
+
+// HINZUFÜGEN:
+function glGetCrystalRange(pct) {
+  if (pct > 90) return { min: 40, max: 50 };
+  if (pct > 80) return { min: 30, max: 40 };
+  if (pct > 70) return { min: 20, max: 30 };
+  if (pct > 60) return { min: 10, max: 20 };
+  return { min: 0, max: 10 };
+}
+
+function glBarColor(pct) {
+  if (pct > 90) return '#1b5e20'; // dunkelgrün
+  if (pct > 80) return '#4caf50'; // hellgrün
+  if (pct > 70) return '#ffc107'; // gelb
+  if (pct > 60) return '#ff9800'; // orange
+  return '#f44336'; // rot
+}
 
   const DEFAULTS = {
     title: 'Übersicht',
@@ -311,7 +329,7 @@
             '<div class="gl-node-title">' + glEsc(lek.label) + '</div>' +
             '<div class="gl-node-sub">' + glEsc(lek.sub || '') + '</div>' +
             '<div class="gl-node-bar-track">' +
-              '<div class="gl-node-bar-fill" style="width:' + pct + '%"></div>' +
+              '<div class="gl-node-bar-fill" style="width:' + pct + '%;background:' + glBarColor(pct) + '"></div>' +
             '</div>' +
           '</div>' +
           '<div class="gl-node-pct ' + (isDone ? '' : 'gl-empty') + '">' + pctLabel + '</div>' +
@@ -380,18 +398,19 @@
         (state === 'locked' ? '<span class="gl-chest-lock">🔒</span>' : '') +
         (state === 'ready' ? '<span class="gl-chest-badge">Öffnen</span>' : '');
 
-      if (state === 'ready') {
-        btn.addEventListener('click', function () {
-          glOpenChestModal(id, function (amount) {
-            const data = glReadCrystals();
-            data.total += amount;
-            data.opened[id] = amount;      // 1x insgesamt → merke Öffnung
-            glSaveCrystals(data);
-            glUpdatePill(true);
-            glRenderAll();                 // NEU rendern → Truhe ist jetzt weg
-          });
-        });
-      } else {
+if (state === 'ready') {
+  const lekFile = item.lek.file;
+  btn.addEventListener('click', function () {
+    glOpenChestModal(id, lekFile, function (amount) {
+      const data = glReadCrystals();
+      data.total += amount;
+      data.opened[id] = amount;
+      glSaveCrystals(data);
+      glUpdatePill(true);
+      glRenderAll();
+    });
+  });
+} else {
         btn.disabled = true;
       }
       box.appendChild(btn);
@@ -423,43 +442,50 @@
     requestAnimationFrame(step);
   }
 
-  function glOpenChestModal(chestId, onCollect) {
-    if (glModalOpen) return;
-    glModalOpen = true;
+function glOpenChestModal(chestId, lekFile, onCollect) {
+  if (glModalOpen) return;
+  glModalOpen = true;
 
-    const amount = CHEST_MIN + Math.floor(Math.random() * (CHEST_MAX - CHEST_MIN + 1));
+  // Prozentwert aus Progress holen
+  const progress = glGetProgress();
+  const entry = progress[lekFile];
+  const pct = (entry && entry.pct) ? entry.pct : 0;
+  
+  // Crystal-Range basierend auf Prozentwert
+  const range = glGetCrystalRange(pct);
+  const amount = range.min + Math.floor(Math.random() * (range.max - range.min + 1));
 
-    const ov = document.createElement('div');
-    ov.className = 'gl-chest-overlay';
-    ov.innerHTML =
-      '<div class="gl-chest-modal">' +
-        '<h2 class="gl-chest-modal-title">Truhe geöffnet!</h2>' +
-        '<div class="gl-chest-modal-stage">' +
-          '<div class="gl-chest-modal-chest">📦</div>' +
-          '<div class="gl-chest-sparks"></div>' +
-        '</div>' +
-        '<div class="gl-chest-modal-amount">💎 +0</div>' +
-        '<div class="gl-chest-modal-total"></div>' +
-        '<button type="button" class="gl-chest-modal-btn">Einkassieren</button>' +
-      '</div>';
-    document.body.appendChild(ov);
+  const ov = document.createElement('div');
+  ov.className = 'gl-chest-overlay';
+  ov.innerHTML =
+    '<div class="gl-chest-modal">' +
+      '<h2 class="gl-chest-modal-title">Truhe geöffnet!</h2>' +
+      '<div class="gl-chest-modal-stage">' +
+        '<div class="gl-chest-modal-chest">📦</div>' +
+        '<div class="gl-chest-sparks"></div>' +
+      '</div>' +
+      '<div class="gl-chest-modal-amount">💎 +0</div>' +
+      '<div class="gl-chest-modal-total"></div>' +
+      '<button type="button" class="gl-chest-modal-btn">Einkassieren</button>' +
+    '</div>';
+  document.body.appendChild(ov);
 
-    const modal = ov.querySelector('.gl-chest-modal');
+  const modal = ov.querySelector('.gl-chest-modal');
 
-    setTimeout(function () {
-      modal.classList.add('gl-burst');
-      glSpawnSparks(ov.querySelector('.gl-chest-sparks'));
-      glCountUp(ov.querySelector('.gl-chest-modal-amount'), amount);
-      ov.querySelector('.gl-chest-modal-total').textContent =
-        'Gesamt: ' + (glReadCrystals().total + amount) + ' Crystals';
-    }, 850);
+  setTimeout(function () {
+    modal.classList.add('gl-burst');
+    glSpawnSparks(ov.querySelector('.gl-chest-sparks'));
+    glCountUp(ov.querySelector('.gl-chest-modal-amount'), amount);
+    ov.querySelector('.gl-chest-modal-total').textContent =
+      'Gesamt: ' + (glReadCrystals().total + amount) + ' Crystals';
+  }, 850);
 
-    ov.querySelector('.gl-chest-modal-btn').addEventListener('click', function () {
-      ov.remove();
-      glModalOpen = false;
-      onCollect(amount);
-    });
-  }
+  ov.querySelector('.gl-chest-modal-btn').addEventListener('click', function () {
+    ov.remove();
+    glModalOpen = false;
+    onCollect(amount);
+  });
+}
 
   /* ---------- alles rendern (2 Durchläufe: bauen → messen → exakt setzen) ---------- */
   function glRenderAll() {
