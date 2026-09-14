@@ -1,1 +1,49 @@
-
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deutsch | Glaggle Learn</title>
+  <!-- Pfade: diese Seite liegt in lektionen/mathe/index.html → zwei Stufen hoch -->
+  <link rel="stylesheet" href="../../shared/theme.css">
+  <script src="../../shared/components.js" defer></script>
+  <script src="../../shared/subject-overview-engine.js"></script>
+  <script>
+    /* ==========================================================
+       NUR HIER EDITIEREN — alles andere macht subject-overview-engine.js
+       ========================================================== */
+GlaggleSubjectOverview.mount({
+  title:   'Mathe',
+  homeUrl: 'https://learn.glaggle.ch/index.html',
+  intro:   'Wähle ein Thema, um zu üben.',
+  searchPlaceholder: 'Thema suchen…',
+  gruppen: [
+    {
+      label: 'Wortarten',
+      themen: [
+        { url: 'einmaleins-ueben/index.html', label: 'Nomen', emoji: '✖️', sub: 'Einmaleins lernen' },
+        { url: 'plusminus-ueben/index.html', label: 'Verben', emoji: '➕', sub: 'Plus Minus Aufgaben' },
+        { url: 'plusminus-ueben/index.html', label: 'Adjektive', emoji: '➕', sub: 'Plus Minus Aufgaben' },
+        { url: 'plusminus-ueben/index.html', label: 'Pronomen', emoji: '➕', sub: 'Plus Minus Aufgaben' },
+      ]
+    },
+    {
+      label: 'Geometrie',
+      themen: [
+        {
+          url:   'flaechen/index.html',
+          label: 'Flächen berechnen',
+          sub:   '2 Lektionen',
+          emoji: '📐',
+          lektionen: ['lektion1.html', 'lektion2.html']
+        },
+      ]
+    },
+  ],
+});
+  </script>
+</head>
+<body>
+  <!-- Kein HTML nötig — das Grundgerüst baut subject-overview-engine.js -->
+</body>
+</html>
