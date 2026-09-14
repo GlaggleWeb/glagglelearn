@@ -372,8 +372,8 @@ showFeedback(isCorrect, correctAnswerText) {
     // LP-Berechnung: 5 LP pro richtige Antwort + Zeit-Bonus pro Frage
     const avgSecPerQuestion = totalQuestions > 0 ? elapsedSeconds / totalQuestions : 999;
     let bonusPerCorrect = 0;
-    if (avgSecPerQuestion < 30) bonusPerCorrect = 3;
-    else if (avgSecPerQuestion < 60) bonusPerCorrect = 1;
+    if (avgSecPerQuestion < 10) bonusPerCorrect = 3;
+    else if (avgSecPerQuestion < 20) bonusPerCorrect = 1;
 
     const basePoints = correct * 5;
     const bonusPoints = correct * bonusPerCorrect;
