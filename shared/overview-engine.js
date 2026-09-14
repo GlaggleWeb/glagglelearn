@@ -143,12 +143,31 @@ function glBarColor(pct) {
     const id = CFG.topicId || glTopicIdFromPath();
     if (!id || total === 0) return;
     const done = CFG.lektionen.filter((l) => !!progress[l.file]).length;
+    
+    // Fach aus dem Pfad ableiten (z.B. "mathe" aus "/lektionen/mathe/einmaleins-ueben/")
+    const parts = location.pathname.split('/').filter(Boolean);
+    let subjectRaw = 'lernen';
+    if (parts.length >= 2 && parts[0] === 'lektionen') {
+      subjectRaw = parts[1]; 
+    }
+    const subjectDisplay = subjectRaw.charAt(0).toUpperCase() + subjectRaw.slice(1); // "Mathe", "Deutsch", etc.
+
     let map = {};
     try { map = JSON.parse(localStorage.getItem(TOPIC_PROGRESS_KEY) || '{}') || {}; } catch (e) { map = {}; }
-    map[id] = { done, total, pct: Math.round((done / total) * 100), updated: new Date().toISOString() };
+    
+    // NEU: subject, subjectRaw und title werden jetzt mitgespeichert
+    map[id] = { 
+      done, 
+      total, 
+      pct: Math.round((done / total) * 100), 
+      updated: new Date().toISOString(),
+      subject: subjectDisplay,       
+      subjectRaw: subjectRaw,        
+      title: CFG.title || id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) 
+    };
     try { localStorage.setItem(TOPIC_PROGRESS_KEY, JSON.stringify(map)); } catch (e) {}
   }
-
+ 
   /* ---------- v3: Crystals / Truhen (NUR diese Engine!) ---------- */
   function glReadCrystals() {
     const d = glReadJson(CRYSTAL_KEY);
