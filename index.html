@@ -203,27 +203,70 @@
     }
 
     /* ---------- Fortsetzen-Karte aus glaggleLastLesson ---------- */
+    /* ---------- Fortsetzen-Karte: Zuletzt besuchtes Thema ---------- */
     function fillContinue() {
-      const raw = localStorage.getItem('glaggleLastLesson');
-      if (!raw) return;
+      // 1. Priorität: Explizite "glaggleLastLesson" (falls von lesson-engine.js geschrieben)
+      const rawLast = localStorage.getItem('glaggleLastLesson');
+      if (rawLast) {
+        try {
+          const last = JSON.parse(rawLast);
+          if (last.href) document.getElementById('glContinueCard').setAttribute('href', last.href);
+          if (last.eyebrow) document.getElementById('glContinueEyebrow').textContent = last.eyebrow;
+          if (last.title) document.getElementById('glContinueTitle').textContent = last.title;
+          const value = Number(last.value) || 0;
+          const max = Number(last.max) || 0;
+          if (max > 0) {
+            const pct = Math.round((value / max) * 100);
+            document.getElementById('glContinueFill').style.width = pct + '%';
+            const pctEl = document.getElementById('glContinuePct');
+            pctEl.textContent = pct + '%';
+            pctEl.classList.remove('gl-empty');
+          }
+          return; // Erfolgreich geladen, Funktion beenden
+        } catch (e) {
+          console.warn('Konnte glaggleLastLesson nicht parsen:', e);
+        }
+      }
+
+      // 2. Fallback: glaggleTopicProgress auswerten (das aktuellste, noch nicht zu 100% fertige Thema)
       try {
-        const last = JSON.parse(raw);
-        if (last.href) document.getElementById('glContinueCard').setAttribute('href', last.href);
-        if (last.eyebrow) document.getElementById('glContinueEyebrow').textContent = last.eyebrow;
-        if (last.title) document.getElementById('glContinueTitle').textContent = last.title;
-        const value = Number(last.value) || 0;
-        const max = Number(last.max) || 0;
-        if (max > 0) {
-          const pct = Math.round((value / max) * 100);
-          document.getElementById('glContinueFill').style.width = pct + '%';
-          const pctEl = document.getElementById('glContinuePct');
-          pctEl.textContent = pct + '%';
-          pctEl.classList.remove('gl-empty');
+        const topicProgress = JSON.parse(localStorage.getItem('glaggleTopicProgress') || '{}');
+        const candidates = Object.entries(topicProgress).map(([id, data]) => ({ id, ...data }));
+        
+        // Sortieren: Zuerst unvollständige Themen, dann nach Datum (neueste zuerst)
+        candidates.sort((a, b) => {
+          const timeA = a.updated ? new Date(a.updated).getTime() : 0;
+          const timeB = b.updated ? new Date(b.updated).getTime() : 0;
+          
+          if (a.done < a.total && b.done === b.total) return -1;
+          if (b.done < b.total && a.done === a.total) return 1;
+          return timeB - timeA;
+        });
+
+        if (candidates.length > 0) {
+          const topic = candidates[0];
+          const subject = topic.subject || 'Thema';
+          const title = topic.title || topic.id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+          const subjRaw = topic.subjectRaw || 'mathe';
+          const href = `lektionen/${subjRaw}/${topic.id}/index.html`;
+          
+          document.getElementById('glContinueCard').setAttribute('href', href);
+          document.getElementById('glContinueEyebrow').textContent = subject;
+          document.getElementById('glContinueTitle').textContent = title;
+          
+          if (topic.total > 0) {
+            const pct = topic.pct || 0;
+            document.getElementById('glContinueFill').style.width = pct + '%';
+            const pctEl = document.getElementById('glContinuePct');
+            pctEl.textContent = pct + '%';
+            pctEl.classList.remove('gl-empty');
+          }
         }
       } catch (e) {
-        console.warn('Konnte letzte Lektion nicht laden:', e);
+        console.warn('Konnte glaggleTopicProgress nicht auswerten:', e);
       }
     }
+ 
 
     /* ---------- Lupe: identisches Verhalten wie in den Overviews ---------- */
     const wrap = document.getElementById('glSearchWrap');
