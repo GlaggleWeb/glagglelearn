@@ -70,10 +70,10 @@ function glGetCrystalRange(pct) {
 }
 
 function glBarColor(pct) {
-  if (pct > 90) return '#1b5e20'; // dunkelgrün
-  if (pct > 80) return '#4caf50'; // hellgrün
-  if (pct > 70) return '#ffc107'; // gelb
-  if (pct > 60) return '#ff9800'; // orange
+  if (pct > 90) return '#00B02C'; // dunkelgrün
+  if (pct > 80) return '#87B869'; // hellgrün
+  if (pct > 70) return '#E6D463'; // gelb
+  if (pct > 60) return '#ED6161'; // orange
   return '#f44336'; // rot
 }
 
