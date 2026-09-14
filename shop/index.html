@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Glaggle Learn | Shop</title>
-<link rel="stylesheet" href="../shared/theme.css">
+<link rel="stylesheet" href="shared/theme.css">
 <style>
-  /* Minimale, spezifische Shop-Styles, die auf den bestehenden CSS-Variablen aufbauen */
   .gl-shop-balance-row {
     display: flex;
     justify-content: space-between;
@@ -78,7 +77,6 @@
     font-weight: 600;
     color: var(--gl-danger);
   }
-  /* Animation für erfolgreiche Umwandlung */
   .gl-flash-coin {
     animation: glCoinFlash 0.5s ease;
   }
@@ -87,13 +85,41 @@
     50% { transform: scale(1.05); background: var(--gl-ok-bg); }
     100% { transform: scale(1); }
   }
+  .gl-sync-status {
+    font-size: 0.75rem;
+    color: var(--gl-text-soft);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .gl-sync-status.gl-sync-success {
+    color: var(--gl-primary-shadow);
+  }
+  .gl-sync-status.gl-sync-error {
+    color: var(--gl-danger);
+  }
+  .gl-sync-spinner {
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--gl-border);
+    border-top-color: var(--gl-secondary);
+    border-radius: 50%;
+    animation: glSpin 0.8s linear infinite;
+    display: none;
+  }
+  .gl-sync-status.gl-syncing .gl-sync-spinner {
+    display: inline-block;
+  }
+  @keyframes glSpin {
+    to { transform: rotate(360deg); }
+  }
 </style>
 </head>
 <body>
 
 <div class="gl-home-wrap">
 
-  <!-- ========== NAVBAR: 100% identisch zur Startseite/Overviews ========== -->
   <div class="gl-overview-header">
     <a class="gl-home-brand" href="index.html">
       <img src="https://glaggle.ch/glame/glagglesonne.png" alt="Glaggle Sun">
@@ -103,10 +129,9 @@
     <div class="gl-header-tools">
       <div class="gl-crystal-pill" id="glCrystalPill" title="Deine Crystals">💎 <span id="glCrystalCount">0</span></div>
 
-      <!-- Lupe: 100% identisch zu den Overviews -->
       <div class="gl-subject-search" id="glSearchWrap">
         <div class="gl-subject-search-field">
-          <input type="search" id="glSearch" placeholder="Fach oder Lektion suchen…" autocomplete="off">
+          <input type="search" id="glSearch" placeholder="Fach, Lektion oder Shop suchen…" autocomplete="off">
           <button type="button" class="gl-subject-search-clear" id="glSearchClear" title="Suche leeren" hidden>✕</button>
         </div>
         <button type="button" class="gl-subject-search-btn" id="glSearchBtn" title="Suchen">🔎</button>
@@ -114,16 +139,15 @@
     </div>
   </div>
 
-  <!-- ========== BODY: Content links, Sidebar rechts (mobil: unten) ========== -->
   <div class="gl-home-body">
 
     <div class="gl-overview-content">
       <div class="gl-subject-main">
 
-        <section class="gl-subject-group">
+        <!-- Shop als durchsuchbare Section -->
+        <section class="gl-subject-group" id="glSectionShop" data-search="shop glaggle coins crystals umwandeln wechseln tauschen">
           <h2 class="gl-subject-group-label">Glaggle Shop</h2>
           
-          <!-- Guthaben-Anzeige -->
           <div class="gl-node-box gl-static" style="margin-bottom: 24px;">
             <div class="gl-shop-balance-row">
               <div class="gl-shop-balance-item">
@@ -147,12 +171,11 @@
             </div>
           </div>
 
-          <!-- Umwandlungs-Karte -->
           <div class="gl-node-box gl-static gl-shop-convert-card" id="glConvertCard">
             <div class="gl-node-icon gl-tone-mathe">💱</div>
             <div>
               <div class="gl-node-title" style="font-size: 1.1rem; margin-bottom: 8px;">Crystals in Coins umwandeln</div>
-              <div class="gl-node-sub" style="font-size: 0.9rem;">Kurs: 10 Crystals = 1 Glaggle Coin</div>
+              <div class="gl-node-sub" style="font-size: 0.9rem;">Kurs: 10 Crystals = 1 Glaggle Coin<br>Wird zu glaggle.ch synchronisiert</div>
             </div>
             
             <button id="glConvertBtn" class="gl-option gl-convert-btn">
@@ -160,13 +183,16 @@
             </button>
             
             <div id="glConvertMessage" class="gl-convert-message"></div>
+            <div id="glSyncStatus" class="gl-sync-status">
+              <div class="gl-sync-spinner"></div>
+              <span id="glSyncText">Bereit zur Synchronisation</span>
+            </div>
           </div>
 
         </section>
       </div>
     </div>
 
-    <!-- ========== SIDEBAR: LP, Fächer, HOME (statt Shop), Settings ========== -->
     <nav class="gl-sidebar" aria-label="Schnellnavigation">
       <div class="gl-lp-badge" title="Deine Learn Points">
         <img src="shared/lp.png" alt="" onerror="this.remove()">
@@ -202,7 +228,6 @@
 
       <div class="gl-sidebar-divider"></div>
 
-      <!-- HIER: Home-Icon statt Shop-Icon, da wir uns im Shop befinden -->
       <a class="gl-sidebar-icon gl-tone-mathe" href="index.html" title="Startseite">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -227,6 +252,15 @@
   (function () {
     'use strict';
 
+    // API-Konfiguration - ANPASSEN an deinen glaggle.ch Backend-Endpoint
+    const GLAGGLE_API_BASE = 'https://glaggle.ch/api'; // Oder dein lokaler Endpoint
+    const GLAGGLE_COINS_ENDPOINT = `${GLAGGLE_API_BASE}/coins/add`;
+    
+    // User-ID oder Token für die Authentifizierung (muss von deinem Login-System kommen)
+    function getUserId() {
+      return localStorage.getItem('glaggleUserId') || null;
+    }
+
     function readJson(key) {
       try {
         const o = JSON.parse(localStorage.getItem(key) || '{}');
@@ -238,29 +272,87 @@
       return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
+    /* ---------- Synchronisation mit glaggle.ch ---------- */
+    async function syncCoinsToGlaggle(amount) {
+      const syncStatus = document.getElementById('glSyncStatus');
+      const syncText = document.getElementById('glSyncText');
+      const userId = getUserId();
+
+      if (!userId) {
+        syncStatus.classList.add('gl-sync-error');
+        syncText.textContent = 'Nicht eingeloggt';
+        return false;
+      }
+
+      syncStatus.classList.add('gl-syncing');
+      syncStatus.classList.remove('gl-sync-success', 'gl-sync-error');
+      syncText.textContent = 'Synchronisiere...';
+
+      try {
+        const response = await fetch(GLAGGLE_COINS_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userId}` // Oder dein Auth-Header
+          },
+          body: JSON.stringify({
+            coins: amount,
+            source: 'glaggle-learn',
+            timestamp: new Date().toISOString()
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        syncStatus.classList.add('gl-sync-success');
+        syncText.textContent = `✓ ${amount} Coins zu glaggle.ch hinzugefügt`;
+        
+        // Erfolgsmeldung nach 3 Sekunden zurücksetzen
+        setTimeout(() => {
+          syncStatus.classList.remove('gl-sync-success');
+          syncText.textContent = 'Bereit zur Synchronisation';
+        }, 3000);
+
+        return true;
+      } catch (error) {
+        console.error('Coin-Synchronisation fehlgeschlagen:', error);
+        syncStatus.classList.add('gl-sync-error');
+        syncText.textContent = 'Fehler bei Synchronisation';
+        
+        // Fehler nach 3 Sekunden zurücksetzen
+        setTimeout(() => {
+          syncStatus.classList.remove('gl-sync-error');
+          syncText.textContent = 'Bereit zur Synchronisation';
+        }, 3000);
+
+        return false;
+      } finally {
+        syncStatus.classList.remove('gl-syncing');
+      }
+    }
+
     /* ---------- UI Aktualisieren ---------- */
     function updateShopUI() {
-      // 1. Daten lesen
       const crystalData = readJson('glaggleCrystalData');
       const crystals = typeof crystalData.total === 'number' ? crystalData.total : 0;
       const coins = parseInt(localStorage.getItem('glaggleCoins') || '0', 10);
       const lp = parseInt(localStorage.getItem('glaggleLearnPoints'), 10);
 
-      // 2. Header & Sidebar Pills befüllen
       document.getElementById('glCrystalCount').textContent = crystals;
       document.getElementById('glSidebarLP').textContent = Number.isFinite(lp) ? lp : 0;
-
-      // 3. Shop-Anzeige aktualisieren
       document.getElementById('shopCrystalDisplay').textContent = crystals;
       document.getElementById('shopCoinDisplay').textContent = coins;
 
-      // 4. Button-Status prüfen
       const btn = document.getElementById('glConvertBtn');
       const msg = document.getElementById('glConvertMessage');
       
       if (crystals >= 10) {
         btn.disabled = false;
-        btn.textContent = '10 💎 in 1 🪙 umwandeln';
+        btn.textContent = '10  in 1 🪙 umwandeln';
         msg.textContent = '';
       } else {
         btn.disabled = true;
@@ -269,33 +361,38 @@
       }
     }
 
-    /* ---------- Umwandlungs-Logik ---------- */
-    document.getElementById('glConvertBtn').addEventListener('click', function() {
+    /* ---------- Umwandlungs-Logik mit Sync ---------- */
+    document.getElementById('glConvertBtn').addEventListener('click', async function() {
       const crystalData = readJson('glaggleCrystalData');
       let crystals = typeof crystalData.total === 'number' ? crystalData.total : 0;
       let coins = parseInt(localStorage.getItem('glaggleCoins') || '0', 10);
 
       if (crystals >= 10) {
-        // Werte anpassen
+        // Lokal umwandeln
         crystals -= 10;
         coins += 1;
 
-        // Speichern
+        // Lokal speichern
         crystalData.total = crystals;
         localStorage.setItem('glaggleCrystalData', JSON.stringify(crystalData));
         localStorage.setItem('glaggleCoins', coins.toString());
 
-        // Visuelles Feedback
-        const card = document.getElementById('glConvertCard');
-        card.classList.add('gl-flash-coin');
-        setTimeout(() => card.classList.remove('gl-flash-coin'), 500);
+        // Zu glaggle.ch synchronisieren
+        const syncSuccess = await syncCoinsToGlaggle(1);
+
+        if (syncSuccess) {
+          // Visuelles Feedback
+          const card = document.getElementById('glConvertCard');
+          card.classList.add('gl-flash-coin');
+          setTimeout(() => card.classList.remove('gl-flash-coin'), 500);
+        }
 
         // UI neu rendern
         updateShopUI();
       }
     });
 
-    /* ---------- Lupe: identisches Verhalten wie in den Overviews ---------- */
+    /* ---------- Lupe: Suche erweitert für Shop ---------- */
     const wrap = document.getElementById('glSearchWrap');
     const btn = document.getElementById('glSearchBtn');
     const input = document.getElementById('glSearch');
@@ -303,8 +400,21 @@
 
     function applyQuery(value) {
       clear.hidden = value === '';
-      // Hinweis: Im Shop filtert die Suche nichts, aber das Verhalten (Auf/Zu) bleibt identisch
+      const q = norm(value.trim());
+      
+      // Durchsuchbare Elemente finden (Sections und Shop-Section)
+      document.querySelectorAll('.gl-subject-group').forEach(function (sec) {
+        const items = sec.querySelectorAll('[data-search]');
+        let any = false;
+        items.forEach(function (el) {
+          const hit = q === '' || norm(el.getAttribute('data-search')).includes(q);
+          el.classList.toggle('gl-hidden', !hit);
+          if (hit) any = true;
+        });
+        sec.classList.toggle('gl-hidden', !any);
+      });
     }
+
     function open() { wrap.classList.add('gl-open'); input.focus(); }
     function close(reset) {
       if (reset) { input.value = ''; applyQuery(''); }
@@ -322,7 +432,6 @@
     /* ---------- Initialisierung ---------- */
     updateShopUI();
     window.addEventListener('pageshow', function () { updateShopUI(); });
-    // Höre auf Storage-Änderungen in anderen Tabs
     window.addEventListener('storage', function (e) {
       if (e.key === 'glaggleCrystalData' || e.key === 'glaggleCoins') {
         updateShopUI();
