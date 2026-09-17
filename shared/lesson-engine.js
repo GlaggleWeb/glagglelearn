@@ -3,13 +3,14 @@
    Rendert eine Lektion aus einem simplen JS-Array. Unterstützte Typen:
 
    { type: 'info',   title: '...', text: '...' }
-   { type: 'mc',      question: '...', options: ['A','B','C'], correct: 1 }
-   { type: 'blank',   question: '...', answer: 'wort' }  // Lückentext
+   { type: 'mc',     question: '...', options: ['A','B','C'], correct: 1 }
+   { type: 'blank',  question: '...', answer: 'wort' }
+   { type: 'click',  question: 'Klicke alle Nomen',
+                     text: 'Der Hund rennt durch den Park.',
+                     answers: ['Hund', 'Park'],
+                     color: '#ffeb3b' }   // 2 LP pro richtig markiertes Wort
 
-   Benutzung auf einer Lektionsseite (siehe lektionen/mathe/lektion1.html
-   für ein Minimalbeispiel — die Seite selbst enthält NUR noch das
-   steps-Array und einen Aufruf von GlaggleLesson.mount(...)):
-
+   Benutzung:
      <script src="../../shared/lesson-engine.js" defer></script>
      <script>
        GlaggleLesson.mount({
@@ -17,10 +18,6 @@
          backHref: '../index.html'
        });
      </script>
-
-   Alles Weitere — DOM-Grundgerüst, Buttons, Fortschritt, Feedback,
-   Ergebnisseite mit Animation, LP-Speicherung in localStorage — übernimmt
-   diese Datei.
    ========================================================================== */
 
 /* ---------- Lustige Sprüche für die Ergebnisseite ---------- */
@@ -75,15 +72,10 @@ function glAddLP(amount) {
   return total;
 }
 
-/* ---------- Lektions-Fortschritt (localStorage) ----------
-   Speichert pro Lektionsseite (Dateiname), ob sie gemacht wurde und mit
-   wie viel Prozent. Wird zentral hier gepflegt, damit jede Übersichtsseite
-   (z.B. die Einmaleins-Lektionsliste) den Fortschritt lesen kann, ohne
-   dass jede einzelne Lektionsseite das selbst implementieren muss. */
+/* ---------- Lektions-Fortschritt (localStorage) ---------- */
 const GL_PROGRESS_KEY = 'glaggleLessonProgress';
 
 function glGetCurrentLessonFile() {
-  // Dateiname aus der aktuellen URL, z.B. "lektion-einmaleins-2.html"
   const path = window.location.pathname;
   return path.substring(path.lastIndexOf('/') + 1) || 'unbekannt.html';
 }
@@ -116,14 +108,11 @@ function glFormatTime(totalSeconds) {
   return min > 0 ? `${min}m ${sec}s` : `${sec}s`;
 }
 
-/* Zählt ein Element von 0 auf einen Zielwert hoch, ca. `duration` ms lang.
-   formatFn formatiert den jeweiligen Zwischenwert (z.B. mit "%" oder "LP"). */
 function glCountUp(el, target, duration, formatFn) {
   const start = performance.now();
   function tick(now) {
     const elapsed = now - start;
     const progress = Math.min(1, elapsed / duration);
-    // easeOutCubic — schnell am Anfang, sanft einlaufend am Ende
     const eased = 1 - Math.pow(1 - progress, 3);
     const current = Math.round(target * eased);
     el.innerHTML = formatFn(current);
@@ -143,14 +132,17 @@ class GlaggleLesson {
     this.steps = steps;
     this.current = 0;
     this.correctCount = 0;
+    this.stepPoints = []; // NEU: LP pro Schritt (5 bei mc/blank, 2/Wort bei click)
     this.startTime = Date.now();
     this.onComplete = options.onComplete || (() => {});
     this.progressEl = options.progressEl || null;
     this.buttonsContainer = options.buttonsContainer || null;
-    this.wrapEl = options.wrapEl || null; // für Hintergrund-Flash grün/rot
+    this.wrapEl = options.wrapEl || null;
 
-    // Nur Fragen zählen (mc/blank), nicht info-Folien
-    this.totalQuestions = steps.filter(s => s.type === 'mc' || s.type === 'blank').length;
+    // Nur Fragen zählen (mc/blank/click), nicht info-Folien
+    this.totalQuestions = steps.filter(s =>
+      s.type === 'mc' || s.type === 'blank' || s.type === 'click'
+    ).length;
 
     this.renderStep();
   }
@@ -175,13 +167,19 @@ class GlaggleLesson {
     const step = this.steps[this.current];
     if (!step) {
       const elapsedSeconds = Math.round((Date.now() - this.startTime) / 1000);
-      this.onComplete(this.correctCount, this.totalQuestions, elapsedSeconds);
+      this.onComplete(
+        this.correctCount,
+        this.totalQuestions,
+        elapsedSeconds,
+        this.stepPoints
+      );
       return;
     }
 
     if (step.type === 'info') this.renderInfo(step);
     else if (step.type === 'mc') this.renderMC(step);
     else if (step.type === 'blank') this.renderBlank(step);
+    else if (step.type === 'click') this.renderClick(step);
     else console.warn('Unbekannter Lektions-Typ:', step.type);
   }
 
@@ -210,62 +208,31 @@ class GlaggleLesson {
     return btn;
   }
 
-  /* Ersetzt den Prüfen-Button durch ein Feedback-Banner + Weiter-Button.
-     isCorrect steuert Text/Farbe des Banners und den Hintergrund-Flash. */
-   
-showFeedback(isCorrect, correctAnswerText) {
-  // Hintergrund grün/rot setzen
-  this.setFlash(isCorrect ? 'ok' : 'bad');
+  /* GEÄNDERT: Nimmt jetzt einen beliebigen Feedback-Text entgegen. */
+  showFeedback(isCorrect, message) {
+    this.setFlash(isCorrect ? 'ok' : 'bad');
+    this.clearButtons();
 
-  // Prüfen-Button entfernen
-  this.clearButtons();
+    const audio = isCorrect ? GL_SOUNDS.true : GL_SOUNDS.false;
+    audio.currentTime = 0;
+    audio.play().catch((error) => {
+      console.warn(`${isCorrect ? 'true.aac' : 'false.aac'} konnte nicht abgespielt werden:`, error);
+    });
 
-  // Sound wiederverwenden
-  const audio = isCorrect ? GL_SOUNDS.true : GL_SOUNDS.false;
+    const banner = document.createElement('div');
+    banner.className =
+      'gl-feedback-banner ' +
+      (isCorrect ? 'gl-feedback-ok' : 'gl-feedback-bad');
 
-  // Sound von vorne starten
-  audio.currentTime = 0;
+    banner.innerHTML = isCorrect
+      ? `<span class="gl-feedback-icon">✅</span><span>${message || 'Richtig!'}</span>`
+      : `<span class="gl-feedback-icon">❌</span><span>${message || 'Leider falsch.'}</span>`;
 
-  audio.play().catch((error) => {
-    console.warn(
-      `${isCorrect ? 'true.aac' : 'false.aac'} konnte nicht abgespielt werden:`,
-      error
-    );
-  });
+    this.buttonsContainer.appendChild(banner);
 
-  // Feedback-Banner erstellen
-  const banner = document.createElement('div');
-
-  banner.className =
-    'gl-feedback-banner ' +
-    (isCorrect ? 'gl-feedback-ok' : 'gl-feedback-bad');
-
-  banner.innerHTML = isCorrect
-    ? `
-      <span class="gl-feedback-icon">✅</span>
-      <span>Richtig!</span>
-    `
-    : `
-      <span class="gl-feedback-icon">❌</span>
-      <span>Leider falsch — richtig wäre: ${correctAnswerText}</span>
-    `;
-
-  this.buttonsContainer.appendChild(banner);
-
-  // Weiter-Button erstellen
-  const nextBtn = this.addButton(
-    'Weiter',
-    'primary',
-    'glNext',
-    false
-  );
-
-  nextBtn.addEventListener('glaggle-click', () => {
-    this.next();
-  });
-}
-
-
+    const nextBtn = this.addButton('Weiter', 'primary', 'glNext', false);
+    nextBtn.addEventListener('glaggle-click', () => this.next());
+  }
 
   renderInfo(step) {
     this.container.innerHTML = `
@@ -274,10 +241,8 @@ showFeedback(isCorrect, correctAnswerText) {
         <p class="gl-step-text">${step.text}</p>
       </div>
     `;
-
     this.clearButtons();
     const nextBtn = this.addButton('Weiter', 'primary', 'glNext', false);
-
     nextBtn.addEventListener('glaggle-click', () => this.next());
   }
 
@@ -290,7 +255,6 @@ showFeedback(isCorrect, correctAnswerText) {
     `;
 
     const optionsEl = this.container.querySelector('#glOptions');
-
     let selected = null;
     let checked = false;
     const optionButtons = [];
@@ -322,8 +286,12 @@ showFeedback(isCorrect, correctAnswerText) {
       if (!isCorrect) optionButtons[step.correct].classList.add('gl-correct');
       optionButtons.forEach(b => b.disabled = true);
       if (isCorrect) this.correctCount++;
+      this.stepPoints.push(isCorrect ? 5 : 0);
 
-      this.showFeedback(isCorrect, step.options[step.correct]);
+      const msg = isCorrect
+        ? 'Richtig!'
+        : `Leider falsch — richtig wäre: ${step.options[step.correct]}`;
+      this.showFeedback(isCorrect, msg);
     });
   }
 
@@ -336,7 +304,6 @@ showFeedback(isCorrect, correctAnswerText) {
     `;
 
     const input = this.container.querySelector('#glBlankInput');
-
     this.clearButtons();
     const checkBtn = this.addButton('Prüfen', 'secondary', 'glCheck', true);
 
@@ -347,9 +314,13 @@ showFeedback(isCorrect, correctAnswerText) {
       answered = true;
       const isCorrect = input.value.trim().toLowerCase() === step.answer.trim().toLowerCase();
       if (isCorrect) this.correctCount++;
+      this.stepPoints.push(isCorrect ? 5 : 0);
       input.disabled = true;
 
-      this.showFeedback(isCorrect, step.answer);
+      const msg = isCorrect
+        ? 'Richtig!'
+        : `Leider falsch — richtig wäre: ${step.answer}`;
+      this.showFeedback(isCorrect, msg);
     };
 
     input.addEventListener('input', () => {
@@ -360,22 +331,129 @@ showFeedback(isCorrect, correctAnswerText) {
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !answered) check(); });
   }
 
-  /* Rendert die animierte, bunte Ergebnisseite und speichert die LP.
-     lessonEl/buttonsEl: DOM-Container. finishHref: Ziel des Abschluss-Buttons. */
-  static renderResults(lessonEl, buttonsEl, correct, totalQuestions, elapsedSeconds, finishHref) {
-    const pct = totalQuestions > 0 ? Math.round((correct / totalQuestions) * 100) : 0;
+  /* ===== NEU: Fragetyp "click" ===== */
+  renderClick(step) {
+    const text = step.text || '';
+    const color = step.color || '#ffeb3b';
+    // Antworten normalisieren (lowercase, ohne Satzzeichen)
+    const normalize = (s) => s.toLowerCase().replace(/[^a-zäöüß0-9]/gi, '');
+    const answers = (step.answers || []).map(normalize);
 
-    // Lektions-Fortschritt speichern: ob gemacht + wie viel Prozent richtig.
-    // Läuft zentral hier, bei jedem Abschluss, unabhängig von der Punktzahl.
+    this.container.innerHTML = `
+      <div class="gl-step">
+        <h2>${step.question}</h2>
+        <p class="gl-click-text" id="glClickText"></p>
+      </div>
+    `;
+
+    const textEl = this.container.querySelector('#glClickText');
+    const wordSpans = [];
+
+    // Text in Wörter + Trennzeichen splitten (Trennzeichen bleiben erhalten)
+    const tokens = text.split(/(\s+|[.,!?;:])/);
+
+    tokens.forEach((token) => {
+      // Leerzeichen und Satzzeichen einfach als Text einfügen
+      if (/^(\s+|[.,!?;:])$/.test(token) || token === '') {
+        textEl.appendChild(document.createTextNode(token));
+        return;
+      }
+
+      const span = document.createElement('span');
+      span.className = 'gl-click-word';
+      span.innerText = token;
+      span.dataset.word = normalize(token);
+
+      span.addEventListener('click', () => {
+        // Toggle: markieren / entmarkieren
+        if (span.classList.contains('gl-word-marked')) {
+          span.classList.remove('gl-word-marked');
+          span.style.backgroundColor = '';
+        } else {
+          span.classList.add('gl-word-marked');
+          span.style.backgroundColor = color;
+        }
+
+        // Prüfen-Button nur aktivieren wenn mind. 1 Wort markiert ist
+        const anyMarked = textEl.querySelectorAll('.gl-word-marked').length > 0;
+        if (anyMarked) checkBtn.removeAttribute('disabled');
+        else checkBtn.setAttribute('disabled', '');
+      });
+
+      textEl.appendChild(span);
+      wordSpans.push(span);
+    });
+
+    this.clearButtons();
+    const checkBtn = this.addButton('Prüfen', 'secondary', 'glCheck', true);
+
+    let checked = false;
+
+    checkBtn.addEventListener('glaggle-click', () => {
+      if (checked) return;
+      checked = true;
+
+      let correctWords = 0;
+      let wrongMarked = 0;
+      let missed = 0;
+
+      // Jedes anklickbare Wort auswerten
+      wordSpans.forEach(span => {
+        const isAnswer = answers.includes(span.dataset.word) && span.dataset.word !== '';
+        const isMarked = span.classList.contains('gl-word-marked');
+
+        if (isAnswer && isMarked) {
+          span.classList.add('gl-word-correct');
+          span.style.backgroundColor = '#a8e6a3'; // grün
+          correctWords++;
+        } else if (isAnswer && !isMarked) {
+          span.classList.add('gl-word-missed');
+          span.style.backgroundColor = '#ffd27f'; // orange = hättest du markieren sollen
+          missed++;
+        } else if (!isAnswer && isMarked) {
+          span.classList.add('gl-word-wrong');
+          span.style.backgroundColor = '#ffb3b3'; // rot = falsch markiert
+          wrongMarked++;
+        }
+        span.style.cursor = 'default';
+      });
+
+      const totalToFind = answers.length;
+      const isFullyCorrect = correctWords === totalToFind && wrongMarked === 0;
+
+      if (isFullyCorrect) this.correctCount++;
+      // 2 LP pro richtig markiertes Wort
+      this.stepPoints.push(correctWords * 2);
+
+      // Feedback-Text zusammenbauen
+      let msg;
+      if (isFullyCorrect) {
+        msg = `Perfekt! Alle ${totalToFind} Wörter richtig markiert.`;
+      } else {
+        const parts = [];
+        if (correctWords > 0) parts.push(`${correctWords} richtig`);
+        if (missed > 0) parts.push(`${missed} vergessen`);
+        if (wrongMarked > 0) parts.push(`${wrongMarked} zu viel`);
+        msg = `${parts.join(', ')} markiert.`;
+      }
+
+      this.showFeedback(isFullyCorrect, msg);
+    });
+  }
+
+  /* ===== GEÄNDERT: LP kommen jetzt aus stepPoints statt correct * 5 ===== */
+  static renderResults(lessonEl, buttonsEl, correct, totalQuestions, elapsedSeconds, finishHref, stepPoints) {
+    const pct = totalQuestions > 0 ? Math.round((correct / totalQuestions) * 100) : 0;
     glSaveLessonProgress(pct);
 
-    // LP-Berechnung: 5 LP pro richtige Antwort + Zeit-Bonus pro Frage
+    // Basis-LP aus allen gesammelten Schritt-Punkten
+    const basePoints = stepPoints.reduce((sum, p) => sum + p, 0);
+
     const avgSecPerQuestion = totalQuestions > 0 ? elapsedSeconds / totalQuestions : 999;
     let bonusPerCorrect = 0;
     if (avgSecPerQuestion < 10) bonusPerCorrect = 3;
     else if (avgSecPerQuestion < 20) bonusPerCorrect = 1;
 
-    const basePoints = correct * 5;
     const bonusPoints = correct * bonusPerCorrect;
     const totalLP = basePoints + bonusPoints;
     const newTotalLP = glAddLP(totalLP);
@@ -415,19 +493,16 @@ showFeedback(isCorrect, correctAnswerText) {
 
     lpLabelEl.textContent = bonusPoints > 0 ? `+${bonusPoints} Bonus` : 'Learn Points';
 
-    const DURATION = 2000; // ca. 2 Sekunden pro Kästchen, wie gewünscht
+    const DURATION = 2000;
 
-    // Zeit-Kästchen zählt in Sekunden hoch und wird am Ende formatiert
     glCountUp(timeEl, elapsedSeconds, DURATION, (v) => glFormatTime(v));
     glCountUp(pctEl, pct, DURATION, (v) => `${v}%`);
     glCountUp(lpEl, totalLP, DURATION, (v) => `${lpIcon}${v} LP`);
 
-    // Glüh-Effekt erst NACH dem Hochzählen aktivieren
     setTimeout(() => {
       lessonEl.querySelectorAll('.gl-result-box').forEach(box => box.classList.add('gl-glow'));
     }, DURATION + 100);
 
-    // Gesamt-LP ebenfalls sanft von "vorher" auf "nachher" hochzählen
     const prevTotal = newTotalLP - totalLP;
     glCountUp(totalLpEl, newTotalLP, DURATION, (v) => String(Math.max(prevTotal, v)));
 
@@ -443,15 +518,6 @@ showFeedback(isCorrect, correctAnswerText) {
     });
   }
 
-  /* Baut das komplette Lektions-DOM-Grundgerüst in `target` auf und startet
-     die Lektion, sobald die Web Components registriert sind. Damit braucht
-     eine einzelne Lektionsseite nur noch:
-       <div id="glLessonRoot"></div>
-       <script src="../../shared/lesson-engine.js" defer></script>
-       <script>
-         GlaggleLesson.mount({ target: document.getElementById('glLessonRoot'),
-                                steps: [...], backHref: '../index.html' });
-       </script> */
   static mount(options) {
     const target = options.target || document.body;
     const backHref = options.backHref || '../index.html';
@@ -482,8 +548,11 @@ showFeedback(isCorrect, correctAnswerText) {
         progressEl,
         buttonsContainer: buttonsEl,
         wrapEl,
-        onComplete: (correct, totalQuestions, elapsedSeconds) => {
-          GlaggleLesson.renderResults(lessonEl, buttonsEl, correct, totalQuestions, elapsedSeconds, backHref);
+        onComplete: (correct, totalQuestions, elapsedSeconds, stepPoints) => {
+          GlaggleLesson.renderResults(
+            lessonEl, buttonsEl, correct, totalQuestions,
+            elapsedSeconds, backHref, stepPoints
+          );
         }
       });
     };
