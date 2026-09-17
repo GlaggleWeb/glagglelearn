@@ -1275,3 +1275,28 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
   .gl-sidebar-icon { width: 42px; height: 42px; }
   .gl-sidebar-icon.gl-settings { margin-bottom: 0; }
 }
+
+/* ---- Fragetyp: Click ---- */
+.gl-click-text {
+  font-size: 1.2rem;
+  line-height: 2;
+  padding: 1rem 0;
+  user-select: none;
+}
+
+.gl-click-word {
+  display: inline-block;
+  padding: 2px 6px;
+  margin: 0 1px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.gl-click-word:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.gl-click-word:active {
+  transform: scale(0.96);
+}
