@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nomen — Deutsch Grundlagen | Glaggle Learn</title>
+<link rel="stylesheet" href="../../../shared/theme.css">
+<script src="../../../shared/components.js" defer></script>
+<script src="../../../shared/lesson-engine.js" defer></script>
+</head>
+<body>
+<div id="glLessonRoot"></div>
+<script>
+window.addEventListener("load", function() {
+setTimeout(function() {
+GlaggleLesson.mount({
+target: document.getElementById('glLessonRoot'),
+backHref: 'https://learn.glaggle.ch/lektionen/deutsch/nomen-erkennen/',
+steps: [
+{
+type: 'info',
+title: '👋 Willkommen zur Nomen-Lektion',
+text: 'In dieser Lektion lernst du, wie man Nomen erkennt und warum sie gross geschrieben werden.'
+},
+{
+type: 'info',
+title: '📚 Was sind Nomen?',
+text: 'Nomen (auch Hauptwörter genannt) bezeichnen Personen, Tiere, Pflanzen, Dinge oder Begriffe. Jeder Nomen wird in der deutschen Sprache GROSS geschrieben!'
+},
+{
+type: 'click',
+question: 'Klicke alle Nomen im folgenden Satz an:',
+text: 'Der kleine Hund spielt mit dem Ball im Garten.',
+answers: ['Hund', 'Ball', 'Garten'],
+color: '#ffeb3b' // gelbe Markierung für Nomen
+},
+{
+type: 'click',
+question: 'Finde alle Nomen in diesem Text:',
+text: 'Die Katze schläft auf dem Teppich neben dem Fenster.',
+answers: ['Katze', 'Teppich', 'Fenster'],
+color: '#ffeb3b'
+},
+{
+type: 'mc',
+question: 'Welches Wort ist ein Nomen?',
+options: ['schnell', 'Katze', 'läuft'],
+correct: 1
+},
+{
+type: 'blank',
+question: 'Ergänze: Ein _____ liest ein Buch.',
+answer: 'Mann'
+},
+{
+type: 'click',
+question: 'Markiere alle Nomen:',
+text: 'Anna kauft Blumen beim Marktstand.',
+answers: ['Anna', 'Blumen', 'Marktstand'],
+color: '#ffeb3b'
+},
+{
+type: 'mc',
+question: 'Warum schreibt man Nomen gross?',
+options: ['Weil es hübscher aussieht', 'Weil es die deutsche Rechtschreibung verlangt', 'Weil sie wichtig sind'],
+correct: 1
+},
+{
+type: 'blank',
+question: 'Ergänze: Der _____ bellt laut.',
+answer: 'Hund'
+},
+{
+type: 'click',
+question: 'Welche Wörter sind Nomen? (Mehrere möglich)',
+text: 'Heute geht er in die Stadt zum Einkaufen.',
+answers: ['Stadt', 'Einkaufen'],
+color: '#ffeb3b'
+},
+{
+type: 'info',
+title: '💡 Tipp zum Merken',
+text: 'Nomen kannst du oft mit Artikel (der, die, das) oder einem Zahlwort (ein, eine) voranstellen testen: "der Tisch", "eine Blume", "ein Auto".'
+},
+{
+type: 'blank',
+question: 'Ergänze mit einem Nomen: Ich sehe einen _____ am Himmel.',
+answer: 'Vogel'
+},
+{
+type: 'click',
+question: 'Finde alle Nomen:',
+text: 'Der Lehrer erklärt die Aufgabe den Schülern.',
+answers: ['Lehrer', 'Aufgabe', 'Schülern'],
+color: '#ffeb3b'
+},
+{
+type: 'mc',
+question: 'Was ist KEIN Nomen?',
+options: ['Haus', 'laufen', 'Freude'],
+correct: 1
+},
+{
+type: 'blank',
+question: 'Ergänze: Das _____ ist blau.',
+answer: 'Himmel'
+}
+]
+});
+}, 500);
+});
+</script>
+</body>
+</html>
