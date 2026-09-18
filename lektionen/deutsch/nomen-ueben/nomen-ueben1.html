@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nomen — Deutsch Grundlagen | Glaggle Learn</title>
+<title>Nomen 1 — Was sind Nomen? | Glaggle Learn</title>
 <link rel="stylesheet" href="../../../shared/theme.css">
 <script src="../../../shared/components.js" defer></script>
 <script src="../../../shared/lesson-engine.js" defer></script>
@@ -17,94 +17,137 @@ GlaggleLesson.mount({
 target: document.getElementById('glLessonRoot'),
 backHref: 'https://learn.glaggle.ch/lektionen/deutsch/nomen-erkennen/',
 steps: [
-{
-type: 'info',
-title: '👋 Willkommen zur Nomen-Lektion',
-text: 'In dieser Lektion lernst du, wie man Nomen erkennt und warum sie gross geschrieben werden.'
-},
-{
-type: 'info',
-title: '📚 Was sind Nomen?',
-text: 'Nomen (auch Hauptwörter genannt) bezeichnen Personen, Tiere, Pflanzen, Dinge oder Begriffe. Jeder Nomen wird in der deutschen Sprache GROSS geschrieben!'
-},
-{
-type: 'click',
-question: 'Klicke alle Nomen im folgenden Satz an:',
-text: 'Der kleine Hund spielt mit dem Ball im Garten.',
-answers: ['Hund', 'Ball', 'Garten'],
-color: '#ffeb3b' // gelbe Markierung für Nomen
-},
-{
-type: 'click',
-question: 'Finde alle Nomen in diesem Text:',
-text: 'Die Katze schläft auf dem Teppich neben dem Fenster.',
-answers: ['Katze', 'Teppich', 'Fenster'],
-color: '#ffeb3b'
-},
-{
-type: 'mc',
-question: 'Welches Wort ist ein Nomen?',
-options: ['schnell', 'Katze', 'läuft'],
-correct: 1
-},
-{
-type: 'blank',
-question: 'Ergänze: Ein _____ liest ein Buch.',
-answer: 'Mann'
-},
-{
-type: 'click',
-question: 'Markiere alle Nomen:',
-text: 'Anna kauft Blumen beim Marktstand.',
-answers: ['Anna', 'Blumen', 'Marktstand'],
-color: '#ffeb3b'
-},
-{
-type: 'mc',
-question: 'Warum schreibt man Nomen gross?',
-options: ['Weil es hübscher aussieht', 'Weil es die deutsche Rechtschreibung verlangt', 'Weil sie wichtig sind'],
-correct: 1
-},
-{
-type: 'blank',
-question: 'Ergänze: Der _____ bellt laut.',
-answer: 'Hund'
-},
-{
-type: 'click',
-question: 'Welche Wörter sind Nomen? (Mehrere möglich)',
-text: 'Heute geht er in die Stadt zum Einkaufen.',
-answers: ['Stadt', 'Einkaufen'],
-color: '#ffeb3b'
-},
-{
-type: 'info',
-title: '💡 Tipp zum Merken',
-text: 'Nomen kannst du oft mit Artikel (der, die, das) oder einem Zahlwort (ein, eine) voranstellen testen: "der Tisch", "eine Blume", "ein Auto".'
-},
-{
-type: 'blank',
-question: 'Ergänze mit einem Nomen: Ich sehe einen _____ am Himmel.',
-answer: 'Vogel'
-},
-{
-type: 'click',
-question: 'Finde alle Nomen:',
-text: 'Der Lehrer erklärt die Aufgabe den Schülern.',
-answers: ['Lehrer', 'Aufgabe', 'Schülern'],
-color: '#ffeb3b'
-},
-{
-type: 'mc',
-question: 'Was ist KEIN Nomen?',
-options: ['Haus', 'laufen', 'Freude'],
-correct: 1
-},
-{
-type: 'blank',
-question: 'Ergänze: Das _____ ist blau.',
-answer: 'Himmel'
-}
+  {
+    "type": "info",
+    "title": "👋 Willkommen zur Nomen-Lektion",
+    "text": "In dieser Lektion lernst du ganz von Anfang an, was Nomen sind, woran du sie erkennst und warum man sie im Deutschen immer gross schreibt."
+  },
+  {
+    "type": "info",
+    "title": "📚 Was sind Nomen?",
+    "text": "Nomen (auch Hauptwörter oder Substantive genannt) sind Wörter, mit denen wir Dinge benennen. Sie sagen uns, WER oder WAS etwas ist. Nomen werden im Deutschen IMMER gross geschrieben!"
+  },
+  {
+    "type": "info",
+    "title": "🧑🐶🌳 Wofür stehen Nomen?",
+    "text": "Nomen bezeichnen:\n• Menschen: der Lehrer, die Mutter, das Kind\n• Tiere: der Hund, die Katze, das Pferd\n• Pflanzen: die Blume, der Baum, das Gras\n• Dinge: der Tisch, die Lampe, das Auto\n• Gedachtes und Gefühle (Begriffe): die Freude, der Traum, die Angst"
+  },
+  {
+    "type": "info",
+    "title": "💡 Tipp 1: Der Artikel-Test",
+    "text": "Vor ein Nomen kannst du fast immer einen Artikel setzen: der, die, das (bestimmt) oder ein, eine (unbestimmt).\n\n✅ der Tisch, die Blume, das Auto, ein Baum\n❌ der schnell, die laufen, das blau – das klingt falsch, also sind das keine Nomen."
+  },
+  {
+    "type": "info",
+    "title": "💡 Tipp 2: Der Einzahl-Mehrzahl-Test",
+    "text": "Die meisten Nomen haben eine Einzahl und eine Mehrzahl:\n\nder Hund → die Hunde\ndie Blume → die Blumen\ndas Kind → die Kinder\n\nAndere Wortarten kannst du nicht in die Mehrzahl setzen."
+  },
+  {
+    "type": "info",
+    "title": "💡 Tipp 3: Die Grossschreibung",
+    "text": "Nomen erkennst du auch an der Grossschreibung. Aber Vorsicht: Am Satzanfang wird jedes Wort gross geschrieben. Dort hilft dir der Artikel-Test, um das Nomen zu erkennen."
+  },
+  {
+    "type": "click",
+    "question": "Klicke alle Nomen in diesem Satz an:",
+    "text": "Der kleine Hund spielt mit dem Ball im Garten.",
+    "answers": [
+      "Hund",
+      "Ball",
+      "Garten"
+    ],
+    "color": "#ffeb3b"
+  },
+  {
+    "type": "click",
+    "question": "Klicke alle Nomen an:",
+    "text": "Die Katze schläft auf dem Teppich neben dem Fenster.",
+    "answers": [
+      "Katze",
+      "Teppich",
+      "Fenster"
+    ],
+    "color": "#ffeb3b"
+  },
+  {
+    "type": "mc",
+    "question": "Welches Wort ist ein Nomen?",
+    "options": [
+      "schnell",
+      "Katze",
+      "läuft"
+    ],
+    "correct": 1
+  },
+  {
+    "type": "info",
+    "title": "🔎 Kleine Erinnerung",
+    "text": "Nomen sind Wörter für Menschen, Tiere, Pflanzen, Dinge und Begriffe. Du kannst sie mit der(die)/das testen und sie haben oft eine Mehrzahl."
+  },
+  {
+    "type": "click",
+    "question": "Markiere alle Nomen:",
+    "text": "Anna kauft Blumen beim Marktstand.",
+    "answers": [
+      "Anna",
+      "Blumen",
+      "Marktstand"
+    ],
+    "color": "#ffeb3b"
+  },
+  {
+    "type": "mc",
+    "question": "Welche Aussage über Nomen stimmt?",
+    "options": [
+      "Nomen schreibt man immer klein",
+      "Nomen schreibt man im Deutschen immer gross",
+      "Nur Namen von Personen sind Nomen",
+      "Nomen gibt es nur in der Mehrzahl"
+    ],
+    "correct": 1
+  },
+  {
+    "type": "click",
+    "question": "Finde alle Nomen. Denk an den Artikel-Test!",
+    "text": "Der Lehrer erklärt die Aufgabe den Schülern.",
+    "answers": [
+      "Lehrer",
+      "Aufgabe",
+      "Schülern"
+    ],
+    "color": "#ffeb3b"
+  },
+  {
+    "type": "mc",
+    "question": "Was ist KEIN Nomen?",
+    "options": [
+      "Haus",
+      "laufen",
+      "Freude"
+    ],
+    "correct": 1
+  },
+  {
+    "type": "blank",
+    "question": "Schreibe das Nomen für das Tier, das im Wasser lebt und Flossen hat (mit Grossbuchstaben am Anfang).",
+    "answer": "Fisch"
+  },
+  {
+    "type": "click",
+    "question": "Wähle alle Nomen aus:",
+    "text": "Im Sommer fahren wir mit dem Zug ans Meer.",
+    "answers": [
+      "Sommer",
+      "Zug",
+      "Meer"
+    ],
+    "color": "#ffeb3b"
+  },
+  {
+    "type": "info",
+    "title": "🎉 Geschafft!",
+    "text": "Super! Du weisst jetzt, was Nomen sind und wie du sie erkennst. In der nächsten Lektion üben wir mit längeren Sätzen und weniger Tipps."
+  }
 ]
 });
 }, 500);
