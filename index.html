@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Glaggle Learn | Startseite</title>
 <link rel="stylesheet" href="shared/theme.css">
+<script src="https://cdn.jsdelivr.net/npm/appwrite@16.0.2"></script>
+<script src="shared/cloud-sync.js"></script>
 </head>
 <body>
 
@@ -18,8 +20,9 @@
     </a>
 
     <div class="gl-header-tools">
+      <button type="button" class="gl-crystal-pill" id="glLoginBtn" title="Anmelden">👤 Anmelden</button>
       <div class="gl-crystal-pill" id="glCrystalPill" title="Deine Crystals">💎 <span id="glCrystalCount">0</span></div>
-
+      
       <!-- Lupe: 100% identisch zu den Overviews -->
       <div class="gl-subject-search" id="glSearchWrap">
         <div class="gl-subject-search-field">
@@ -306,7 +309,91 @@
     fillContinue();
     window.addEventListener('pageshow', function () { fillPills(); fillContinue(); });
   })();
-</script>
+  /* ---------- Login / Cloud-Sync ---------- */
+const $ = (id) => document.getElementById(id);
+const overlay = $('glLoginOverlay');
+const loginBtn = $('glLoginBtn');
 
+function showStep(name) {
+  ['step1', 'stepConfirm', 'stepSuccess'].forEach((s) => {
+    $(s).style.display = (s === name) ? 'block' : 'none';
+  });
+}
+function msg(text) { $('messageBox').textContent = text || ''; }
+function updateLoginBtn() {
+  loginBtn.textContent = GlaggleCloud.loggedIn ? '👤 Abmelden' : '👤 Anmelden';
+}
+
+loginBtn.addEventListener('click', async () => {
+  if (GlaggleCloud.loggedIn) {
+    await GlaggleCloud.logout();
+    updateLoginBtn();
+  } else {
+    showStep('step1'); msg(''); overlay.hidden = false;
+  }
+});
+$('glLoginClose').addEventListener('click', () => { overlay.hidden = true; });
+
+$('btnSend').addEventListener('click', async () => {
+  const email = $('identifier').value.trim();
+  if (!email.includes('@')) { msg('Bitte gib eine gültige E-Mail-Adresse ein.'); return; }
+  try {
+    await GlaggleCloud.sendMagicLink(email, location.origin + location.pathname);
+    msg('Login-Link gesendet! Prüfe dein Postfach.');
+  } catch (e) { msg('Fehler: ' + (e.message || e)); }
+});
+
+// Rückkehr vom Magic Link: ?userId=...&secret=...
+const params = new URLSearchParams(location.search);
+const magicUid = params.get('userId');
+const magicSecret = params.get('secret');
+if (magicUid && magicSecret) {
+  overlay.hidden = false;
+  showStep('stepConfirm');
+  $('btnConfirm').addEventListener('click', async () => {
+    try {
+      await GlaggleCloud.confirmMagicLink(magicUid, magicSecret);
+      history.replaceState({}, '', location.pathname);   // Secret aus der URL entfernen
+      showStep('stepSuccess');
+      fillPills(); fillContinue(); updateLoginBtn();
+      setTimeout(() => { overlay.hidden = true; }, 2000);
+    } catch (e) { msg('Anmeldung fehlgeschlagen: ' + (e.message || e)); }
+  });
+}
+
+// Beim Start Session prüfen; nach dem Sync Anzeigen auffrischen
+GlaggleCloud.init().then(updateLoginBtn);
+window.addEventListener('glaggle-synced', () => { fillPills(); fillContinue(); });
+  
+</script>
+<div id="glLoginOverlay" class="gl-login-overlay" hidden>
+  <div class="box">
+    <button type="button" id="glLoginClose" class="gl-login-close" title="Schliessen">✕</button>
+    <img src="https://glaggle.ch/glagglelogooriginal.png" alt="Glaggle Logo" class="logo">
+
+    <div id="step1">
+      <h1>Anmelden</h1>
+      <p>Gib deine E-Mail-Adresse ein, um einen Login-Link zu erhalten.</p>
+      <input type="text" id="identifier" placeholder="E-Mail">
+      <button id="btnSend" type="button">Login-Link anfordern</button>
+      <p style="margin-top:20px;font-size:.8rem;">
+        Noch kein Konto? <a href="https://glaggle.ch/account/index.html">Registrieren</a>
+      </p>
+    </div>
+
+    <div id="stepConfirm" style="display:none;">
+      <h1>Fast da!</h1>
+      <p>Klicke unten, um deine Anmeldung zu bestätigen.</p>
+      <button id="btnConfirm" type="button">Anmeldung bestätigen ✓</button>
+    </div>
+
+    <div id="stepSuccess" style="display:none;">
+      <h1>🎉 Erfolgreich eingeloggt!</h1>
+      <p>Deine Fortschritte werden jetzt synchronisiert.</p>
+    </div>
+
+    <div id="messageBox"></div>
+  </div>
+</div>
 </body>
 </html>
