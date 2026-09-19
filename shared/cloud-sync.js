@@ -114,20 +114,23 @@
     };
   }
 
-  async function pushNow() {
-    if (!userId || syncing) return;
-    const data = localPayload();
-    try {
-      if (docExists) {
-        await databases.updateDocument(DATABASE_ID, COLLECTION_ID, userId, data);
-      } else {
-        await databases.createDocument(DATABASE_ID, COLLECTION_ID, userId, data);
-        docExists = true;
-      }
-    } catch (e) {
-      console.warn('[CloudSync] Upload fehlgeschlagen:', e);
+async function pushNow() {
+  if (!userId || syncing) return;
+  const data = localPayload();
+  try {
+    if (docExists) {
+      await databases.updateDocument(DATABASE_ID, COLLECTION_ID, userId, data);
+    } else {
+      await databases.createDocument(DATABASE_ID, COLLECTION_ID, userId, data, [
+        Appwrite.Permission.read(Appwrite.Role.user(userId)),
+        Appwrite.Permission.update(Appwrite.Role.user(userId))
+      ]);
+      docExists = true;
     }
+  } catch (e) {
+    console.warn('[CloudSync] Upload fehlgeschlagen:', e);
   }
+}
 
   function schedulePush() {
     if (!userId) return;
