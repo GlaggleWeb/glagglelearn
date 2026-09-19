@@ -1300,3 +1300,56 @@ a.gl-subject-search-btn svg { width: 20px; height: 20px; }
 .gl-click-word:active {
   transform: scale(0.96);
 }
+
+.gl-login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 16px;
+}
+.gl-login-overlay[hidden] { display: none; }   /* wichtig! */
+
+.gl-login-overlay .box {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background: var(--card-bg, #fff);
+  color: var(--text-color, #222);
+  border-radius: 16px;
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+.gl-login-overlay .logo { width: 72px; margin-bottom: 12px; }
+.gl-login-overlay input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  margin: 12px 0;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+.gl-login-overlay button:not(.gl-login-close) {
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.gl-login-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: 0;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+#messageBox { margin-top: 12px; font-size: .9rem; }
