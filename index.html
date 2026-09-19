@@ -179,7 +179,35 @@
 
   </div>
 </div>
+<div id="glLoginOverlay" class="gl-login-overlay" hidden>
+  <div class="box">
+    <button type="button" id="glLoginClose" class="gl-login-close" title="Schliessen">✕</button>
+    <img src="https://glaggle.ch/glagglelogooriginal.png" alt="Glaggle Logo" class="logo">
 
+    <div id="step1">
+      <h1>Anmelden</h1>
+      <p>Gib deine E-Mail-Adresse ein, um einen Login-Link zu erhalten.</p>
+      <input type="text" id="identifier" placeholder="E-Mail">
+      <button id="btnSend" type="button">Login-Link anfordern</button>
+      <p style="margin-top:20px;font-size:.8rem;">
+        Noch kein Konto? <a href="https://glaggle.ch/account/index.html">Registrieren</a>
+      </p>
+    </div>
+
+    <div id="stepConfirm" style="display:none;">
+      <h1>Fast da!</h1>
+      <p>Klicke unten, um deine Anmeldung zu bestätigen.</p>
+      <button id="btnConfirm" type="button">Anmeldung bestätigen ✓</button>
+    </div>
+
+    <div id="stepSuccess" style="display:none;">
+      <h1>🎉 Erfolgreich eingeloggt!</h1>
+      <p>Deine Fortschritte werden jetzt synchronisiert.</p>
+    </div>
+
+    <div id="messageBox"></div>
+  </div>
+</div>
 <script>
   /* Startseite: Pills + Fortsetzen-Karte + Lupe — alles aus localStorage,
      gleiche Keys wie lesson-engine.js / overview-engine.js. */
@@ -308,8 +336,7 @@
     fillPills();
     fillContinue();
     window.addEventListener('pageshow', function () { fillPills(); fillContinue(); });
-  })();
-  /* ---------- Login / Cloud-Sync ---------- */
+      /* ---------- Login / Cloud-Sync ---------- */
 const $ = (id) => document.getElementById(id);
 const overlay = $('glLoginOverlay');
 const loginBtn = $('glLoginBtn');
@@ -364,36 +391,10 @@ if (magicUid && magicSecret) {
 // Beim Start Session prüfen; nach dem Sync Anzeigen auffrischen
 GlaggleCloud.init().then(updateLoginBtn);
 window.addEventListener('glaggle-synced', () => { fillPills(); fillContinue(); });
+  })();
+
   
 </script>
-<div id="glLoginOverlay" class="gl-login-overlay" hidden>
-  <div class="box">
-    <button type="button" id="glLoginClose" class="gl-login-close" title="Schliessen">✕</button>
-    <img src="https://glaggle.ch/glagglelogooriginal.png" alt="Glaggle Logo" class="logo">
 
-    <div id="step1">
-      <h1>Anmelden</h1>
-      <p>Gib deine E-Mail-Adresse ein, um einen Login-Link zu erhalten.</p>
-      <input type="text" id="identifier" placeholder="E-Mail">
-      <button id="btnSend" type="button">Login-Link anfordern</button>
-      <p style="margin-top:20px;font-size:.8rem;">
-        Noch kein Konto? <a href="https://glaggle.ch/account/index.html">Registrieren</a>
-      </p>
-    </div>
-
-    <div id="stepConfirm" style="display:none;">
-      <h1>Fast da!</h1>
-      <p>Klicke unten, um deine Anmeldung zu bestätigen.</p>
-      <button id="btnConfirm" type="button">Anmeldung bestätigen ✓</button>
-    </div>
-
-    <div id="stepSuccess" style="display:none;">
-      <h1>🎉 Erfolgreich eingeloggt!</h1>
-      <p>Deine Fortschritte werden jetzt synchronisiert.</p>
-    </div>
-
-    <div id="messageBox"></div>
-  </div>
-</div>
 </body>
 </html>
