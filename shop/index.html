@@ -270,30 +270,41 @@
     }
 
     /* ---------- Umwandlungs-Logik ---------- */
-    document.getElementById('glConvertBtn').addEventListener('click', function() {
-      const crystalData = readJson('glaggleCrystalData');
-      let crystals = typeof crystalData.total === 'number' ? crystalData.total : 0;
-      let coins = parseInt(localStorage.getItem('glaggleCoins') || '0', 10);
+   document.getElementById('glConvertBtn').addEventListener('click', function() {
+  const crystalData = readJson('glaggleCrystalData');
+  let crystals = typeof crystalData.total === 'number' ? crystalData.total : 0;
+  let coins = parseInt(localStorage.getItem('glaggleCoins') || '0', 10);
 
-      if (crystals >= 10) {
-        // Werte anpassen
-        crystals -= 10;
-        coins += 1;
+  if (crystals >= 10) {
+    // Werte lokal anpassen (für sofortiges Feedback)
+    crystals -= 10;
+    coins += 1;
 
-        // Speichern
-        crystalData.total = crystals;
-        localStorage.setItem('glaggleCrystalData', JSON.stringify(crystalData));
-        localStorage.setItem('glaggleCoins', coins.toString());
+    // Lokal speichern
+    crystalData.total = crystals;
+    localStorage.setItem('glaggleCrystalData', JSON.stringify(crystalData));
+    localStorage.setItem('glaggleCoins', coins.toString());
 
-        // Visuelles Feedback
-        const card = document.getElementById('glConvertCard');
-        card.classList.add('gl-flash-coin');
-        setTimeout(() => card.classList.remove('gl-flash-coin'), 500);
+    // VISUELL FEEDBACK ZUERST
+    const card = document.getElementById('glConvertCard');
+    card.classList.add('gl-flash-coin');
+    setTimeout(() => card.classList.remove('gl-flash-coin'), 500);
 
-        // UI neu rendern
-        updateShopUI();
-      }
-    });
+    // LINK GENERIREN UND WEITERLEITEN
+    const redirectUrl = `https://glaggle.ch/gamecenter/coins?q=1&return=${encodeURIComponent(window.location.href)}`;
+    
+    // In neuem Tab öffnen (vermeidet Navigation-Problem)
+    const syncTab = window.open(redirectUrl, '_blank');
+    
+    // Falls Popup blockiert wurde -> Fallback in gleichem Tab
+    if (!syncTab || syncTab.closed || typeof syncTab.closed == 'undefined') {
+        window.location.href = redirectUrl;
+    }
+
+    // UI neu rendern
+    updateShopUI();
+  }
+});
 
     /* ---------- Lupe: identisches Verhalten wie in den Overviews ---------- */
     const wrap = document.getElementById('glSearchWrap');
