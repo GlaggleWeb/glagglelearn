@@ -20,10 +20,6 @@
     gap: 12px;
     flex: 1;
   }
-  .gl-shop-balance-item.reverse {
-    flex-direction: row-reverse;
-    text-align: right;
-  }
   .gl-shop-balance-item .gl-node-title {
     font-size: 1.3rem;
     display: flex;
@@ -131,17 +127,6 @@
                 <div>
                   <div class="gl-node-sub" style="margin-bottom: 2px;">Deine Crystals</div>
                   <div class="gl-node-title" id="shopCrystalDisplay">0</div>
-                </div>
-              </div>
-              
-              <div class="gl-shop-balance-item reverse">
-                <div class="gl-node-icon" style="background: color-mix(in srgb, #f7d060 30%, var(--gl-surface)); color: #b9860a; font-size: 1.5rem;">🪙</div>
-                <div>
-                  <div class="gl-node-sub" style="margin-bottom: 2px;">Deine Glaggle Coins</div>
-                  <div class="gl-node-title">
-                    <span id="shopCoinDisplay">0</span>
-                    <img src="shared/coin.png" alt="Coin" class="gl-coin-icon" onerror="this.style.display='none'">
-                  </div>
                 </div>
               </div>
             </div>
@@ -252,7 +237,6 @@
 
       // 3. Shop-Anzeige aktualisieren
       document.getElementById('shopCrystalDisplay').textContent = crystals;
-      document.getElementById('shopCoinDisplay').textContent = coins;
 
       // 4. Button-Status prüfen
       const btn = document.getElementById('glConvertBtn');
@@ -260,7 +244,7 @@
       
       if (crystals >= 10) {
         btn.disabled = false;
-        btn.textContent = '10 💎 in 1 🪙 umwandeln';
+        btn.textContent = '10 💎 in 1 Glaggle Coin umwandeln';
         msg.textContent = '';
       } else {
         btn.disabled = true;
