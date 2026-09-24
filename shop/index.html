@@ -296,10 +296,32 @@
     const input = document.getElementById('glSearch');
     const clear = document.getElementById('glSearchClear');
 
-    function applyQuery(value) {
-      clear.hidden = value === '';
-      // Hinweis: Im Shop filtert die Suche nichts, aber das Verhalten (Auf/Zu) bleibt identisch
-    }
+   // SUCHVERHALTEN ÄNDERN
+function applyQuery(value) {
+  clear.hidden = value === '';
+  
+  if (!value) return;
+  
+  const query = norm(value);
+  
+  // Direkte Navigation basierend auf Suchbegriff
+  if (query.includes('coin') || query.includes('umwandeln') || query.includes('shop')) {
+    // Bleibe hier (oder Scroll zu Umwandlung)
+    document.getElementById('glConvertCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  else if (query.includes('mathe')) {
+    window.location.href = 'lektionen/mathe/index.html';
+  }
+  else if (query.includes('deutsch')) {
+    window.location.href = 'lektionen/deutsch/index.html';
+  }
+  else if (query.includes('nmg')) {
+    window.location.href = 'lektionen/nmg/index.html';
+  }
+  else if (query.includes('home') || query.includes('start')) {
+    window.location.href = 'index.html';
+  }
+}
     function open() { wrap.classList.add('gl-open'); input.focus(); }
     function close(reset) {
       if (reset) { input.value = ''; applyQuery(''); }
