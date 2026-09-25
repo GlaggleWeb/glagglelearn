@@ -132,11 +132,23 @@ async function pushNow() {
   }
 }
 
-  function schedulePush() {
-    if (!userId) return;
-    clearTimeout(pushTimer);
+// In cloud-sync.js, schedulePush() optimieren:
+function schedulePush() {
+  if (!userId) return;
+  clearTimeout(pushTimer);
+  
+  // Bei kritischen Updates (Crystals!) sofort pushen
+  const immediateKeys = ['glaggleCrystalData', 'glaggleLearnPoints'];
+  const key = /* der geänderte Key */;
+  
+  if (immediateKeys.includes(key)) {
+    // Unmittelbarer Push ohne Warten
+    pushNow().catch(err => console.warn('[CloudSync]', err));
+  } else {
+    // Normales Debouncing für weniger kritische Updates
     pushTimer = setTimeout(pushNow, 1500);
   }
+}
 
   async function pullAndMerge() {
     syncing = true;
