@@ -348,20 +348,29 @@ function showStep(name) {
 }
 function msg(text) { $('messageBox').textContent = text || ''; }
 function updateLoginBtn() {
+  if (!window.GlaggleCloud) {
+    loginBtn.textContent = '👤 Anmelden';
+    return;
+  }
   loginBtn.textContent = GlaggleCloud.loggedIn ? '👤 Abmelden' : '👤 Anmelden';
 }
 
 loginBtn.addEventListener('click', async () => {
+  if (!window.GlaggleCloud) {
+    alert('Cloud-Sync nicht geladen. Bitte Seite neu laden.');
+    return;
+  }
   if (GlaggleCloud.loggedIn) {
     await GlaggleCloud.logout();
     updateLoginBtn();
-  } else {
-    showStep('step1'); msg(''); overlay.hidden = false;
   }
-});
 $('glLoginClose').addEventListener('click', () => { overlay.hidden = true; });
 
 $('btnSend').addEventListener('click', async () => {
+  if (!window.GlaggleCloud) {
+    msg('Cloud-Sync nicht geladen. Bitte Seite neu laden.');
+    return;
+  }
   const email = $('identifier').value.trim();
   if (!email.includes('@')) { msg('Bitte gib eine gültige E-Mail-Adresse ein.'); return; }
   try {
@@ -377,9 +386,13 @@ const magicSecret = params.get('secret');
 if (magicUid && magicSecret) {
   overlay.hidden = false;
   showStep('stepConfirm');
-  $('btnConfirm').addEventListener('click', async () => {
-    try {
-      await GlaggleCloud.confirmMagicLink(magicUid, magicSecret);
+$('btnConfirm').addEventListener('click', async () => {
+  if (!window.GlaggleCloud) {
+    msg('Cloud-Sync nicht geladen. Bitte Seite neu laden.');
+    return;
+  }
+  try {
+    await GlaggleCloud.confirmMagicLink(magicUid, magicSecret);
       history.replaceState({}, '', location.pathname);   // Secret aus der URL entfernen
       showStep('stepSuccess');
       fillPills(); fillContinue(); updateLoginBtn();
