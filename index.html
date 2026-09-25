@@ -6,7 +6,7 @@
 <title>Glaggle Learn | Startseite</title>
 <link rel="stylesheet" href="shared/theme.css">
 <script src="https://cdn.jsdelivr.net/npm/appwrite@16.0.2"></script>
-<script src="/shared/cloud-sync.js"></script>
+<script src="shared/cloud-sync.js"></script>
 </head>
 <body>
 
@@ -336,99 +336,64 @@
     fillPills();
     fillContinue();
     window.addEventListener('pageshow', function () { fillPills(); fillContinue(); });
-    /* ---------- Login / Cloud-Sync ---------- */
-    const $ = (id) => document.getElementById(id);
-    const overlay = $('glLoginOverlay');
-    const loginBtn = $('glLoginBtn');
+      /* ---------- Login / Cloud-Sync ---------- */
+const $ = (id) => document.getElementById(id);
+const overlay = $('glLoginOverlay');
+const loginBtn = $('glLoginBtn');
 
-    function showStep(name) {
-      ['step1', 'stepConfirm', 'stepSuccess'].forEach((s) => {
-        $(s).style.display = (s === name) ? 'block' : 'none';
-      });
-    }
+function showStep(name) {
+  ['step1', 'stepConfirm', 'stepSuccess'].forEach((s) => {
+    $(s).style.display = (s === name) ? 'block' : 'none';
+  });
+}
+function msg(text) { $('messageBox').textContent = text || ''; }
+function updateLoginBtn() {
+  loginBtn.textContent = GlaggleCloud.loggedIn ? '👤 Abmelden' : '👤 Anmelden';
+}
 
-    function msg(text) {
-      const el = $('messageBox');
-      if (el) el.textContent = text || '';
-    }
+loginBtn.addEventListener('click', async () => {
+  if (GlaggleCloud.loggedIn) {
+    await GlaggleCloud.logout();
+    updateLoginBtn();
+  } else {
+    showStep('step1'); msg(''); overlay.hidden = false;
+  }
+});
+$('glLoginClose').addEventListener('click', () => { overlay.hidden = true; });
 
-    function updateLoginBtn() {
-      if (!window.GlaggleCloud) {
-        loginBtn.textContent = '👤 Anmelden';
-        return;
-      }
-      loginBtn.textContent = GlaggleCloud.loggedIn ? '👤 Abmelden' : '👤 Anmelden';
-    }
+$('btnSend').addEventListener('click', async () => {
+  const email = $('identifier').value.trim();
+  if (!email.includes('@')) { msg('Bitte gib eine gültige E-Mail-Adresse ein.'); return; }
+  try {
+    await GlaggleCloud.sendMagicLink(email, location.origin + location.pathname);
+    msg('Login-Link gesendet! Prüfe dein Postfach.');
+  } catch (e) { msg('Fehler: ' + (e.message || e)); }
+});
 
-    loginBtn.addEventListener('click', async () => {
-      if (!window.GlaggleCloud) {
-        alert('Cloud-Sync nicht geladen. Bitte Seite neu laden.');
-        return;
-      }
-      if (GlaggleCloud.loggedIn) {
-        await GlaggleCloud.logout();
-        updateLoginBtn();
-      } else {
-        showStep('step1');
-        msg('');
-        overlay.hidden = false;
-      }
-    });
+// Rückkehr vom Magic Link: ?userId=...&secret=...
+const params = new URLSearchParams(location.search);
+const magicUid = params.get('userId');
+const magicSecret = params.get('secret');
+if (magicUid && magicSecret) {
+  overlay.hidden = false;
+  showStep('stepConfirm');
+  $('btnConfirm').addEventListener('click', async () => {
+    try {
+      await GlaggleCloud.confirmMagicLink(magicUid, magicSecret);
+      history.replaceState({}, '', location.pathname);   // Secret aus der URL entfernen
+      showStep('stepSuccess');
+      fillPills(); fillContinue(); updateLoginBtn();
+      setTimeout(() => { overlay.hidden = true; }, 2000);
+    } catch (e) { msg('Anmeldung fehlgeschlagen: ' + (e.message || e)); }
+  });
+}
 
-    $('glLoginClose').addEventListener('click', () => { overlay.hidden = true; });
-
-    $('btnSend').addEventListener('click', async () => {
-      if (!window.GlaggleCloud) {
-        msg('Cloud-Sync nicht geladen. Bitte Seite neu laden.');
-        return;
-      }
-      const email = $('identifier').value.trim();
-      if (!email.includes('@')) {
-        msg('Bitte gib eine gültige E-Mail-Adresse ein.');
-        return;
-      }
-      try {
-        await GlaggleCloud.sendMagicLink(email, location.origin + location.pathname);
-        msg('Login-Link gesendet! Prüfe dein Postfach.');
-      } catch (e) {
-        msg('Fehler: ' + (e.message || e));
-      }
-    });
-
-    // Rückkehr vom Magic Link: ?userId=...&secret=...
-    const params = new URLSearchParams(location.search);
-    const magicUid = params.get('userId');
-    const magicSecret = params.get('secret');
-    if (magicUid && magicSecret) {
-      overlay.hidden = false;
-      showStep('stepConfirm');
-      $('btnConfirm').addEventListener('click', async () => {
-        if (!window.GlaggleCloud) {
-          msg('Cloud-Sync nicht geladen. Bitte Seite neu laden.');
-          return;
-        }
-        try {
-          await GlaggleCloud.confirmMagicLink(magicUid, magicSecret);
-          history.replaceState({}, '', location.pathname);
-          showStep('stepSuccess');
-          fillPills();
-          fillContinue();
-          updateLoginBtn();
-          setTimeout(() => { overlay.hidden = true; }, 2000);
-        } catch (e) {
-          msg('Anmeldung fehlgeschlagen: ' + (e.message || e));
-        }
-      });
-    }
-
-    // Beim Start Session prüfen; nach dem Sync Anzeigen auffrischen
-    if (window.GlaggleCloud) {
-      GlaggleCloud.init().then(updateLoginBtn).catch(err => console.error('[Index] init failed:', err));
-      window.addEventListener('glaggle-synced', () => { fillPills(); fillContinue(); });
-    } else {
-      console.error('[Index] GlaggleCloud ist NICHT definiert!');
-    }
+// Beim Start Session prüfen; nach dem Sync Anzeigen auffrischen
+GlaggleCloud.init().then(updateLoginBtn);
+window.addEventListener('glaggle-synced', () => { fillPills(); fillContinue(); });
   })();
+
+  
 </script>
 
 </body>
