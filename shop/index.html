@@ -253,39 +253,33 @@
       }
     }
 
-    /* ---------- Umwandlungs-Logik ---------- */
-   document.getElementById('glConvertBtn').addEventListener('click', function() {
+document.getElementById('glConvertBtn').addEventListener('click', function() {
   const crystalData = readJson('glaggleCrystalData');
-  let crystals = typeof crystalData.total === 'number' ? crystalData.total : 0;
+  const total = typeof crystalData.total === 'number' ? crystalData.total : 0;
   let coins = parseInt(localStorage.getItem('glaggleCoins') || '0', 10);
 
-  if (crystals >= 10) {
-    // Werte lokal anpassen (für sofortiges Feedback)
-    crystals -= 10;
+  if (total >= 10) {
+    crystalData.spent = (Number(crystalData.spent) || 0) + 10;
+    crystalData.total = Math.max(total - 10, 0);
     coins += 1;
 
-    // Lokal speichern
-    crystalData.total = crystals;
-    localStorage.setItem('glaggleCrystalData', JSON.stringify(crystalData));
-    localStorage.setItem('glaggleCoins', coins.toString());
+localStorage.setItem('glaggleCrystalData', JSON.stringify(crystalData));
+localStorage.setItem('glaggleCoins', coins.toString());
 
-    // VISUELL FEEDBACK ZUERST
+if (window.GlaggleCloud && window.GlaggleCloud.loggedIn) {
+  await window.GlaggleCloud.flush();
+}
+
     const card = document.getElementById('glConvertCard');
     card.classList.add('gl-flash-coin');
     setTimeout(() => card.classList.remove('gl-flash-coin'), 500);
 
-    // LINK GENERIREN UND WEITERLEITEN
     const redirectUrl = `https://glaggle.ch/gamecenter/coins?q=1&return=${encodeURIComponent(window.location.href)}`;
-    
-    // In neuem Tab öffnen (vermeidet Navigation-Problem)
     const syncTab = window.open(redirectUrl, '_blank');
-    
-    // Falls Popup blockiert wurde -> Fallback in gleichem Tab
     if (!syncTab || syncTab.closed || typeof syncTab.closed == 'undefined') {
         window.location.href = redirectUrl;
     }
 
-    // UI neu rendern
     updateShopUI();
   }
 });
