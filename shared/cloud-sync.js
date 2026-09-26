@@ -199,10 +199,11 @@ async function pushNow() {
       const user = await account.get();
       userId = user.$id;
       await pullAndMerge();
+    },
+
+    // NEU: erzwingt sofortigen Push, umgeht den Debounce
+    async flush() {
+      clearTimeout(pushTimer);
+      await pushNow();
     }
-  // NEU: erzwingt sofortigen Push, umgeht den Debounce
-  async flush() {
-    clearTimeout(pushTimer);
-    await pushNow();
-  }
-};
+  };
