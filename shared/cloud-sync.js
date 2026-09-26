@@ -200,5 +200,9 @@ async function pushNow() {
       userId = user.$id;
       await pullAndMerge();
     }
-  };
-})();
+  // NEU: erzwingt sofortigen Push, umgeht den Debounce
+  async flush() {
+    clearTimeout(pushTimer);
+    await pushNow();
+  }
+};
