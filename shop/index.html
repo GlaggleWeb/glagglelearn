@@ -253,7 +253,7 @@
       }
     }
 
-document.getElementById('glConvertBtn').addEventListener('click', function() {
+document.getElementById('glConvertBtn').addEventListener('click', async function() {
   const crystalData = readJson('glaggleCrystalData');
   const total = typeof crystalData.total === 'number' ? crystalData.total : 0;
   let coins = parseInt(localStorage.getItem('glaggleCoins') || '0', 10);
@@ -263,12 +263,12 @@ document.getElementById('glConvertBtn').addEventListener('click', function() {
     crystalData.total = Math.max(total - 10, 0);
     coins += 1;
 
-localStorage.setItem('glaggleCrystalData', JSON.stringify(crystalData));
-localStorage.setItem('glaggleCoins', coins.toString());
+    localStorage.setItem('glaggleCrystalData', JSON.stringify(crystalData));
+    localStorage.setItem('glaggleCoins', coins.toString());
 
-if (window.GlaggleCloud && window.GlaggleCloud.loggedIn) {
-  await window.GlaggleCloud.flush();
-}
+    if (window.GlaggleCloud && window.GlaggleCloud.loggedIn) {
+      await window.GlaggleCloud.flush();
+    }
 
     const card = document.getElementById('glConvertCard');
     card.classList.add('gl-flash-coin');
