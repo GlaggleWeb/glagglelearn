@@ -73,17 +73,16 @@
     });
     return out;
   }
-
-  // Crystals: geöffnete Truhen vereinigen. Total = Summe aller geöffneten
-  // Truhen (so gehen Crystals nicht verloren und werden nicht doppelt gezählt).
-  // Wichtig: Falls du später Crystals AUSGIBST (Shop), muss das hier angepasst
-  // werden (z.B. zusätzliches Feld "spent"), sonst kommen sie zurück.
-  function mergeCrystals(a, b) {
-    const opened = Object.assign({}, a.opened || {}, b.opened || {});
-    const sum = Object.values(opened).reduce((s, v) => s + (Number(v) || 0), 0);
-    const total = Math.max(sum, Number(a.total) || 0, Number(b.total) || 0);
-    return { total, opened };
-  }
+// Crystals: geöffnete Truhen vereinigen (Verdienst), "spent" wird als
+// Maximum übernommen (monoton steigend, nie verloren). Total = verdiente
+// Summe minus ausgegebene Menge, nie negativ.
+function mergeCrystals(a, b) {
+  const opened = Object.assign({}, a.opened || {}, b.opened || {});
+  const earned = Object.values(opened).reduce((s, v) => s + (Number(v) || 0), 0);
+  const spent  = Math.max(Number(a.spent) || 0, Number(b.spent) || 0);
+  const total  = Math.max(earned - spent, 0);
+  return { total, opened, spent };
+}
 
   /* ---------- Appwrite ---------- */
   function initClient() {
