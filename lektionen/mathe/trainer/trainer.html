@@ -1,16 +1,28 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lektion 1 — Mathe Grundlagen | Glaggle Learn</title>
-<link rel="stylesheet" href="/shared/theme.css">
-<script src="/shared/train-engine.js"></script>
-<script>
-  GlaggleTrainer.mount({
-    type: 'einmaleins',   // 'einmaleins' | 'plus' | 'minus'
-    title: 'Einmaleins-Trainer',
-    intro: 'Wie schnell bist du im kleinen Einmaleins?',
-    homeUrl: '../index.html'
-  });
-</script>
+  <meta charset="UTF-8">
+  <!-- viewport-fit=cover + kein Zoom: wichtig fürs iPad/iPhone, sonst zoomt Safari beim Fokussieren ins Feld -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Einmaleins-Trainer | Glaggle Learn</title>
+
+  <!-- 1) Zentrales Theme -->
+  <link rel="stylesheet" href="../../shared/theme.css">
+
+  <!-- 2) Web Components (glaggle-button, glaggle-card, glaggle-progress) -->
+  <script src="../../shared/components.js"></script>
+
+  <!-- 3) Train-Engine — OHNE defer/async laden, sonst existiert GlaggleTrainer beim mount() noch nicht -->
+  <script src="../../shared/train-engine.js"></script>
+</head>
+<body>
+  <script>
+    GlaggleTrainer.mount({
+      type: 'einmaleins',                       // 'einmaleins' | 'plus' | 'minus'
+      title: 'Einmaleins-Trainer',
+      intro: 'Wie schnell bist du im kleinen Einmaleins? Wähle, ob du auf Zeit oder auf eine bestimmte Anzahl Aufgaben spielst.',
+      backHref: '../index.html'
+    });
+  </script>
+</body>
+</html>
