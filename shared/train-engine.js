@@ -382,17 +382,20 @@
     });
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAnswer(); });
 
-    updateBar(0);
-    nextQuestion();
-    const input = document.getElementById('glTrainAnswer');
+updateBar(0);
+nextQuestion();
 
+// Eingabefeld erneut fokussieren
 setTimeout(() => {
-  input.focus({ preventScroll: true });
+  const answerInput = document.getElementById('glTrainAnswer');
+  if (answerInput) {
+    answerInput.focus({ preventScroll: true });
+  }
 }, 100);
 
-    clearInterval(timerId);
-    timerId = setInterval(tick, 100);
-    tick();
+clearInterval(timerId);
+timerId = setInterval(tick, 100);
+tick();
   }
 
   function tick() {
