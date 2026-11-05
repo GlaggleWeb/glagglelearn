@@ -369,12 +369,12 @@
           '<span class="gl-train-pill" id="glTrainBad">❌ 0</span>' +
         '</div>' +
         '<h2 class="gl-train-q" id="glTrainQ"></h2>' +
-        '<input type="text" id="glTrainAnswer" class="gl-input gl-train-answer" inputmode="numeric" placeholder="?" autocomplete="off">' +
+        '<input type="text" id="glTrainAnswer" class="gl-input gl-train-answer" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" placeholder="?" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">' +
       '</div>';
 
     const input = document.getElementById('glTrainAnswer');
     input.addEventListener('input', () => {
-      input.value = input.value.replace(/[^\d-]/g, '');
+      input.value = input.value.replace(/\D/g, '');
       const btn = document.getElementById('glCheck');
       if (!btn || S.locked) return;
       if (input.value.trim().length > 0) btn.removeAttribute('disabled');
@@ -426,7 +426,7 @@
 
     const input = document.getElementById('glTrainAnswer');
     input.value = '';
-    input.disabled = false;
+    input.readOnly = false;
     input.classList.remove('gl-shake');
     input.focus();
 
@@ -447,9 +447,9 @@
     if (!S || S.locked) return;
     const input = document.getElementById('glTrainAnswer');
     const raw = input.value.trim();
-    if (raw === '' || raw === '-') { input.focus(); return; }
+    if (raw === '') { input.focus(); return; }
     S.locked = true;
-    input.disabled = true;
+    input.readOnly = true;                // NICHT disabled: sonst verliert das Feld den Fokus → iPad-Tastatur klappt zu
 
     const round = S;
     const ok = Number(raw) === round.cur.answer;
@@ -577,6 +577,13 @@
       progress: document.getElementById('glProgress'),
       buttons: document.getElementById('glButtons')
     };
+
+    // Taps auf die Buttons unten dürfen den Fokus nicht aus dem Eingabefeld ziehen
+    ['mousedown', 'pointerdown'].forEach((ev) => {
+      el.buttons.addEventListener(ev, (e) => {
+        if (S) e.preventDefault();
+      });
+    });
 
     Promise.all([
       customElements.whenDefined('glaggle-button'),
