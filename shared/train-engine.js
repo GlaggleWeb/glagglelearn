@@ -41,8 +41,8 @@
   const COUNT_PRESETS = [10, 20, 30, 50];   // Aufgaben
   const TIME_MIN = 10, TIME_MAX = 3600;
   const COUNT_MIN = 1, COUNT_MAX = 200;
-  const FEEDBACK_OK_MS = 700;
-  const FEEDBACK_BAD_MS = 1500;
+  const FEEDBACK_OK_MS = 200;
+  const FEEDBACK_BAD_MS = 600;
   const COUNT_DURATION = 2000;
 
   /* Balkenfarben nach Trefferquote: [Farbe, Schatten] — null = Standard-Grün */
@@ -384,6 +384,11 @@
 
     updateBar(0);
     nextQuestion();
+    const input = document.getElementById('glTrainAnswer');
+
+setTimeout(() => {
+  input.focus({ preventScroll: true });
+}, 100);
 
     clearInterval(timerId);
     timerId = setInterval(tick, 100);
