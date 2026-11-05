@@ -150,17 +150,26 @@
     return v < 60 ? v + ' Sek.' : (v / 60) + ' Min.';
   }
 
-  function countUp(node, target, duration, formatFn) {
-    const start = performance.now();
-    function tick(now) {
-      const p = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - p, 3);
-      node.innerHTML = formatFn(Math.round(target * eased));
-      if (p < 1) requestAnimationFrame(tick);
-      else { node.innerHTML = formatFn(target); node.classList.add('gl-count-done'); }
+function countUp(node, target, duration, formatFn) {
+  const start = performance.now();
+
+  function tick(now) {
+    const p = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const value = Math.round(target * eased);
+
+    node.innerHTML = formatFn(value);
+
+    if (p < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      node.innerHTML = formatFn(target);
+      node.classList.add('gl-count-done');
     }
-    requestAnimationFrame(tick);
   }
+
+  requestAnimationFrame(tick);
+}
 
   function calcBonus(correct, avgSec) {
     let factor = 0;
